@@ -72,24 +72,24 @@
   }
 */
 var parser = (function(){
-var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o};
+var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[6,10];
 var parser = {trace: function trace() { },
 yy: {},
-symbols_: {"error":2,"document":3,"TK_NUMBER":4,"space":5,"EOF":6,"TK_SPACE":7,"$accept":0,"$end":1},
-terminals_: {2:"error",4:"TK_NUMBER",6:"EOF",7:"TK_SPACE"},
-productions_: [0,[3,3],[5,0],[5,1]],
+symbols_: {"error":2,"document":3,"first_nodes":4,"space":5,"EOF":6,"TK_NUMBER":7,"TK_WORD":8,"html_tag":9,"TK_SPACE":10,"$accept":0,"$end":1},
+terminals_: {2:"error",6:"EOF",7:"TK_NUMBER",8:"TK_WORD",10:"TK_SPACE"},
+productions_: [0,[3,3],[4,1],[4,1],[9,1],[5,0],[5,1]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
 
 var $0 = $$.length - 1;
 switch (yystate) {
 case 1:
- console.log('This is the number!', $$[$0-2]); 
+ console.log('This is the first nodes!', $$[$0-2]); 
 break;
 }
 },
-table: [{3:1,4:[1,2]},{1:[3]},{5:3,6:[2,2],7:[1,4]},{6:[1,5]},{6:[2,3]},{1:[2,1]}],
-defaultActions: {4:[2,3],5:[2,1]},
+table: [{3:1,4:2,7:[1,3],8:[1,4]},{1:[3]},{5:5,6:[2,5],10:[1,6]},o($V0,[2,2]),o($V0,[2,3]),{6:[1,7]},{6:[2,6]},{1:[2,1]}],
+defaultActions: {6:[2,6],7:[2,1]},
 parseError: function parseError(str, hash) {
     if (hash.recoverable) {
         this.trace(str);
@@ -568,16 +568,20 @@ options: {},
 performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START) {
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
-case 0:return 7;
+case 0:return 10;
 break;
-case 1:return 4;
+case 1:return 7;
 break;
-case 2:return 6;
+case 2:return 8;
+break;
+case 3:return 'TK_COLON';
+break;
+case 4:return 6;
 break;
 }
 },
-rules: [/^(?:[\s\n\t]+)/,/^(?:[0-9]+(\.[0-9]+)?\b)/,/^(?:$)/],
-conditions: {"INITIAL":{"rules":[0,1,2],"inclusive":true}}
+rules: [/^(?:[\s\n\t]+)/,/^(?:[0-9]+(\.[0-9]+)?\b)/,/^(?:[a-zA-Z]+([a-zA-Z0-9]+)?\b)/,/^(?:[:])/,/^(?:$)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4],"inclusive":true}}
 });
 return lexer;
 })();
