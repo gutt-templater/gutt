@@ -8,6 +8,8 @@
 \<\!\-\-                    return 'TK_COMMENT_OPEN';
 \-\-\>                      return 'TK_COMMENT_CLOSE';
 \-                          return 'TK_DASH';
+\<                          return 'TK_BROKEN_BRACKET_OPEN';
+\>                          return 'TK_BROKEN_BRACKET_CLOSE';
 [^\<\>\-\:a-zA-Z0-9]+       return 'TK_OTHER';
 <<EOF>>                     return 'EOF';
 
@@ -23,19 +25,38 @@ document
   ;
 
 first_nodes
+  : first_node
+    { $$ = [$1]; }
+  | first_nodes space first_node
+    { $1.push($3); $$ = $1; }
+  ;
+
+first_node
   : TK_NUMBER
   | tag_name
   | comment
+  | open_tag
   ;
 
 word
   : TK_WORD
   ;
 
+word_dash
+  : word
+  | word_dash TK_DASH word
+    { $$ = $1 + $2 + $3; }
+  ;
+
 tag_name
   : word
-  | word TK_COLON word
+  | word TK_COLON word_dash
     { $$ = $1 + $2 + $3; }
+  ;
+
+open_tag
+  : TK_BROKEN_BRACKET_OPEN tag_name space TK_BROKEN_BRACKET_CLOSE
+    { $$ = $1 + $2 + $4; }
   ;
 
 comment

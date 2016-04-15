@@ -1,1 +1,1 @@
-xsl:template
+html xsl:template xsl:value-of
