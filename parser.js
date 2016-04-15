@@ -72,12 +72,12 @@
   }
 */
 var parser = (function(){
-var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[6,10];
+var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[1,6],$V1=[6,12];
 var parser = {trace: function trace() { },
 yy: {},
-symbols_: {"error":2,"document":3,"first_nodes":4,"space":5,"EOF":6,"TK_NUMBER":7,"TK_WORD":8,"html_tag":9,"TK_SPACE":10,"$accept":0,"$end":1},
-terminals_: {2:"error",6:"EOF",7:"TK_NUMBER",8:"TK_WORD",10:"TK_SPACE"},
-productions_: [0,[3,3],[4,1],[4,1],[9,1],[5,0],[5,1]],
+symbols_: {"error":2,"document":3,"first_nodes":4,"space":5,"EOF":6,"TK_NUMBER":7,"tag_name":8,"word":9,"TK_WORD":10,"TK_COLON":11,"TK_SPACE":12,"$accept":0,"$end":1},
+terminals_: {2:"error",6:"EOF",7:"TK_NUMBER",10:"TK_WORD",11:"TK_COLON",12:"TK_SPACE"},
+productions_: [0,[3,3],[4,1],[4,1],[9,1],[8,1],[8,3],[5,0],[5,1]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
 
@@ -86,10 +86,13 @@ switch (yystate) {
 case 1:
  console.log('This is the first nodes!', $$[$0-2]); 
 break;
+case 6:
+ this.$ = $$[$0-2] + $$[$0-1] + $$[$0]; 
+break;
 }
 },
-table: [{3:1,4:2,7:[1,3],8:[1,4]},{1:[3]},{5:5,6:[2,5],10:[1,6]},o($V0,[2,2]),o($V0,[2,3]),{6:[1,7]},{6:[2,6]},{1:[2,1]}],
-defaultActions: {6:[2,6],7:[2,1]},
+table: [{3:1,4:2,7:[1,3],8:4,9:5,10:$V0},{1:[3]},{5:7,6:[2,7],12:[1,8]},o($V1,[2,2]),o($V1,[2,3]),o($V1,[2,5],{11:[1,9]}),o([6,11,12],[2,4]),{6:[1,10]},{6:[2,8]},{9:11,10:$V0},{1:[2,1]},o($V1,[2,6])],
+defaultActions: {8:[2,8],10:[2,1]},
 parseError: function parseError(str, hash) {
     if (hash.recoverable) {
         this.trace(str);
@@ -568,13 +571,13 @@ options: {},
 performAction: function anonymous(yy,yy_,$avoiding_name_collisions,YY_START) {
 var YYSTATE=YY_START;
 switch($avoiding_name_collisions) {
-case 0:return 10;
+case 0:return 12;
 break;
 case 1:return 7;
 break;
-case 2:return 8;
+case 2:return 10;
 break;
-case 3:return 'TK_COLON';
+case 3:return 11;
 break;
 case 4:return 6;
 break;
