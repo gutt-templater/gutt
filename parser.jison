@@ -10,6 +10,8 @@
 \-                          return 'TK_DASH';
 \<                          return 'TK_BROKEN_BRACKET_OPEN';
 \>                          return 'TK_BROKEN_BRACKET_CLOSE';
+\'                          return 'TK_SINGLE_QUOTE';
+\"                          return 'TK_DOUBLE_QUOTE';
 [^\<\>\-\:a-zA-Z0-9]+       return 'TK_OTHER';
 <<EOF>>                     return 'EOF';
 
@@ -36,6 +38,14 @@ first_node
   | tag_name
   | comment
   | open_tag
+  | string
+  ;
+
+string
+  : TK_SINGLE_QUOTE text TK_SINGLE_QUOTE
+    { $$ = '"' + $2 + '"'; }
+  | TK_DOUBLE_QUOTE text TK_DOUBLE_QUOTE
+    { $$ = $1 + $2 + $3; }
   ;
 
 word
