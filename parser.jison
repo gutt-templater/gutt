@@ -39,6 +39,7 @@ first_node
   | tag_name
   | comment
   | open_tag
+  | close_tag
   | string
   ;
 
@@ -73,6 +74,11 @@ open_tag
 open_tag_slash
   :
   | TK_SLASH
+  ;
+
+close_tag
+  : TK_BROKEN_BRACKET_OPEN TK_SLASH tag_name TK_BROKEN_BRACKET_CLOSE
+    { $$ = $1 + $2 + $3 + $4; }
   ;
 
 comment
