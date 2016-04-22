@@ -12,7 +12,8 @@
 \>                          return 'TK_BROKEN_BRACKET_CLOSE';
 \'                          return 'TK_SINGLE_QUOTE';
 \"                          return 'TK_DOUBLE_QUOTE';
-[^\<\>\-\:a-zA-Z0-9]+       return 'TK_OTHER';
+\/                          return 'TK_SLASH';
+[^\<\>\-\:\/a-zA-Z0-9]+     return 'TK_OTHER';
 <<EOF>>                     return 'EOF';
 
 /lex
@@ -65,8 +66,13 @@ tag_name
   ;
 
 open_tag
-  : TK_BROKEN_BRACKET_OPEN tag_name space TK_BROKEN_BRACKET_CLOSE
-    { $$ = $1 + $2 + $4; }
+  : TK_BROKEN_BRACKET_OPEN tag_name space open_tag_slash TK_BROKEN_BRACKET_CLOSE
+    { $$ = $1 + $2 + ($4 ? ' ' + $4 : '') + $5; }
+  ;
+
+open_tag_slash
+  :
+  | TK_SLASH
   ;
 
 comment
@@ -91,5 +97,6 @@ text_element
   | TK_WORD
   | TK_COLON
   | TK_DASH
+  | TK_SLASH
   | TK_OTHER
   ;
