@@ -30,7 +30,8 @@
 %%
 
 document
-  : first_nodes space EOF
+  : EOF
+  | first_nodes space EOF
     { console.log('This is the first nodes!', $1); }
   ;
 
@@ -42,13 +43,11 @@ first_nodes
   ;
 
 first_node
-  : TK_NUMBER
-  | tag_name
+  : text
   | comment
   | logic
   | open_tag
   | close_tag
-  | string
   ;
 
 string
