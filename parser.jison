@@ -31,19 +31,19 @@
 
 document
   : EOF
-  | first_nodes space EOF
+  | first_nodes EOF
     { console.log('This is the first nodes!', $1); }
   ;
 
 first_nodes
   : first_node
     { $$ = [$1]; }
-  | first_nodes space first_node
-    { $1.push($3); $$ = $1; }
+  | first_nodes first_node
+    { $1.push($2); $$ = $1; }
   ;
 
 first_node
-  : text
+  : text_element
   | comment
   | logic
   | open_tag
