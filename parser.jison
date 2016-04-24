@@ -32,18 +32,27 @@
 document
   : EOF
   | first_nodes EOF
-    { console.log('This is the first nodes!', $1); }
+    { console.log($1); }
   ;
 
 first_nodes
   : first_node
     { $$ = [$1]; }
   | first_nodes first_node
-    { $1.push($2); $$ = $1; }
+    {
+      if ($2.type === 'text' && $1[$1.length - 1].type === 'text') {
+        $1[$1.length - 1].value += $2.value;
+      } else {
+        $1.push($2);
+      }
+
+      $$ = $1;
+    }
   ;
 
 first_node
   : text_element
+    { $$ = {type: 'text', value: $1}; }
   | comment
   | logic
   | open_tag
@@ -75,7 +84,7 @@ tag_name
 
 open_tag
   : TK_BROKEN_BRACKET_OPEN tag_name space open_tag_slash TK_BROKEN_BRACKET_CLOSE
-    { $$ = $1 + $2 + ($4 ? ' ' + $4 : '') + $5; }
+    { $$ = {type: (!!$4 ? 'single_tag' : 'open_tag'), value: $2}; }
   ;
 
 open_tag_slash
@@ -85,12 +94,12 @@ open_tag_slash
 
 close_tag
   : TK_BROKEN_BRACKET_OPEN TK_SLASH tag_name TK_BROKEN_BRACKET_CLOSE
-    { $$ = $1 + $2 + $3 + $4; }
+    { $$ = {type: 'close_tag', value: $3}; }
   ;
 
 comment
   : TK_COMMENT_OPEN text TK_COMMENT_CLOSE
-    { $$ = $1 + $2 + $3; }
+    { $$ = {type: 'comment', value: $2.trim()}; }
   ;
 
 escape_logic_open
@@ -115,7 +124,7 @@ escape_single_quote
 
 logic
   : TK_LOGIC_BRACKET_OPEN text TK_LOGIC_BRACKET_CLOSE
-    { $$ = $2; }
+    { $$ = {type: 'logic', value: $2.trim()}; }
   ;
 
 space

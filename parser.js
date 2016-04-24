@@ -84,25 +84,39 @@ performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* actio
 var $0 = $$.length - 1;
 switch (yystate) {
 case 2:
- console.log('This is the first nodes!', $$[$0-1]); 
+ console.log($$[$0-1]); 
 break;
 case 3:
  this.$ = [$$[$0]]; 
 break;
 case 4:
- $$[$0-1].push($$[$0]); this.$ = $$[$0-1]; 
+
+      if ($$[$0].type === 'text' && $$[$0-1][$$[$0-1].length - 1].type === 'text') {
+        $$[$0-1][$$[$0-1].length - 1].value += $$[$0].value;
+      } else {
+        $$[$0-1].push($$[$0]);
+      }
+
+      this.$ = $$[$0-1];
+    
+break;
+case 5:
+ this.$ = {type: 'text', value: $$[$0]}; 
 break;
 case 10:
  this.$ = '"' + $$[$0-1] + '"'; 
 break;
-case 11: case 14: case 16: case 21:
+case 11: case 14: case 16:
  this.$ = $$[$0-2] + $$[$0-1] + $$[$0]; 
 break;
 case 17:
- this.$ = $$[$0-4] + $$[$0-3] + ($$[$0-1] ? ' ' + $$[$0-1] : '') + $$[$0]; 
+ this.$ = {type: (!!$$[$0-1] ? 'single_tag' : 'open_tag'), value: $$[$0-3]}; 
 break;
 case 20:
- this.$ = $$[$0-3] + $$[$0-2] + $$[$0-1] + $$[$0]; 
+ this.$ = {type: 'close_tag', value: $$[$0-1]}; 
+break;
+case 21:
+ this.$ = {type: 'comment', value: $$[$0-1].trim()}; 
 break;
 case 22:
  this.$ = '{'; 
@@ -117,7 +131,7 @@ case 25:
  this.$ = '\''; 
 break;
 case 26:
- this.$ = $$[$0-1]; 
+ this.$ = {type: 'logic', value: $$[$0-1].trim()}; 
 break;
 case 30: case 35:
  this.$ = $$[$0-1] + $$[$0]; 
