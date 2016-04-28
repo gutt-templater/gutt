@@ -18,9 +18,10 @@
 \\\}                        return 'TK_ESCAPE_LOGIC_BRACKET_CLOSE';
 \{                          return 'TK_LOGIC_BRACKET_OPEN';
 \}                          return 'TK_LOGIC_BRACKET_CLOSE';
+\=                          return 'TK_EQUAL';
 \\                          return 'TK_ESCAPE';
 \/                          return 'TK_SLASH';
-[^\<\>\-\:\/a-zA-Z0-9\{\}\'\"\\]+ return 'TK_OTHER';
+[^\<\>\-\:\/a-zA-Z0-9\{\}\'\"\\\=]+ return 'TK_OTHER';
 <<EOF>>                     return 'EOF';
 
 /lex
@@ -32,7 +33,7 @@
 document
   : EOF
   | first_nodes EOF
-    { console.log($1); }
+    { return $1; }
   ;
 
 first_nodes
@@ -61,30 +62,46 @@ first_node
 
 string
   : TK_SINGLE_QUOTE text_words TK_SINGLE_QUOTE
-    { $$ = '"' + $2 + '"'; }
+    { $$ = $2; }
   | TK_DOUBLE_QUOTE text_words TK_DOUBLE_QUOTE
-    { $$ = $1 + $2 + $3; }
-  ;
-
-word
-  : TK_WORD
+    { $$ = $2; }
   ;
 
 word_dash
-  : word
-  | word_dash TK_DASH word
+  : TK_WORD space
+  | word_dash TK_DASH TK_WORD space
     { $$ = $1 + $2 + $3; }
   ;
 
 tag_name
-  : word
-  | word TK_COLON word_dash
+  : TK_WORD space
+  | TK_WORD TK_COLON word_dash
     { $$ = $1 + $2 + $3; }
   ;
 
 open_tag
-  : TK_BROKEN_BRACKET_OPEN tag_name space open_tag_slash TK_BROKEN_BRACKET_CLOSE
-    { $$ = {type: (!!$4 ? 'single_tag' : 'open_tag'), value: $2}; }
+  : TK_BROKEN_BRACKET_OPEN tag_name open_tag_slash TK_BROKEN_BRACKET_CLOSE
+    { $$ = {type: (!!$3 ? 'single_tag' : 'open_tag'), value: $2}; }
+  | TK_BROKEN_BRACKET_OPEN tag_name attributes open_tag_slash TK_BROKEN_BRACKET_CLOSE
+    { $$ = {type: (!!$4 ? 'single_tag' : 'open_tag'), value: $2, attrs: $3}; }
+  | TK_BROKEN_BRACKET_OPEN tag_name attributes TK_SPACE open_tag_slash TK_BROKEN_BRACKET_CLOSE
+    { $$ = {type: (!!$5 ? 'single_tag' : 'open_tag'), value: $2, attrs: $3}; }
+  ;
+
+attributes
+  : attributes TK_SPACE attribute
+    { $1.push($3); $$ = $1; }
+  | attribute
+    { $$ = [$1]; }
+  ;
+
+attribute
+  : TK_WORD
+    { $$ = {name: $1}; }
+  | TK_WORD TK_EQUAL string
+    { $$ = {name: $1, value: $2}; }
+  | string
+    { $$ = {str: $1}; }
   ;
 
 open_tag_slash
@@ -161,6 +178,7 @@ text_char
   | escape_double_quote
   | escape_single_quote
   | TK_SLASH
+  | TK_EQUAL
   | TK_ESCAPE
   | TK_OTHER
   ;
