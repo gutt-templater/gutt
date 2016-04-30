@@ -21,7 +21,8 @@
 \=                          return 'TK_EQUAL';
 \\                          return 'TK_ESCAPE';
 \/                          return 'TK_SLASH';
-[^\<\>\-\:\/a-zA-Z0-9\{\}\'\"\\\=]+ return 'TK_OTHER';
+\!                          return 'TK_EXPLANATION_MARK';
+[^\<\>\-\:\/a-zA-Z0-9\{\}\'\"\\\=\!]+ return 'TK_OTHER';
 <<EOF>>                     return 'EOF';
 
 /lex
@@ -32,6 +33,7 @@
 
 document
   : EOF
+    { return []; }
   | first_nodes EOF
     { return $1; }
   ;
@@ -68,24 +70,35 @@ string
   ;
 
 word_dash
-  : TK_WORD space
-  | word_dash TK_DASH TK_WORD space
+  : TK_WORD
+  | word_dash TK_DASH TK_WORD
     { $$ = $1 + $2 + $3; }
   ;
 
 tag_name
-  : TK_WORD space
+  : TK_WORD
   | TK_WORD TK_COLON word_dash
     { $$ = $1 + $2 + $3; }
   ;
 
 open_tag
-  : TK_BROKEN_BRACKET_OPEN tag_name open_tag_slash TK_BROKEN_BRACKET_CLOSE
-    { $$ = {type: (!!$3 ? 'single_tag' : 'open_tag'), value: $2}; }
-  | TK_BROKEN_BRACKET_OPEN tag_name attributes open_tag_slash TK_BROKEN_BRACKET_CLOSE
-    { $$ = {type: (!!$4 ? 'single_tag' : 'open_tag'), value: $2, attrs: $3}; }
-  | TK_BROKEN_BRACKET_OPEN tag_name attributes TK_SPACE open_tag_slash TK_BROKEN_BRACKET_CLOSE
-    { $$ = {type: (!!$5 ? 'single_tag' : 'open_tag'), value: $2, attrs: $3}; }
+  : TK_BROKEN_BRACKET_OPEN TK_EXPLANATION_MARK tag_name open_tag_slash TK_BROKEN_BRACKET_CLOSE
+    { $$ = {type: (!!$4 ? 'single_tag' : 'open_tag'), value: $2 + $3, attrs: []}; }
+  | TK_BROKEN_BRACKET_OPEN TK_EXPLANATION_MARK tag_name TK_SPACE open_tag_slash TK_BROKEN_BRACKET_CLOSE
+    { $$ = {type: (!!$4 ? 'single_tag' : 'open_tag'), value: $2 + $3, attrs: []}; }
+  | TK_BROKEN_BRACKET_OPEN TK_EXPLANATION_MARK tag_name TK_SPACE attributes open_tag_slash TK_BROKEN_BRACKET_CLOSE
+    { $$ = {type: (!!$6 ? 'single_tag' : 'open_tag'), value: $2 + $3, attrs: $5}; }
+  | TK_BROKEN_BRACKET_OPEN TK_EXPLANATION_MARK tag_name TK_SPACE attributes TK_SPACE open_tag_slash TK_BROKEN_BRACKET_CLOSE
+    { $$ = {type: (!!$7 ? 'single_tag' : 'open_tag'), value: $2 + $3, attrs: $5}; }
+
+  | TK_BROKEN_BRACKET_OPEN tag_name open_tag_slash TK_BROKEN_BRACKET_CLOSE
+    { $$ = {type: (!!$3 ? 'single_tag' : 'open_tag'), value: $2, attrs: []}; }
+  | TK_BROKEN_BRACKET_OPEN tag_name TK_SPACE open_tag_slash TK_BROKEN_BRACKET_CLOSE
+    { $$ = {type: (!!$3 ? 'single_tag' : 'open_tag'), value: $2, attrs: []}; }
+  | TK_BROKEN_BRACKET_OPEN tag_name TK_SPACE attributes open_tag_slash TK_BROKEN_BRACKET_CLOSE
+    { $$ = {type: (!!$5 ? 'single_tag' : 'open_tag'), value: $2, attrs: $4}; }
+  | TK_BROKEN_BRACKET_OPEN tag_name TK_SPACE attributes TK_SPACE open_tag_slash TK_BROKEN_BRACKET_CLOSE
+    { $$ = {type: (!!$6 ? 'single_tag' : 'open_tag'), value: $2, attrs: $4}; }
   ;
 
 attributes
@@ -99,9 +112,9 @@ attribute
   : TK_WORD
     { $$ = {name: $1}; }
   | TK_WORD TK_EQUAL string
-    { $$ = {name: $1, value: $2}; }
+    { $$ = {name: $1, value: $3}; }
   | string
-    { $$ = {str: $1}; }
+    { $$ = {str: '"' + $1 + '"'}; }
   ;
 
 open_tag_slash
@@ -180,5 +193,6 @@ text_char
   | TK_SLASH
   | TK_EQUAL
   | TK_ESCAPE
+  | TK_EXPLANATION_MARK
   | TK_OTHER
   ;

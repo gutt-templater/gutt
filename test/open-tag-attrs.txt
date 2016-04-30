@@ -1,1 +1,0 @@
-<tag select><xls:template href="title.html"><xls:value-of "doctype-link"><tag select ><xls:template href="title.html" > <xls:value-of "doctype-link" ><tag selected/><xls:template href="title.html"/><xls:value-of "doctype-link"/><tag selected /><xls:template href="title.html" /> <xls:value-of "doctype-link" />

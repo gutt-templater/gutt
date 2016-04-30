@@ -1,4 +1,8 @@
-var parser = require('./parser').parser
+var parser = require('./parser')([
+  require('./modules/tag')
+], [
+  require('./stringifiers/php')
+])
 var fs = require('fs')
 var path = require('path')
 
@@ -7,9 +11,11 @@ var result
 
 testFiles.forEach(function (filename) {
   var result
+  var filebase
 
   if (path.extname(filename) === '.txt') {
-    result = parser.parse(fs.readFileSync(__dirname + '/test/' + filename, 'utf8'))
-    console.log(result)
+    filebase = path.basename(filename, path.extname(filename))
+    result = parser(fs.readFileSync(__dirname + '/test/' + filename, 'utf8'))
+    fs.writeFileSync(__dirname + '/dist/' + filebase + '.php', result.php)
   }
 })
