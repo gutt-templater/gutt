@@ -1,3 +1,10 @@
+var inlineNodes = [
+  'b', 'big', 'i', 'small', 'tt', 'time', 'var',
+  'abbr', 'acronym', 'cite', 'code', 'dfn', 'em', 'kbd', 'strong', 'samp',
+  'a', 'bdo', 'br', 'img', 'map', 'object', 'q', 'span', 'sub', 'sup',
+  'button, label, textarea', 'title', 'li'
+]
+
 function generateAttrs(attrs) {
   var result = []
 
@@ -79,9 +86,9 @@ function reduce(tree, indent) {
 
     switch (node.type) {
       case 'open_tag':
-        result += generateTabs(indent) + '<' + node.value + generateAttrs(node.attrs) + '>\n'
+        result += generateTabs(indent) + '<' + node.value + generateAttrs(node.attrs) + '>' + (!~inlineNodes.indexOf(node.value) ? '\n' : '')
         result += reduce(node.childs, indent + 1)
-        result += generateTabs(indent) + '</' + node.value + '>\n'
+        result += (!~inlineNodes.indexOf(node.value) ? generateTabs(indent) : '') + '</' + node.value + '>\n'
 
         break
       case 'single_tag':
@@ -100,6 +107,8 @@ function reduce(tree, indent) {
         result += generateTabs(indent) + '<?php echo ' + expression(node.value) + ' ?>'
 
         break
+      case 'text':
+        result += node.value.trim()
     }
   })
 

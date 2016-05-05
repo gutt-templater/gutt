@@ -2,6 +2,7 @@ var parser = require('./parser')([
   require('./modules/bem'),
   require('./modules/tag'),
   require('./modules/logic'),
+  require('./modules/text'),
   require('./modules/assignment')
 ], [
   require('./stringifiers/php')
