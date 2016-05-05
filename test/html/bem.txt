@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Document</title>
+</head>
+<body>
+  <ul block="menu">
+    <li elem="item">Item 1</li>
+
+    <ul block="submenu">
+      <li elem="item"></li>
+      <li elem="item"></li>
+      <li elem="item"></li>
+    </ul>
+
+    <li elem="item">Item 2</li>
+    <li elem="item">Item 3</li>
+  </ul>
+
+  <ul block="menu" mods="red">
+    <li elem="item" mods="first selected">Item 1</li>
+    <li elem="item">Item 2</li>
+    <li elem="item" mods="pos:last">Item 3</li>
+  </ul>
+
+  <ul block="menu" mods="size:big state:active">
+    <li elem="item">Item 1</li>
+    <li elem="item" mods="pos:middle">Item 2</li>
+    <li elem="item" mods="last">Item 3</li>
+  </ul>
+</body>
+</html>

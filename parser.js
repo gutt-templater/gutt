@@ -7,33 +7,36 @@ function BreakException(err) {
   this.message = err
 }
 
+var N_NOTHING = 1 << 0
+var N_OPEN = 1 << 1
+var N_CLOSE = 1 << 2
+
 module.exports = function (_modules, _stringifiers) {
   return function (str) {
     var modules = _modules.slice(0)
     var stringifiers = _stringifiers.slice(0)
     var raw = htmlParser.parse(str)
     var result = {
-      childs: []
+      childs: [],
+      type: 'root'
     }
     var currentNode = result
     var currentParent = result
     var results = {}
     var nesteStack = []
-    var isNested = false
+    var currentNexting = {
+      flag: N_NOTHING,
+      keyword: null
+    }
 
     var helper = {
       neste: function (keyword) {
-        isNested = keyword
+        currentNexting.keyword = keyword
+        currentNexting.flag = N_OPEN
       },
       closeNeste: function (keyword) {
-        if (nesteStack[nesteStack.length - 1] === keyword) {
-          nesteStack.pop()
-          currentNode = currentNode.parent
-          currentParent = currentNode.parent
-        } else {
-          throw new SyntaxError('Syntax error: extected ' + nesteStack[nesteStack.length - 1] +
-            ', got ' + keyword)
-        }
+        currentNexting.flag = N_CLOSE
+        currentNexting.keyword = keyword
       }
     }
 
@@ -48,17 +51,36 @@ module.exports = function (_modules, _stringifiers) {
           if (module.check(helper, item) === true) {
             currentNode.childs.push(item)
 
-            if (isNested) {
+            if (currentNexting.flag & N_OPEN) {
               item.childs = []
               item.parent = currentNode
               currentParent = currentNode
               currentNode = item
-              nesteStack.push(isNested)
-              isNested = false
+              nesteStack.push(currentNexting.keyword)
+              currentNexting.flag = N_NOTHING
+              currentNexting.keyword = null
+            } else if (currentNexting.flag & N_CLOSE) {
+              if (nesteStack[nesteStack.length - 1] === currentNexting.keyword) {
+                nesteStack.pop()
+              } else {
+                throw new SyntaxError('Syntax error: extected ' + nesteStack[nesteStack.length - 1] +
+                  ', got ' + keyword)
+              }
             }
 
             throw new BreakException()
           }
+
+          if (currentNexting.flag & N_CLOSE) {
+            if (module.closeNeste) {
+              module.closeNeste(currentNode)
+            }
+
+            currentNode = currentNode.parent
+            currentParent = currentNode.parent
+            currentNexting.flag = N_NOTHING
+            currentNexting.keyword = null
+          } 
         })
       } catch (e) {
         if (e.name !== 'BreakException') {

@@ -1,4 +1,5 @@
 var parser = require('./parser')([
+  require('./modules/bem'),
   require('./modules/tag'),
   require('./modules/logic'),
   require('./modules/assignment')
