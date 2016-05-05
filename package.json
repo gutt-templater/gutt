@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "node test.js",
-    "generate": "jison html-parser.jison"
+    "generate": "jison html-parser.jison && jison logic-parser.jison"
   },
   "author": "",
   "license": "ISC",

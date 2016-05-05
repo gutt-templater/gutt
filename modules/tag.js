@@ -2,35 +2,35 @@ var singleTags = ['!DOCTYPE', 'meta', 'hr']
 
 module.exports = {
   check: function (helper, item) {
+    var checked = true
+
     switch (item.type) {
       case 'open_tag':
         if (~singleTags.indexOf(item.value)) {
           item.type = 'single_tag'
-
-          helper.push(item)
         } else {
-          helper.neste(item)
+          helper.neste(item.value)
         }
 
         break
       case 'close_tag':
-        helper.closeNeste(item)
+        helper.closeNeste(item.value)
 
         break
       case 'single_tag':
         if (!~singleTags.indexOf(item.value)) {
           item.type = 'open_tag'
-
-          helper.push(item)
-        } else {
-          helper.push(item)
         }
 
         break
       case 'comment':
-        helper.push(item)
+        // do nothing just catch this case
 
         break
+      default:
+        checked = false
     }
+
+    return checked
   }
 }

@@ -15,12 +15,13 @@
 "]"                         return ']';
 "="                         return '=';
 ","                         return ',';
+\'                          return 'SINGLE_QUOTE';
+\"                          return 'DOUBLE_QUOTE';
 
 /lex
 
 %left '+' '-'
 %left '*' '/'
-%left '^'
 %left UMINUS
 
 %start document
@@ -29,7 +30,7 @@
 
 document
   : expressions
-    { console.log($1); return $1; }
+    { return $1; }
   ;
 
 expressions
@@ -44,27 +45,31 @@ assignment
   ;
 
 variable
-  : variable '[' key ']'
-    { $1.keys.push($2); $$ = $1; }
+  : variable '[' expression ']'
+    { $1.keys.push($3); $$ = $1; }
   | WORD
     { $$ = {type: 'var', value: $1, keys: []}; }
   ;
 
-key
-  : expression
-  ;
-
 function
   : variable '(' params ')'
-    { $$ = {type: 'func', value: $1, attrs: $2}; }
+    { $$ = {type: 'func', value: $1, attrs: $3}; }
   ;
 
 params
   :
+    { $$ = []; }
   | expression
     { $$ = [$1]; }
   | params ',' expression
     { $1.push($3); $$ = $1; }
+  ;
+
+string
+  : SINGLE_QUOTE WORD SINGLE_QUOTE
+    { $$ = '"' + $2 + '"'; }
+  | DOUBLE_QUOTE WORD DOUBLE_QUOTE
+    { $$ = '"' + $2 + '"'; }
   ;
 
 expression
@@ -73,15 +78,16 @@ expression
   | expression '-' expression
     { $$ = {type: 'minus', value: [$1, $3]}; }
   | expression '*' expression
-    { $$ = {type: 'milt', value: [$1, $3]}; }
+    { $$ = {type: 'mult', value: [$1, $3]}; }
   | expression '/' expression
-    { $$ = {type: 'devis', value: [$1, $3]}; }
+    { $$ = {type: 'divis', value: [$1, $3]}; }
   | '-' expression %prec UMINUS
     { $$ = {type: 'uminus', value: $2}; }
   | '(' expression ')'
     { $$ = {type: 'brack', value: $2}; }
   | function
   | variable
+  | string
   | NUMBER
     { $$ = {type: 'num', value: $1}; }
   ;
