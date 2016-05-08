@@ -32,15 +32,47 @@ module.exports = function (_modules, _stringifiers) {
     var helper = {
       neste: function (keyword) {
         currentNexting.keyword = keyword
-        currentNexting.flag = N_OPEN
+        currentNexting.flag = currentNexting.flag | N_OPEN
       },
       closeNeste: function (keyword) {
-        currentNexting.flag = N_CLOSE
         currentNexting.keyword = keyword
+        currentNexting.flag = currentNexting.flag | N_CLOSE
+      },
+      logicMatch: function (item, rule) {
+        var ruleItems = rule.split('.')
+        var currItem = item
+        var matched = true
+        var field
+        var expr
+        var out
+
+        ruleItems.forEach(function (ruleItem, index) {
+          if (!matched) return false
+
+          out = ruleItem.match(/([a-z]+)(\[([a-z]+)\])?/i)
+          field = out[1]
+          expr = out[3]
+
+          if (typeof currItem === 'string') {
+            if (expr || currItem !== field) {
+              matched = false
+            }
+          } else if (expr && currItem[field] && currItem[field] === expr) {
+            currItem = currItem.value
+          } else if (currItem[field]) {
+            currItem = currItem.value
+          } else {
+            matched = false
+          }
+        })
+
+        return matched
       }
     }
 
     raw.forEach(function (item) {
+      var checked = false
+
       if (item.type === 'logic') {
         item.value = logicParser.parse(item.value)
       }
@@ -48,7 +80,24 @@ module.exports = function (_modules, _stringifiers) {
       try {
         item.parent = currentParent
         modules.forEach(function (module) {
-          if (module.check(helper, item) === true) {
+          checked = module.check(helper, item)
+
+          if (checked === true) {
+            if (currentNexting.flag & N_CLOSE) {
+              if (nesteStack[nesteStack.length - 1] === currentNexting.keyword) {
+                nesteStack.pop()
+              } else {
+                throw new SyntaxError('Syntax error: extected ' + nesteStack[nesteStack.length - 1] +
+                  ', got ' + keyword)
+              }
+
+              if (currentNexting.flag & N_OPEN) {
+                currentNode = currentNode.parent
+                currentParent = currentNode.parent
+                currentNexting.flag = currentNexting.flag & ~N_CLOSE
+              }
+            }
+
             currentNode.childs.push(item)
 
             if (currentNexting.flag & N_OPEN) {
@@ -57,16 +106,10 @@ module.exports = function (_modules, _stringifiers) {
               currentParent = currentNode
               currentNode = item
               nesteStack.push(currentNexting.keyword)
-              currentNexting.flag = N_NOTHING
-              currentNexting.keyword = null
-            } else if (currentNexting.flag & N_CLOSE) {
-              if (nesteStack[nesteStack.length - 1] === currentNexting.keyword) {
-                nesteStack.pop()
-              } else {
-                throw new SyntaxError('Syntax error: extected ' + nesteStack[nesteStack.length - 1] +
-                  ', got ' + keyword)
-              }
+              currentNexting.flag = currentNexting.flag & ~N_OPEN
             }
+
+            currentNexting.keyword = null
 
             throw new BreakException()
           }
@@ -78,9 +121,9 @@ module.exports = function (_modules, _stringifiers) {
 
             currentNode = currentNode.parent
             currentParent = currentNode.parent
-            currentNexting.flag = N_NOTHING
+            currentNexting.flag = currentNexting.flag & ~N_CLOSE
             currentNexting.keyword = null
-          } 
+          }
         })
       } catch (e) {
         if (e.name !== 'BreakException') {
@@ -88,6 +131,10 @@ module.exports = function (_modules, _stringifiers) {
         }
       }
     })
+
+    if (nesteStack.length) {
+      console.error('Syntax error: there is not closed neste elements: ' + nesteStack.join(', '))
+    }
 
     stringifiers.forEach(function (stringifier) {
       results[stringifier.ext] = stringifier.stringify(result)

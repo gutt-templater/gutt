@@ -58,6 +58,50 @@ function expression(tree) {
       str += expression(tree.value[0]) + ' / ' + expression(tree.value[1])
 
       break
+    case 'or':
+      str += expression(tree.value[0]) + ' || ' + expression(tree.value[1])
+
+      break
+    case 'and':
+      str += expression(tree.value[0]) + ' && ' + expression(tree.value[1])
+
+      break
+    case 'bitor':
+      str += expression(tree.value[0]) + ' | ' + expression(tree.value[1])
+
+      break
+    case 'bitand':
+      str += expression(tree.value[0]) + ' & ' + expression(tree.value[1])
+
+      break
+    case 'notequal':
+      str += expression(tree.value[0]) + ' != ' + expression(tree.value[1])
+
+      break
+    case 'equal':
+      str += expression(tree.value[0]) + ' == ' + expression(tree.value[1])
+
+      break
+    case 'gtequal':
+      str += expression(tree.value[0]) + ' >= ' + expression(tree.value[1])
+
+      break
+    case 'gt':
+      str += expression(tree.value[0]) + ' > ' + expression(tree.value[1])
+
+      break
+    case 'lt':
+      str += expression(tree.value[0]) + ' < ' + expression(tree.value[1])
+
+      break
+    case 'ltequal':
+      str += expression(tree.value[0]) + ' <= ' + expression(tree.value[1])
+
+      break
+    case 'not':
+      str += '!' + expression(tree.value[0])
+
+      break
     case 'brack':
       str += '(' + expression(tree.value) + ')'
 
@@ -100,11 +144,30 @@ function reduce(tree, indent) {
 
         break
       case 'assign':
-        result += generateTabs(indent) + '<?php ' + expression(node.value) + ' = ' + expression(node.expr) + ' ?>\n'
+        result += generateTabs(indent) + '<?php ' + expression(node.value) + ' = ' + expression(node.expr) + '; ?>\n'
+
+        break
+      case 'if':
+        result += generateTabs(indent) + '<?php if (' + expression(node.value) + ') { ?>\n'
+        result += reduce(node.childs, indent + 1)
+
+        break
+      case 'elseif':
+        result += generateTabs(indent) + '<?php } elseif (' + expression(node.value) + ') { ?>\n'
+        result += reduce(node.childs, indent + 1)
+
+        break
+      case 'else':
+        result += generateTabs(indent) + '<?php } else { ?>\n'
+        result += reduce(node.childs, indent + 1)
+
+        break
+      case 'endif':
+        result += generateTabs(indent - 1) + '<?php } ?>\n'
 
         break
       case 'expr':
-        result += generateTabs(indent) + '<?php echo ' + expression(node.value) + ' ?>'
+        result += generateTabs(indent) + '<?php echo ' + expression(node.value) + '; ?>\n'
 
         break
       case 'text':

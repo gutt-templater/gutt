@@ -1,0 +1,7 @@
+{ if (a == b) }
+  { a = b + c }
+{ elseif (c != d) }
+  { e = f * d }
+{ else }
+  { i - g }
+{ endif }

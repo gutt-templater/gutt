@@ -13,16 +13,38 @@
 ")"                         return ')';
 "["                         return '[';
 "]"                         return ']';
+"=="                        return '==';
+"!="                        return '!=';
+"<="                        return '<=';
+">="                        return '>=';
 "="                         return '=';
+"<"                         return '<';
+">"                         return '>';
+"&&"                        return '&&';
+"||"                        return '||';
+"&"                         return '&';
+"|"                         return '|';
+"!"                         return '!';
 ","                         return ',';
 \'                          return 'SINGLE_QUOTE';
 \"                          return 'DOUBLE_QUOTE';
 
 /lex
 
+%left '||' '||'
+%left '&&' '&&'
+%left '|' '|'
+%left '&' '&'
+%left '!=' '!='
+%left '==' '=='
+%left '>=' '>='
+%left '>' '>'
+%left '<=' '<='
+%left '<' '<'
 %left '+' '-'
 %left '*' '/'
 %left UMINUS
+%left NOT
 
 %start document
 
@@ -73,7 +95,27 @@ string
   ;
 
 expression
-  : expression '+' expression
+  : expression '||' expression
+    { $$ = {type: 'or', value: [$1, $3]}; }
+  | expression '&&' expression
+    { $$ = {type: 'and', value: [$1, $3]}; }
+  | expression '|' expression
+    { $$ = {type: 'bitor', value: [$1, $3]}; }
+  | expression '&' expression
+    { $$ = {type: 'bitand', value: [$1, $3]}; }
+  | expression '!=' expression
+    { $$ = {type: 'notequal', value: [$1, $3]}; }
+  | expression '==' expression
+    { $$ = {type: 'equal', value: [$1, $3]}; }
+  | expression '>=' expression
+    { $$ = {type: 'gtequal', value: [$1, $3]}; }
+  | expression '>' expression
+    { $$ = {type: 'gt', value: [$1, $3]}; }
+  | expression '<=' expression
+    { $$ = {type: 'ltequal', value: [$1, $3]}; }
+  | expression '<' expression
+    { $$ = {type: 'lt', value: [$1, $3]}; }
+  | expression '+' expression
     { $$ = {type: 'plus', value: [$1, $3]}; }
   | expression '-' expression
     { $$ = {type: 'minus', value: [$1, $3]}; }
@@ -83,6 +125,8 @@ expression
     { $$ = {type: 'divis', value: [$1, $3]}; }
   | '-' expression %prec UMINUS
     { $$ = {type: 'uminus', value: $2}; }
+  | '!' expression %prec NOT
+    { $$ = {type: 'not', value: $2}; }
   | '(' expression ')'
     { $$ = {type: 'brack', value: $2}; }
   | function
