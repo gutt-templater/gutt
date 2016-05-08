@@ -1,0 +1,6 @@
+{ for (index, item, news) }
+  <h1>{ item['title'] }</h1>
+{ endfor }
+{ for (item, news) }
+  <h2>{ item['subtitle'] }</h2>
+{ endfor }

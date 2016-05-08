@@ -166,6 +166,22 @@ function reduce(tree, indent) {
         result += generateTabs(indent - 1) + '<?php } ?>\n'
 
         break
+      case 'for':
+        result += generateTabs(indent - 1) + '<?php foreach ('
+
+        if (node.value.length === 2) {
+          result += expression(node.value[1]) + ' as ' + expression(node.value[0])
+        } else if (node.value.length === 3) {
+          result += expression(node.value[2]) + ' as ' + expression(node.value[0]) +
+            ' => ' + expression(node.value[1])
+        }
+
+        result += ') { ?>\n'
+        result += reduce(node.childs, indent + 1)
+
+        result += generateTabs(indent - 1) + '<?php } ?>\n'
+
+        break
       case 'expr':
         result += generateTabs(indent) + '<?php echo ' + expression(node.value) + '; ?>\n'
 

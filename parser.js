@@ -57,8 +57,12 @@ module.exports = function (_modules, _stringifiers) {
             if (expr || currItem !== field) {
               matched = false
             }
-          } else if (expr && currItem[field] && currItem[field] === expr) {
-            currItem = currItem.value
+          } else if (expr) {
+            if (currItem[field] && currItem[field] === expr) {
+              currItem = currItem.value
+            } else {
+              matched = false
+            }
           } else if (currItem[field]) {
             currItem = currItem.value
           } else {
