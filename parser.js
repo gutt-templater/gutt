@@ -86,47 +86,42 @@ module.exports = function (_modules, _stringifiers) {
         modules.forEach(function (module) {
           checked = module.check(helper, item)
 
-          if (checked === true) {
-            if (currentNexting.flag & N_CLOSE) {
-              if (nesteStack[nesteStack.length - 1] === currentNexting.keyword) {
-                nesteStack.pop()
-              } else {
-                throw new SyntaxError('Syntax error: extected ' + nesteStack[nesteStack.length - 1] +
-                  ', got ' + keyword)
-              }
-
-              if (currentNexting.flag & N_OPEN) {
-                currentNode = currentNode.parent
-                currentParent = currentNode.parent
-                currentNexting.flag = currentNexting.flag & ~N_CLOSE
-              }
-            }
-
-            currentNode.childs.push(item)
-
-            if (currentNexting.flag & N_OPEN) {
-              item.childs = []
-              item.parent = currentNode
-              currentParent = currentNode
-              currentNode = item
-              nesteStack.push(currentNexting.keyword)
-              currentNexting.flag = currentNexting.flag & ~N_OPEN
-            }
-
-            currentNexting.keyword = null
-
-            throw new BreakException()
-          }
-
           if (currentNexting.flag & N_CLOSE) {
-            if (module.closeNeste) {
-              module.closeNeste(currentNode)
+            if (nesteStack[nesteStack.length - 1] === currentNexting.keyword) {
+              nesteStack.pop()
+            } else {
+              throw new SyntaxError('Syntax error: extected ' + nesteStack[nesteStack.length - 1] +
+                ', got ' + keyword)
             }
+
+            modules.forEach(function (module) {
+              if (module.closeNeste) {
+                module.closeNeste(currentNode)
+              }
+            })
 
             currentNode = currentNode.parent
             currentParent = currentNode.parent
             currentNexting.flag = currentNexting.flag & ~N_CLOSE
-            currentNexting.keyword = null
+          }
+
+          if (checked === true) {
+            currentNode.childs.push(item)
+          }
+
+          if (currentNexting.flag & N_OPEN) {
+            item.childs = []
+            item.parent = currentNode
+            currentParent = currentNode
+            currentNode = item
+            nesteStack.push(currentNexting.keyword)
+            currentNexting.flag = currentNexting.flag & ~N_OPEN
+          }
+
+          currentNexting.keyword = null
+
+          if (checked === true) {
+            throw new BreakException()
           }
         })
       } catch (e) {

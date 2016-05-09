@@ -1,5 +1,6 @@
 var parser = require('./parser')([
   require('./modules/bem'),
+  require('./modules/layout'),
   require('./modules/tag'),
   require('./modules/if'),
   require('./modules/foreach'),

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Document</title>
+</head>
+<body>
+  <div layout="prises">
+    <h1 pos="title"></h1>
+
+    <ul layout="grid">
+      <li pos="item">Item1</li>
+      <li pos="item">Item2</li>
+      <li pos="item">Item3</li>
+      <li pos="item">Item4</li>
+    </ul>
+
+    <footer pos="footer"></footer>
+  </div>
+</body>
+</html>
