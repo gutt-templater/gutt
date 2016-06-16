@@ -1,5 +1,7 @@
 { if (a == b) }
   { a = b + c }
+{ elseif (g > 2 && u < 8 || g >= 10 && u <= 12) }
+  { e = true }
 { elseif (c != d) }
   { e = f * d }
 { else }
