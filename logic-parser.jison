@@ -31,16 +31,13 @@
 
 /lex
 
-%left '||' '||'
-%left '&&' '&&'
-%left '|' '|'
-%left '&' '&'
-%left '!=' '!='
-%left '==' '=='
-%left '>=' '>='
-%left '>' '>'
-%left '<=' '<='
-%left '<' '<'
+%left '||'
+%left '&&'
+%left '|'
+%left '&'
+%left '!='
+%left '=='
+%left '>=' '>' '<=' '<'
 %left '+' '-'
 %left '*' '/'
 %left UMINUS
