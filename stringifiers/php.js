@@ -1,29 +1,17 @@
-var inlineNodes = [
-  'b', 'big', 'i', 'small', 'tt', 'time', 'var',
-  'abbr', 'acronym', 'cite', 'code', 'dfn', 'em', 'kbd', 'strong', 'samp',
-  'a', 'bdo', 'br', 'img', 'map', 'object', 'q', 'span', 'sub', 'sup',
-  'button, label, textarea', 'title', 'li'
-]
-
 function generateAttrs(attrs) {
   var result = []
 
   attrs.forEach(function (attr) {
-    result.push((attr.name ? attr.name : attr.str) + (attr.value ? '="' + attr.value + '"' : ''))
+    var attrValue = ''
+
+    attr.value.forEach(function (value) {
+      attrValue += reduce([value], 0)
+    })
+
+    result.push(attr.name + (attrValue.length ? '="' + attrValue + '"' : ''))
   })
 
   return (result.length ? ' ' : '') + result.join(' ')
-}
-
-function generateTabs(indent) {
-  var str = ''
-  var i = 0
-
-  for (;i < indent; i += 1) {
-    str += '  '
-  }
-
-  return str
 }
 
 function expression(tree) {
@@ -121,8 +109,7 @@ function expression(tree) {
   return str
 }
 
-function reduce(tree, indent) {
-  indent || (indent = 0)
+function reduce(tree) {
   var result = ''
 
   tree.forEach(function (node) {
@@ -130,44 +117,44 @@ function reduce(tree, indent) {
 
     switch (node.type) {
       case 'open_tag':
-        result += generateTabs(indent) + '<' + node.value + generateAttrs(node.attrs) + '>' + (!~inlineNodes.indexOf(node.value) ? '\n' : '')
-        result += reduce(node.childs, indent + 1)
-        result += (!~inlineNodes.indexOf(node.value) ? generateTabs(indent) : '') + '</' + node.value + '>\n'
+        result += '<' + node.value + generateAttrs(node.attrs) + '>'
+        result += reduce(node.childs)
+        result += '</' + node.value + '>'
 
         break
       case 'single_tag':
-        result += generateTabs(indent) + '<' + node.value + generateAttrs(node.attrs) + (node.value !== '!DOCTYPE' ? ' /' : '') + '>\n'
+        result += '<' + node.value + generateAttrs(node.attrs) + (node.value !== '!DOCTYPE' ? ' /' : '') + '>'
 
         break
       case 'comment':
-        result += generateTabs(indent) + '<!-- ' + node.value + ' -->\n'
+        result += '<!-- ' + node.value + ' -->'
 
         break
       case 'assign':
-        result += generateTabs(indent) + '<?php ' + expression(node.value) + ' = ' + expression(node.expr) + '; ?>\n'
+        result += '<?php ' + expression(node.value) + ' = ' + expression(node.expr) + '; ?>'
 
         break
       case 'if':
-        result += generateTabs(indent) + '<?php if (' + expression(node.value) + ') { ?>\n'
-        result += reduce(node.childs, indent + 1)
+        result += '<?php if (' + expression(node.value) + ') { ?>'
+        result += reduce(node.childs)
 
         break
       case 'elseif':
-        result += generateTabs(indent) + '<?php } elseif (' + expression(node.value) + ') { ?>\n'
-        result += reduce(node.childs, indent + 1)
+        result += '<?php } elseif (' + expression(node.value) + ') { ?>'
+        result += reduce(node.childs)
 
         break
       case 'else':
-        result += generateTabs(indent) + '<?php } else { ?>\n'
-        result += reduce(node.childs, indent + 1)
+        result += '<?php } else { ?>'
+        result += reduce(node.childs)
 
         break
       case 'endif':
-        result += generateTabs(indent - 1) + '<?php } ?>\n'
+        result += '<?php } ?>'
 
         break
       case 'for':
-        result += generateTabs(indent - 1) + '<?php foreach ('
+        result += '<?php foreach ('
 
         if (node.value.length === 2) {
           result += expression(node.value[1]) + ' as ' + expression(node.value[0])
@@ -176,18 +163,18 @@ function reduce(tree, indent) {
             ' => ' + expression(node.value[1])
         }
 
-        result += ') { ?>\n'
-        result += reduce(node.childs, indent + 1)
+        result += ') { ?>'
+        result += reduce(node.childs)
 
-        result += generateTabs(indent - 1) + '<?php } ?>\n'
+        result += '<?php } ?>'
 
         break
       case 'expr':
-        result += generateTabs(indent) + '<?php echo ' + expression(node.value) + '; ?>\n'
+        result += '<?php echo ' + expression(node.value) + '; ?>'
 
         break
       case 'text':
-        result += node.value.trim()
+        result += node.value
     }
   })
 
