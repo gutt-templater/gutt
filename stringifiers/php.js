@@ -82,7 +82,7 @@ function expression(tree) {
 
       break
     case 'not':
-      str += '!' + expression(tree.value[0])
+      str += '!' + expression(tree.value)
 
       break
     case 'brack':
