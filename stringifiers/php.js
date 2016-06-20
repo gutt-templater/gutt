@@ -2,12 +2,7 @@ function generateAttrs(attrs) {
   var result = []
 
   attrs.forEach(function (attr) {
-    var attrValue = ''
-
-    attr.value.forEach(function (value) {
-      attrValue += reduce([value], 0)
-    })
-
+    var attrValue = reduce(attr.value.childs)
     result.push(attr.name + (attrValue.length ? '="' + attrValue + '"' : ''))
   })
 

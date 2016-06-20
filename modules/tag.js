@@ -1,11 +1,29 @@
+var nester = require('../nester')
 var singleTags = ['!DOCTYPE', 'meta', 'hr']
 
+function handleAttrs(item, modules) {
+  if (item.attrs.length) {
+    item.attrs.forEach(function (attr) {
+      if (attr.value.length) {
+        attr.value = nester(attr.value, modules)
+      } else {
+        attr.value = {
+          childs: [],
+          type: 'root'
+        }
+      }
+    })
+  }
+}
+
 module.exports = {
-  check: function (helper, item) {
+  check: function (helper, item, modules) {
     var checked = true
 
     switch (item.type) {
       case 'open_tag':
+        handleAttrs(item, modules)
+
         if (~singleTags.indexOf(item.value)) {
           item.type = 'single_tag'
         } else {
@@ -18,6 +36,8 @@ module.exports = {
 
         break
       case 'single_tag':
+        handleAttrs(item, modules)
+
         if (!~singleTags.indexOf(item.value)) {
           item.type = 'open_tag'
         }
