@@ -81,6 +81,10 @@ function expression(tree) {
       str += expression(tree.value[0]) + ' <= ' + expression(tree.value[1])
 
       break
+    case 'isset':
+      str += 'isset(' + expression(tree.value) + ')'
+
+      break
     case 'not':
       str += '!' + expression(tree.value)
 
@@ -165,7 +169,11 @@ function reduce(tree) {
 
         break
       case 'expr':
-        result += '<?php echo ' + expression(node.value) + '; ?>'
+        if (node.value.type === 'isset') {
+          result += '<?php if (isset(' + expression(node.value.value) + ')) echo ' + expression(node.value.value) + '; ?>'
+        } else {
+          result += '<?php echo ' + expression(node.value) + '; ?>'
+        }
 
         break
       case 'text':

@@ -19,7 +19,7 @@ testFiles.forEach(function (filename) {
   var result
   var filebase
 
-  if (path.extname(filename) === '.txt') {
+  if (path.extname(filename) === '.txt' && path.basename(filename) === 'logic-concat.txt') {
     filebase = path.basename(filename, path.extname(filename))
     result = parser(fs.readFileSync(__dirname + '/test/' + filename, 'utf8'))
     fs.writeFileSync(__dirname + '/dist/' + filebase + '.php', result.php)

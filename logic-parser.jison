@@ -25,9 +25,12 @@
 "&"                         return '&';
 "|"                         return '|';
 "!"                         return '!';
+"?"                         return '?';
 ","                         return ',';
+"."                         return '.';
 \'                          return 'SINGLE_QUOTE';
 \"                          return 'DOUBLE_QUOTE';
+[^\*\/\-\+&\(\)\[\]=!<>?,\.\'\"\|] return 'OTHER';
 
 /lex
 
@@ -38,10 +41,12 @@
 %left '!='
 %left '=='
 %left '>=' '>' '<=' '<'
+%left '.'
 %left '+' '-'
 %left '*' '/'
 %left UMINUS
 %left NOT
+%left '?'
 
 %start document
 
@@ -85,9 +90,9 @@ params
   ;
 
 string
-  : SINGLE_QUOTE WORD SINGLE_QUOTE
+  : SINGLE_QUOTE string_elements SINGLE_QUOTE
     { $$ = '"' + $2 + '"'; }
-  | DOUBLE_QUOTE WORD DOUBLE_QUOTE
+  | DOUBLE_QUOTE string_elements DOUBLE_QUOTE
     { $$ = '"' + $2 + '"'; }
   ;
 
@@ -112,6 +117,8 @@ expression
     { $$ = {type: 'ltequal', value: [$1, $3]}; }
   | expression '<' expression
     { $$ = {type: 'lt', value: [$1, $3]}; }
+  | expression '.' expression
+    { $$ = {type: 'concat', value: [$1, $3]}; }
   | expression '+' expression
     { $$ = {type: 'plus', value: [$1, $3]}; }
   | expression '-' expression
@@ -124,6 +131,8 @@ expression
     { $$ = {type: 'uminus', value: $2}; }
   | '!' expression %prec NOT
     { $$ = {type: 'not', value: $2}; }
+  | expression '?'
+    { $$ = {type: 'isset', value: $1}; }
   | '(' expression ')'
     { $$ = {type: 'brack', value: $2}; }
   | function
@@ -131,4 +140,39 @@ expression
   | string
   | NUMBER
     { $$ = {type: 'num', value: $1}; }
+  ;
+
+string_elements
+  :
+    { $$ = ""; }
+  | string_elements string_element
+    { $$ = $1 + $2; }
+  ;
+
+string_element
+  : "*"
+  | "/"
+  | "-"
+  | "+"
+  | "^"
+  | "("
+  | ")"
+  | "["
+  | "]"
+  | "=="
+  | "!="
+  | "<="
+  | ">="
+  | "="
+  | "<"
+  | ">"
+  | "&&"
+  | "||"
+  | "&"
+  | "|"
+  | "!"
+  | "?"
+  | ","
+  | "."
+  | OTHER
   ;

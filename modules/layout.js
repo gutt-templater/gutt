@@ -11,25 +11,24 @@ module.exports = {
       for (;i < item.attrs.length; i += 1) {
         attr = item.attrs[i]
 
-        if (attr.name === 'layout') {
-          isLayout = attr.value
+        if (attr.name === 'layout' && attr.value.length === 1 && attr.value[0].type === 'text') {
+          isLayout = attr.value[0].value
           item.attrs.splice(i, 1)
-          item._layout = attr.value
-          layouts.push(attr.value)
-          lastLayout = attr.value
+          item._layout = isLayout
+          layouts.push(isLayout)
+          lastLayout = isLayout
           i--
-        } else if (attr.name === 'pos') {
-          isPos = attr.value
-          isLayout = lastLayout
+        } else if (attr.name === 'pos' && attr.value.length === 1 && attr.value[0].type === 'text') {
+          isPos = attr.value[0].value
           item.attrs.splice(i, 1)
           i--
         }
       }
 
-      if (isLayout || isPos) {
+      if (isLayout || lastLayout && isPos) {
         item.attrs.push({
           name: 'class',
-          value: isLayout + (isPos ? '__' + isPos : '')
+          value: [{type: 'text', value: (isLayout || lastLayout) + (isPos ? '__' + isPos : '')}]
         })
       }
     }

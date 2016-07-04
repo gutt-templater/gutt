@@ -18,16 +18,16 @@
     <li elem="item">Item 3</li>
   </ul>
 
-  <ul block="menu" mods="red">
-    <li elem="item" mods="first selected">Item 1</li>
+  <ul block="menu" mod="red">
+    <li elem="item" mod="first" mod="selected">Item 1</li>
     <li elem="item">Item 2</li>
-    <li elem="item" mods="pos:last">Item 3</li>
+    <li elem="item" mod="pos:last">Item 3</li>
   </ul>
 
-  <ul block="menu" mods="size:big state:active">
+  <ul block="menu" mod="size:big" mod="state:active">
     <li elem="item">Item 1</li>
-    <li elem="item" mods="pos:middle">Item 2</li>
-    <li elem="item" mods="last">Item 3</li>
+    <li elem="item" mod="pos:middle">Item 2</li>
+    <li elem="item" mod="last">Item 3</li>
   </ul>
 </body>
 </html>

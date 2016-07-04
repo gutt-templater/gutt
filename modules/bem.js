@@ -1,13 +1,16 @@
-function joinerMods(mods, className) {
-  return mods.map(function (mod) {
-    return className + '--' + mod
-  }).join(' ')
-}
+function generateClassName(block, element) {
+  var className = []
 
-function generateClassName(block, element, mods) {
-  var className = (block ? block : '') + (element ? '__' + element : '')
+  if (block) {
+    className = className.concat(block)
+  }
 
-  return className + (mods.length ? ' ' + joinerMods(mods, className) : '')
+  if (element) {
+    className.push({type: 'text', value:'__'})
+    className = className.concat(element)
+  }
+
+  return className
 }
 
 var blocks = []
@@ -17,28 +20,31 @@ module.exports = {
   check: function (helper, item) {
     var i = 0
     var attr
-    var isBlock = false
-    var isElement = false
     var mods = []
+    var result
 
     if (item.type === 'open_tag' || item.type === 'single_tag') {
       for (;i < item.attrs.length; i += 1) {
+        isBlock = false
+        isElement = false
         attr = item.attrs[i]
 
         if (attr.name === 'block') {
           isBlock = attr.value
           item.attrs.splice(i, 1)
-          item._block = attr.value
-          blocks.push(attr.value)
-          lastBlock = attr.value
+          item._block = isBlock
+          blocks.push(isBlock)
+          lastBlock = isBlock
           i--
-        } else if (attr.name === 'elem') {
+        }
+
+        if (attr.name === 'elem') {
           isElement = attr.value
-          isBlock = lastBlock
           item.attrs.splice(i, 1)
           i--
-        } else if (attr.name === 'mods') {
-          mods = attr.value.split(' ')
+        }
+
+        if (attr.name === 'mod') {
           mods = mods.map(function (mod) {
             if (~mod.indexOf(':')) {
               mod = mod.replace(':', '_')
@@ -51,10 +57,11 @@ module.exports = {
         }
       }
 
-      if (isBlock || isElement) {
+      if (isBlock || lastBlock && isElement) {
+        result = generateClassName(isBlock || lastBlock, isElement)
         item.attrs.push({
-          name: 'class',
-          value: generateClassName(isBlock, isElement, mods)
+          type: 'class',
+          value: result
         })
       }
     }
