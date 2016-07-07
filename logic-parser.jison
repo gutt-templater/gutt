@@ -1,3 +1,13 @@
+%{
+function prepareDoubleQuoteString(str) {
+  return str.substr(1, str.length - 2);
+}
+
+function prepareSingleQuoteString(str) {
+  return str.substr(1, str.length - 2).replace(/\\\'/g, '\'');
+}
+%}
+
 %lex
 
 %%
@@ -28,9 +38,8 @@
 "?"                         return '?';
 ","                         return ',';
 "."                         return '.';
-\'                          return 'SINGLE_QUOTE';
-\"                          return 'DOUBLE_QUOTE';
-[^\*\/\-\+&\(\)\[\]=!<>?,\.\'\"\|] return 'OTHER';
+\"(\\\"|[^\"])*?\"          return 'DOUBLE_QUOTE_STRING';
+\'(\\\'|[^\'])*?\'          return 'SINGLE_QUOTE_STRING';
 
 /lex
 
@@ -90,10 +99,10 @@ params
   ;
 
 string
-  : SINGLE_QUOTE string_elements SINGLE_QUOTE
-    { $$ = '"' + $2 + '"'; }
-  | DOUBLE_QUOTE string_elements DOUBLE_QUOTE
-    { $$ = '"' + $2 + '"'; }
+  : SINGLE_QUOTE_STRING
+    { $$ = '"' + prepareDoubleQuoteString($1) + '"'; }
+  | DOUBLE_QUOTE_STRING
+    { $$ = '"' + prepareSingleQuoteString($1) + '"'; }
   ;
 
 expression
@@ -140,39 +149,4 @@ expression
   | string
   | NUMBER
     { $$ = {type: 'num', value: $1}; }
-  ;
-
-string_elements
-  :
-    { $$ = ""; }
-  | string_elements string_element
-    { $$ = $1 + $2; }
-  ;
-
-string_element
-  : "*"
-  | "/"
-  | "-"
-  | "+"
-  | "^"
-  | "("
-  | ")"
-  | "["
-  | "]"
-  | "=="
-  | "!="
-  | "<="
-  | ">="
-  | "="
-  | "<"
-  | ">"
-  | "&&"
-  | "||"
-  | "&"
-  | "|"
-  | "!"
-  | "?"
-  | ","
-  | "."
-  | OTHER
   ;

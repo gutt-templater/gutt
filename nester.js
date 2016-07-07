@@ -71,7 +71,6 @@ module.exports = function (raw, modules) {
     var checked = false
 
     if (item.type === 'logic') {
-      console.log(item.value);
       item.value = logicParser.parse(item.value)
     }
 
