@@ -7,6 +7,8 @@ module.exports = function (_modules, _stringifiers) {
     var modules = _modules.slice(0)
     var stringifiers = _stringifiers.slice(0)
     var raw = htmlParser.parse(str)
+    console.log(raw)
+    return false
     var results = {}
 
     try {
