@@ -3,7 +3,12 @@ function generateAttrs(attrs) {
 
   attrs.forEach(function (attr) {
     var attrValue = reduce(attr.value.childs)
-    result.push(attr.name + (attrValue.length ? '="' + attrValue + '"' : ''))
+
+    if (attr.name) {
+      result.push(attr.name + (attrValue.length ? '="' + attrValue + '"' : ''))
+    } else {
+      result.push('"' + attrValue + '"')
+    }
   })
 
   return (result.length ? ' ' : '') + result.join(' ')

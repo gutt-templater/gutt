@@ -4,6 +4,7 @@ var singleTags = ['!DOCTYPE', 'meta', 'hr']
 function handleAttrs(item, modules) {
   if (item.attrs.length) {
     item.attrs.forEach(function (attr) {
+      console.log(attr);
       if (attr.value.length) {
         attr.value = nester(attr.value, modules)
       } else {

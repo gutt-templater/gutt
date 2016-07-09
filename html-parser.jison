@@ -69,16 +69,15 @@ ss
 
 tagname
   : se ID
-    { $$ = $1; }
+    { $$ = $1 + $2; }
   | se ID ':' ID
-    { $$ = $1 + $2 + $3; }
+    { $$ = $1 + $2 + $3 + $4; }
   ;
 
 se
   :
     { $$ = ''; }
   | '!'
-    { $$ = ''; }
   ;
 
 attrs
@@ -89,15 +88,12 @@ attrs
   ;
 
 attr
-  : ID optnl_val
-    { $$ = {name: $1, value: $2}; }
-  ;
-
-optnl_val
-  :
-    { $$ = []; }
-  | '=' string
-    { $$ = $2; }
+  : ID
+    { $$ = {name: $1, value: []}; }
+  | ID '=' string
+    { $$ = {name: $1, value: $3}; }
+  | string
+    { $$ = {value: $1}; }
   ;
 
 string
@@ -105,14 +101,7 @@ string
     { $$ = [{type: 'text', value: prepareDoubleQuoteString($1)}]; }
   | STRING_SINGLE_QUOTE_LITERAL
     { $$ = [{type: 'text', value: prepareSingleQuoteString($1)}]; }
-  | string_elements
-  ;
-
-string_elements
-  : string_element
-    { $$ = [$1]; }
-  | string_elements string_element
-    { $1.push($2); $$ = $1; }
+  | string_element
   ;
 
 string_element
