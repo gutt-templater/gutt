@@ -1,6 +1,5 @@
-var htmlParser = require('./html-parser').parser
+var htmlParser = require('./parsers/html-parser').parser
 var nester = require('./nester')
-var path = require('path')
 
 module.exports = function (_modules, _stringifiers) {
   return function (str) {
@@ -8,9 +7,10 @@ module.exports = function (_modules, _stringifiers) {
     var stringifiers = _stringifiers.slice(0)
     var raw = htmlParser.parse(str)
     var results = {}
+    var result
 
     try {
-      var result = nester(raw, modules)
+      result = nester(raw, modules)
 
       stringifiers.forEach(function (stringifier) {
         results[stringifier.ext] = stringifier.stringify(result)

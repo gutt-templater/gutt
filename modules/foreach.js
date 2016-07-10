@@ -6,7 +6,9 @@ module.exports = {
       helper.neste('for')
 
       return true
-    } else if (helper.logicMatch(item, 'type[logic].type[expr].type[var].endfor')) {
+    }
+
+    if (helper.logicMatch(item, 'type[logic].type[expr].type[var].endfor')) {
       helper.closeNeste('for')
 
       return true

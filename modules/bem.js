@@ -1,4 +1,7 @@
-function generateClassName(block, element) {
+var blocks = []
+var lastBlock
+
+function generateClassName (block, element) {
   var className = []
 
   if (block) {
@@ -6,15 +9,12 @@ function generateClassName(block, element) {
   }
 
   if (element) {
-    className.push({type: 'text', value:'__'})
+    className.push({type: 'text', value: '__'})
     className = className.concat(element)
   }
 
   return className
 }
-
-var blocks = []
-var lastBlock
 
 module.exports = {
   check: function (helper, item) {
@@ -22,9 +22,11 @@ module.exports = {
     var attr
     var mods = []
     var result
+    var isBlock
+    var isElement
 
     if (item.type === 'open_tag' || item.type === 'single_tag') {
-      for (;i < item.attrs.length; i += 1) {
+      for (; i < item.attrs.length; i += 1) {
         isBlock = false
         isElement = false
         attr = item.attrs[i]
@@ -52,6 +54,7 @@ module.exports = {
 
             return mod
           })
+
           item.attrs.splice(i, 1)
           i--
         }
@@ -66,6 +69,7 @@ module.exports = {
       }
     }
   },
+
   closeNeste: function (item) {
     if (item.type === 'open_tag') {
       if (item._block) {

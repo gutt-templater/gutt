@@ -1,9 +1,9 @@
-var logicParser = require('./logic-parser').parser
+var logicParser = require('./parsers/logic-parser').parser
 var N_NOTHING = 1 << 0
 var N_OPEN = 1 << 1
 var N_CLOSE = 1 << 2
 
-function BreakException(err) {
+function BreakException (err) {
   this.name = 'BreakException'
   this.message = err
 }
@@ -27,10 +27,12 @@ module.exports = function (raw, modules) {
       currentNexting.keyword = keyword
       currentNexting.flag = currentNexting.flag | N_OPEN
     },
+
     closeNeste: function (keyword) {
       currentNexting.keyword = keyword
       currentNexting.flag = currentNexting.flag | N_CLOSE
     },
+
     logicMatch: function (item, rule) {
       var ruleItems = rule.split('.')
       var currItem = item
@@ -39,7 +41,7 @@ module.exports = function (raw, modules) {
       var expr
       var out
 
-      ruleItems.forEach(function (ruleItem, index) {
+      ruleItems.forEach(function (ruleItem) {
         if (!matched) return false
 
         out = ruleItem.match(/([a-z]+)(\[([a-z]+)\])?/i)
@@ -84,7 +86,7 @@ module.exports = function (raw, modules) {
             nesteStack.pop()
           } else {
             throw new SyntaxError('Syntax error: extected ' + nesteStack[nesteStack.length - 1] +
-              ', got ' + keyword)
+              ', got ' + currentNexting.keyword)
           }
 
           modules.forEach(function (module) {
@@ -125,8 +127,8 @@ module.exports = function (raw, modules) {
   })
 
   if (nesteStack.length) {
-    throw new SyntaxError('Syntax error: there is not closed neste elements: ' + nesteStack.join(', '));
+    throw new SyntaxError('Syntax error: there is not closed neste elements: ' + nesteStack.join(', '))
   }
 
-  return result;
+  return result
 }

@@ -1,10 +1,9 @@
 var nester = require('../nester')
 var singleTags = ['!DOCTYPE', 'meta', 'hr']
 
-function handleAttrs(item, modules) {
+function handleAttrs (item, modules) {
   if (item.attrs.length) {
     item.attrs.forEach(function (attr) {
-      console.log(attr);
       if (attr.value.length) {
         attr.value = nester(attr.value, modules)
       } else {
@@ -19,8 +18,6 @@ function handleAttrs(item, modules) {
 
 module.exports = {
   check: function (helper, item, modules) {
-    var checked = true
-
     switch (item.type) {
       case 'open_tag':
         handleAttrs(item, modules)
@@ -31,11 +28,11 @@ module.exports = {
           helper.neste(item.value)
         }
 
-        break
+        return true
       case 'close_tag':
         helper.closeNeste(item.value)
 
-        break
+        return true
       case 'single_tag':
         handleAttrs(item, modules)
 
@@ -43,15 +40,13 @@ module.exports = {
           item.type = 'open_tag'
         }
 
-        break
+        return true
       case 'comment':
-        // do nothing just catch this case
 
-        break
-      default:
-        checked = false
+        // do nothing just catch this case
+        return true
     }
 
-    return checked
+    return false
   }
 }

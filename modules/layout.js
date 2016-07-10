@@ -6,9 +6,10 @@ module.exports = {
     var i = 0
     var isLayout
     var isPos
+    var attr
 
     if (item.type === 'open_tag' || item.type === 'single_tag') {
-      for (;i < item.attrs.length; i += 1) {
+      for (; i < item.attrs.length; i += 1) {
         attr = item.attrs[i]
 
         if (attr.name === 'layout' && attr.value.length === 1 && attr.value[0].type === 'text') {
@@ -33,6 +34,7 @@ module.exports = {
       }
     }
   },
+
   closeNeste: function (item) {
     if (item.type === 'open_tag') {
       if (item._layout) {

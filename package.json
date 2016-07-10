@@ -5,11 +5,18 @@
   "main": "index.js",
   "scripts": {
     "test": "node test.js",
-    "generate": "jison html-parser.jison && jison logic-parser.jison"
+    "generate": "jison ./parsers/html-parser.jison -o ./parsers/html-parser.js && jison ./parsers/logic-parser.jison -o ./parsers/logic-parser.js",
+    "jslint": "jscs ./{,modules/,stringifiers/}*.js && jshint ./{,modules/,stringifiers/}*.js"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "jison": "^0.4.17"
-  }
+    "jison": "^0.4.17",
+    "jscs": "^3.0.5",
+    "jshint": "^2.9.2",
+    "pre-commit": "^1.1.3"
+  },
+  "pre-commit": [
+    "jslint"
+  ]
 }
