@@ -1,3 +1,5 @@
+var consts = ['true', 'false']
+
 function generateAttrs (attrs) {
   var result = []
 
@@ -21,7 +23,7 @@ function expression (tree) {
 
   switch (tree.type) {
     case 'var':
-      str += '$' + tree.value + tree.keys.map(function (key) {
+      str += (~consts.indexOf(tree.value) ? '' : '$') + tree.value + tree.keys.map(function (key) {
         return '[' + expression(key) + ']'
       }).join('')
 
@@ -103,11 +105,19 @@ function expression (tree) {
 
       return str
     case 'func':
-      str += expression(tree.value) + '(' + tree.attrs.map(function (attr) {
+      str +=
+        (tree.value.type === 'var' && !tree.value.keys.length ? tree.value.value : expression(tree.value))
+      str += '(' + tree.attrs.map(function (attr) {
+
         return expression(attr)
       }).join(', ') + ')'
 
       return str
+
+    case 'concat':
+      return tree.value.map(function (item) {
+        return expression(item)
+      }).join(' . ')
   }
 
   return str
@@ -128,7 +138,7 @@ function switchNode (node) {
 
       return result
     case 'comment':
-      result += '<!-- ' + node.value + ' -->'
+      result += '<!--' + node.value + '-->'
 
       return result
     case 'assign':
@@ -183,6 +193,8 @@ function switchNode (node) {
 
       return result
   }
+
+  return ''
 }
 
 function reduce (tree) {

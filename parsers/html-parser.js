@@ -93,13 +93,13 @@ case 3: case 24:
  this.$ = $$[$0-1].concat($$[$0]); 
 break;
 case 4:
- this.$ = [{type: ($$[$0-4].length ? 'close_tag' : 'open_tag'), value: $$[$0-3], attrs: $$[$0-2]}]; if ($$[$0-1].length) this.$ = this.$.concat($$[$0-1]); 
+ this.$ = [{type: ($$[$0-4].length ? 'close_tag' : 'open_tag'), value: $$[$0-3], attrs: $$[$0-2]}]; this.$ = this.$.concat($$[$0]); 
 break;
 case 5:
  this.$ = [{type: 'comment', value: $$[$0].substr(4, $$[$0].length - 7)}]; 
 break;
 case 6:
- this.$ = [{type: 'logic', value: $$[$0-1].substr(1)}]; 
+ this.$ = [{type: 'logic', value: $$[$0-1].substr(1).trim()}, {type: 'text', value: $$[$0].substr(1)}]; 
 break;
 case 7: case 8: case 11: case 26:
  this.$ = ''; 
@@ -129,7 +129,7 @@ case 19:
  this.$ = [{type: 'text', value: prepareSingleQuoteString($$[$0])}]; 
 break;
 case 21: case 22:
- this.$ = [{type: 'text', value: $$[$0-3].substr(1)}, {type: 'logic', value: $$[$0-2].substr(1).trim()}]; this.$ = this.$.concat($$[$0-1]); this.$.push($$[$0].substr(0, $$[$0].length - 1)); 
+ this.$ = [{type: 'text', value: $$[$0-3].substr(1)}, {type: 'logic', value: $$[$0-2].substr(1).trim()}]; this.$ = this.$.concat($$[$0-1]); this.$.push({type: 'text', value: $$[$0].substr(1, $$[$0].length - 2)}); 
 break;
 case 25:
  this.$ = [{type: 'text', value: $$[$0-1].substr(1)}, {type: 'logic', value: $$[$0].substr(1).trim()}]; 
@@ -675,7 +675,7 @@ case 18:return 16;
 break;
 }
 },
-rules: [/^(?:[\s\n\t]+)/,/^(?:$)/,/^(?:[a-zA-Z][a-zA-Z\-0-9]*\b)/,/^(?:<!--.*?-->)/,/^(?::)/,/^(?:<)/,/^(?:\/)/,/^(?:=)/,/^(?:\}[^\"\{\<]*?")/,/^(?:\}[^\'\{\<]*?')/,/^(?:[>][^<{]*)/,/^(?:[}][^<{]*)/,/^(?:\{(\\\}|[^}])*)/,/^(?:"[^\"\{]*?(?=\{))/,/^(?:'[^\'\{]*?(?=\{))/,/^(?:"(\\"|[^\"])*?")/,/^(?:'(\\'|[^\'])*?')/,/^(?:!)/,/^(?:\/)/],
+rules: [/^(?:[\s\n\t]+)/,/^(?:$)/,/^(?:[a-zA-Z][a-zA-Z\-0-9]*\b)/,/^(?:<!--.*?-->)/,/^(?::)/,/^(?:<)/,/^(?:\/)/,/^(?:=)/,/^(?:\}[^\"\{\<]*?")/,/^(?:\}[^\'\{\<]*?')/,/^(?:>[^<{]*)/,/^(?:\}[^<{]*)/,/^(?:\{(\\\}|[^}])*)/,/^(?:"[^\"\{]*?(?=\{))/,/^(?:'[^\'\{]*?(?=\{))/,/^(?:"(\\"|[^\"])*?")/,/^(?:'(\\'|[^\'])*?')/,/^(?:!)/,/^(?:\/)/],
 conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18],"inclusive":true}}
 });
 return lexer;

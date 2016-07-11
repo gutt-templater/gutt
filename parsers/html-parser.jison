@@ -23,8 +23,8 @@ function prepareSingleQuoteString(str) {
 '='                         return '=';
 \}[^\"\{\<]*?\"             return 'TEXT_TAIL_AFTER_LOGIC_BEFORE_DOUBLE_QUOTE';
 \}[^\'\{\<]*?\'             return 'TEXT_TAIL_AFTER_LOGIC_BEFORE_SINGLE_QUOTE';
-[>][^<{]*                   return 'TEXT_AFTER_TAG';
-[}][^<{]*                   return 'TEXT_AFTER_LOGIC_BEFORE_LOGIC';
+\>[^<{]*                    return 'TEXT_AFTER_TAG';
+\}[^<{]*                    return 'TEXT_AFTER_LOGIC_BEFORE_LOGIC';
 \{(\\\}|[^}])*              return 'LOGIC_LITERAL';
 \"[^\"\{]*?(?=\{)           return 'STRING_DOUBLE_QUOTE_BEFORE_LOGIC';
 \'[^\'\{]*?(?=\{)           return 'STRING_SINGLE_QUOTE_BEFORE_LOGIC';
@@ -53,11 +53,11 @@ nodes
 
 node
   : '<' sl tagname attrs ss text
-    { $$ = [{type: ($2.length ? 'close_tag' : 'open_tag'), value: $3, attrs: $4}]; if ($5.length) $$ = $$.concat($5); }
+    { $$ = [{type: ($2.length ? 'close_tag' : 'open_tag'), value: $3, attrs: $4}]; $$ = $$.concat($6); }
   | COMMENT_LITERAL
     { $$ = [{type: 'comment', value: $1.substr(4, $1.length - 7)}]; }
   | LOGIC_LITERAL TEXT_AFTER_LOGIC_BEFORE_LOGIC
-    { $$ = [{type: 'logic', value: $1.substr(1)}]; }
+    { $$ = [{type: 'logic', value: $1.substr(1).trim()}, {type: 'text', value: $2.substr(1)}]; }
   ;
 
 ss
@@ -106,9 +106,9 @@ string
 
 string_element
   : STRING_DOUBLE_QUOTE_BEFORE_LOGIC LOGIC_LITERAL logic_other_elements TEXT_TAIL_AFTER_LOGIC_BEFORE_DOUBLE_QUOTE
-    { $$ = [{type: 'text', value: $1.substr(1)}, {type: 'logic', value: $2.substr(1).trim()}]; $$ = $$.concat($3); $$.push($4.substr(0, $4.length - 1)); }
+    { $$ = [{type: 'text', value: $1.substr(1)}, {type: 'logic', value: $2.substr(1).trim()}]; $$ = $$.concat($3); $$.push({type: 'text', value: $4.substr(1, $4.length - 2)}); }
   | STRING_SINGLE_QUOTE_BEFORE_LOGIC LOGIC_LITERAL logic_other_elements TEXT_TAIL_AFTER_LOGIC_BEFORE_SINGLE_QUOTE
-    { $$ = [{type: 'text', value: $1.substr(1)}, {type: 'logic', value: $2.substr(1).trim()}]; $$ = $$.concat($3); $$.push($4.substr(0, $4.length - 1)); }
+    { $$ = [{type: 'text', value: $1.substr(1)}, {type: 'logic', value: $2.substr(1).trim()}]; $$ = $$.concat($3); $$.push({type: 'text', value: $4.substr(1, $4.length - 2)}); }
   ;
 
 logic_other_elements
