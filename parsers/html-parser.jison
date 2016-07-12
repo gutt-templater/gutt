@@ -1,6 +1,4 @@
 %{
-var singleTags = [];
-
 function prepareDoubleQuoteString(str) {
   return str.substr(1, str.length - 2);
 }
@@ -21,15 +19,17 @@ function prepareSingleQuoteString(str) {
 '<'                         return '<';
 '/'                         return '/';
 '='                         return '=';
+\}(?=(\{(\\\}|[^\}])*?\}|\"(\\\"|[^\"])*?\"|[^\"\'\{\}\<\>])*\>)       return 'LOGIC_CLOSE_AT_ATTRIBUTE';
 \}[^\"\{\<]*?\"             return 'TEXT_TAIL_AFTER_LOGIC_BEFORE_DOUBLE_QUOTE';
 \}[^\'\{\<]*?\'             return 'TEXT_TAIL_AFTER_LOGIC_BEFORE_SINGLE_QUOTE';
-\>[^<{]*                    return 'TEXT_AFTER_TAG';
-\}[^<{]*                    return 'TEXT_AFTER_LOGIC_BEFORE_LOGIC';
+\>[^<\{]*                   return 'TEXT_AFTER_TAG';
+\}[^><\{]*(?=(\{|\<))       return 'TEXT_AFTER_LOGIC';
 \{(\\\}|[^}])*              return 'LOGIC_LITERAL';
 \"[^\"\{]*?(?=\{)           return 'STRING_DOUBLE_QUOTE_BEFORE_LOGIC';
 \'[^\'\{]*?(?=\{)           return 'STRING_SINGLE_QUOTE_BEFORE_LOGIC';
 \"(\\\"|[^\"])*?\"          return 'STRING_DOUBLE_QUOTE_LITERAL';
 \'(\\\'|[^\'])*?\'          return 'STRING_SINGLE_QUOTE_LITERAL';
+'}'                         return '}';
 '!'                         return '!';
 '/'                         return '/';
 
@@ -53,18 +53,23 @@ nodes
 
 node
   : '<' sl tagname attrs ss text
-    { $$ = [{type: ($2.length ? 'close_tag' : 'open_tag'), value: $3, attrs: $4}]; $$ = $$.concat($6); }
+    { $$ = [{type: ($2.length ? 'close_tag' : ($5.length ? 'single_tag' : 'open_tag')), value: $3, attrs: $4}]; $$ = $$.concat($6); }
   | COMMENT_LITERAL
     { $$ = [{type: 'comment', value: $1.substr(4, $1.length - 7)}]; }
-  | LOGIC_LITERAL TEXT_AFTER_LOGIC_BEFORE_LOGIC
+  | LOGIC_LITERAL close_logic
     { $$ = [{type: 'logic', value: $1.substr(1).trim()}, {type: 'text', value: $2.substr(1)}]; }
+  ;
+
+close_logic
+  : TEXT_AFTER_LOGIC
+  | '}'
   ;
 
 ss
   :
     { $$ = ''; }
   | '/'
-    { $$ = ''; }
+    { $$ = '/'; }
   ;
 
 tagname
@@ -89,11 +94,13 @@ attrs
 
 attr
   : ID
-    { $$ = {name: $1, value: []}; }
+    { $$ = {type: 'param', name: $1, value: []}; }
   | ID '=' string
-    { $$ = {name: $1, value: $3}; }
+    { $$ = {type: 'param', name: $1, value: $3}; }
   | string
-    { $$ = {value: $1}; }
+    { $$ = {type: 'param', string: $1}; }
+  | LOGIC_LITERAL LOGIC_CLOSE_AT_ATTRIBUTE
+    { $$ = {type: 'logic', value: $1.substr(1).trim()}; }
   ;
 
 string
@@ -119,7 +126,7 @@ logic_other_elements
   ;
 
 logic_other_element
-  : TEXT_AFTER_LOGIC_BEFORE_LOGIC LOGIC_LITERAL
+  : TEXT_AFTER_LOGIC LOGIC_LITERAL
     { $$ = [{type: 'text', value: $1.substr(1)}, {type: 'logic', value: $2.substr(1).trim()}]; }
   ;
 
@@ -139,6 +146,6 @@ text
 text_element
   : TEXT_AFTER_TAG
     { $$ = {type: 'text', value: $1.substr(1)}; }
-  | TEXT_AFTER_LOGIC_BEFORE_LOGIC
+  | TEXT_AFTER_LOGIC
     { $$ = {type: 'text', value: $1.substr(1)}; }
   ;

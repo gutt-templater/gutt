@@ -1,21 +1,5 @@
 var consts = ['true', 'false']
 
-function generateAttrs (attrs) {
-  var result = []
-
-  attrs.forEach(function (attr) {
-    var attrValue = reduce(attr.value.childs)
-
-    if (attr.name) {
-      result.push(attr.name + (attrValue.length ? '="' + attrValue + '"' : ''))
-    } else {
-      result.push('"' + attrValue + '"')
-    }
-  })
-
-  return (result.length ? ' ' : '') + result.join(' ')
-}
-
 function expression (tree) {
   var str = ''
 
@@ -128,13 +112,13 @@ function switchNode (node) {
 
   switch (node.type) {
     case 'open_tag':
-      result += '<' + node.value + generateAttrs(node.attrs) + '>'
+      result += '<' + node.value + reduce(node.attrs.childs) + '>'
       result += reduce(node.childs)
       result += '</' + node.value + '>'
 
       return result
     case 'single_tag':
-      result += '<' + node.value + generateAttrs(node.attrs) + (node.value === '!DOCTYPE' ? '' : ' /') + '>'
+      result += '<' + node.value + reduce(node.attrs.childs) + (node.value === '!DOCTYPE' ? '' : ' /') + '>'
 
       return result
     case 'comment':
@@ -192,6 +176,22 @@ function switchNode (node) {
       result += node.value
 
       return result
+    case 'param':
+      if (node.value) {
+        if (node.value.length) {
+          result += reduce(node.value)
+        }
+
+        return ' ' + node.name + (result.length ? '="' + result + '"' : '')
+      }
+
+      if (node.string) {
+        if (node.string.length) {
+          result += reduce(node.string)
+        }
+
+        return ' ' + (result.length ? '"' + result + '"' : '')
+      }
   }
 
   return ''

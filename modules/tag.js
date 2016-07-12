@@ -1,19 +1,35 @@
 var nester = require('../nester')
-var singleTags = ['!DOCTYPE', 'meta', 'hr']
+var singleTags = [
+  '!DOCTYPE',
+  'area',
+  'base',
+  'br',
+  'col',
+  'embed',
+  'frame',
+  'hr',
+  'img',
+  'input',
+  'keygen',
+  'link',
+  'meta',
+  'param',
+  'source',
+  'track'
+]
 
 function handleAttrs (item, modules) {
-  if (item.attrs.length) {
-    item.attrs.forEach(function (attr) {
-      if (attr.value.length) {
-        attr.value = nester(attr.value, modules)
-      } else {
-        attr.value = {
-          childs: [],
-          type: 'root'
-        }
+  item.attrs.forEach(function (attr) {
+    if (attr.type === 'param') {
+      if (attr.value) {
+        attr.value = nester(attr.value, modules).childs
+      } else if (attr.string) {
+        attr.string = nester(attr.string, modules).childs
       }
-    })
-  }
+    }
+  })
+
+  item.attrs = nester(item.attrs, modules)
 }
 
 module.exports = {
@@ -36,12 +52,12 @@ module.exports = {
       case 'single_tag':
         handleAttrs(item, modules)
 
-        if (!~singleTags.indexOf(item.value)) {
-          item.type = 'open_tag'
-        }
-
         return true
       case 'comment':
+
+        // do nothing just catch this case
+        return true
+      case 'param':
 
         // do nothing just catch this case
         return true
