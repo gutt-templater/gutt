@@ -1,4 +1,6 @@
+var htmlParser = require('./parsers/html-parser').parser
 var logicParser = require('./parsers/logic-parser').parser
+var fs = require('fs')
 var N_NOTHING = 1 << 0
 var N_OPEN = 1 << 1
 var N_CLOSE = 1 << 2
@@ -8,7 +10,7 @@ function BreakException (err) {
   this.message = err
 }
 
-module.exports = function (raw, modules) {
+function nester (raw, modules, filePath) {
   var result = {
     childs: [],
     type: 'root'
@@ -66,6 +68,16 @@ module.exports = function (raw, modules) {
       })
 
       return matched
+    },
+
+    parser: {
+      parse: function (str, filePath) {
+        return nester(htmlParser.parse(str), modules, filePath);
+      },
+
+      parseFile: function (filePath) {
+        return this.parse(fs.readFileSync(filePath, 'utf-8').trim(), filePath);
+      }
     }
   }
 
@@ -132,3 +144,5 @@ module.exports = function (raw, modules) {
 
   return result
 }
+
+module.exports = nester
