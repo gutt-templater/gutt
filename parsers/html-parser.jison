@@ -6,6 +6,16 @@ function prepareDoubleQuoteString(str) {
 function prepareSingleQuoteString(str) {
   return str.substr(1, str.length - 2).replace(/\\\'/g, '\'');
 }
+
+function prepareText(arr, text) {
+  if (text.length) {
+    arr.push({type: 'text', value: text});
+  }
+}
+
+function prepareLogic(arr, text) {
+  arr.push({type: 'logic', value: text.trim()});
+}
 %}
 
 %lex
@@ -57,7 +67,11 @@ node
   | COMMENT_LITERAL
     { $$ = [{type: 'comment', value: $1.substr(4, $1.length - 7)}]; }
   | LOGIC_LITERAL close_logic
-    { $$ = [{type: 'logic', value: $1.substr(1).trim()}, {type: 'text', value: $2.substr(1)}]; }
+    {
+      $$ = [];
+      prepareLogic($$, $1.substr(1));
+      prepareText($$, $2.substr(1));
+    }
   ;
 
 close_logic
@@ -105,17 +119,29 @@ attr
 
 string
   : STRING_DOUBLE_QUOTE_LITERAL
-    { $$ = [{type: 'text', value: prepareDoubleQuoteString($1)}]; }
+    { $$ = []; prepareText($$, prepareDoubleQuoteString($1)); }
   | STRING_SINGLE_QUOTE_LITERAL
-    { $$ = [{type: 'text', value: prepareSingleQuoteString($1)}]; }
+    { $$ = []; prepareText($$, prepareSingleQuoteString($1)); }
   | string_element
   ;
 
 string_element
   : STRING_DOUBLE_QUOTE_BEFORE_LOGIC LOGIC_LITERAL logic_other_elements TEXT_TAIL_AFTER_LOGIC_BEFORE_DOUBLE_QUOTE
-    { $$ = [{type: 'text', value: $1.substr(1)}, {type: 'logic', value: $2.substr(1).trim()}]; $$ = $$.concat($3); $$.push({type: 'text', value: $4.substr(1, $4.length - 2)}); }
+    {
+      $$ = [];
+      prepareText($$, $1.substr(1));
+      prepareLogic($$, $2.substr(1));
+      $$ = $$.concat($3);
+      prepareText($$, $4.substr(1, $4.length - 2));
+    }
   | STRING_SINGLE_QUOTE_BEFORE_LOGIC LOGIC_LITERAL logic_other_elements TEXT_TAIL_AFTER_LOGIC_BEFORE_SINGLE_QUOTE
-    { $$ = [{type: 'text', value: $1.substr(1)}, {type: 'logic', value: $2.substr(1).trim()}]; $$ = $$.concat($3); $$.push({type: 'text', value: $4.substr(1, $4.length - 2)}); }
+    {
+      $$ = [];
+      prepareText($$, $1.substr(1));
+      prepareLogic($$, $2.substr(1));
+      $$ = $$.concat($3);
+      prepareText($$, $4.substr(1, $4.length - 2));
+    }
   ;
 
 logic_other_elements
@@ -127,7 +153,11 @@ logic_other_elements
 
 logic_other_element
   : TEXT_AFTER_LOGIC LOGIC_LITERAL
-    { $$ = [{type: 'text', value: $1.substr(1)}, {type: 'logic', value: $2.substr(1).trim()}]; }
+    {
+      $$ = [];
+      prepareText($$, $1.substr(1));
+      prepareLogic($$, $2.substr(1));
+    }
   ;
 
 sl
@@ -138,14 +168,14 @@ sl
 
 text
   : text_element
-    { $$ = [$1]; }
+    { $$ = []; prepareText($$, $1); }
   | text text_element
-    { if ($2.value.length) $1.push($2); $$ = $1; }
+    { $$ = $1; prepareText($1, $2); }
   ;
 
 text_element
   : TEXT_AFTER_TAG
-    { $$ = {type: 'text', value: $1.substr(1)}; }
+    { $$ = $1.substr(1); }
   | TEXT_AFTER_LOGIC
-    { $$ = {type: 'text', value: $1.substr(1)}; }
+    { $$ = $1.substr(1); }
   ;
