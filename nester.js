@@ -81,6 +81,8 @@ function nester (raw, modules, filePath) {
     }
   }
 
+  result.parent = result
+
   raw.forEach(function (item) {
     var checked = false
 
@@ -89,7 +91,8 @@ function nester (raw, modules, filePath) {
     }
 
     try {
-      item.parent = currentParent
+      item.parent = currentNode
+
       modules.forEach(function (module) {
         checked = module.check(helper, item, modules)
 
