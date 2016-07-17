@@ -70,6 +70,34 @@ function nester (raw, modules, filePath) {
       return matched
     },
 
+    replace: function (node, tree) {
+      var i
+      var len
+      var nodeIndex
+
+      for (i = 0, len = node.parent.childs.length; i < len; i += 1) {
+        if (node.parent.childs[i] === node) {
+          nodeIndex = i
+        }
+      }
+
+      if (nodeIndex) {
+        node.parent.childs.splice(nodeIndex, 1)
+
+        for (i = nodeIndex + tree.length; i > nodeIndex; i -= 1) {
+          node.parent.childs.splice(nodeIndex, 0, tree[i - nodeIndex - 1])
+        }
+      }
+
+      for (i = 0, len = tree.length; i < len; i += 1) {
+        tree[i].parent = node.parent
+      }
+    },
+
+    filePath: function () {
+      return filePath
+    },
+
     parser: {
       parse: function (str, filePath) {
         return nester(htmlParser.parse(str), modules, filePath);
@@ -106,12 +134,13 @@ function nester (raw, modules, filePath) {
 
           modules.forEach(function (module) {
             if (module.closeNeste) {
-              module.closeNeste(currentNode)
+              module.closeNeste(helper, currentNode)
             }
           })
 
           currentNode = currentNode.parent
           currentParent = currentNode.parent
+
           currentNexting.flag = currentNexting.flag & ~N_CLOSE
         }
 

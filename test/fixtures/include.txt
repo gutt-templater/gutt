@@ -1,0 +1,22 @@
+{ import (FormItem, './includes/form-item') }
+
+<form action="/cms/configs/{ if (id?) }{ alias }{ else }add{ endif }/" class="form" role="configs-add-form">
+  { include ("./includes/form-head") }{ endinclude }
+
+  <FormItem label="Название" id="name">
+    <label for=""></label>
+    <input type="text" class="form__inp" value="{ title }" name="name" id="name" role="configs-add-title" />
+  </FormItem>
+  <FormItem label="Веб-имя" id="alias">
+    <label for=""></label>
+    <input type="text" class="form__inp" { if (value?) }value="{ alias }"{ endif } name="alias" id="alias" role="configs-add-alias"{ if (id?) } disabled{ endif } />
+  </FormItem>
+
+  <div>
+  { include ("./includes/form-group", fields) }
+    <FormItem label="Веб-имя" id="alias">
+      <input type="text" class="form__inp" { if (value?) }value="{ alias }"{ endif } name="alias" id="alias" role="configs-add-alias"{ if (id?) } disabled{ endif } />
+    </FormItem>
+  { endinclude }
+  </div>
+</form>
