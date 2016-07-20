@@ -1,7 +1,7 @@
 module.exports = {
-  check: function (helper, item) {
+  check: function (tree, item) {
     if (item.type === 'text') {
-      return true
+      tree.push(item)
     }
   }
 }

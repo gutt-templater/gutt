@@ -1,4 +1,4 @@
-var nester = require('../nester')
+var Parser = require('../parsers/parser')
 var singleTags = [
   '!DOCTYPE',
   'area',
@@ -18,46 +18,53 @@ var singleTags = [
   'track'
 ]
 
-function handleAttrs (item, modules) {
+function handleAttrs (tree, item) {
+  var parser = Parser(tree.modules())
+
   item.attrs.forEach(function (attr) {
     if (attr.type === 'param') {
       if (attr.value) {
-        attr.value = nester(attr.value, modules).childs
+        attr.value = parser.parse(attr.value, tree.filePath()).tree()
       } else if (attr.string) {
-        attr.string = nester(attr.string, modules).childs
+        attr.string = parser.parse(attr.string, tree.filePath()).tree()
       }
     }
   })
 
-  item.attrs = nester(item.attrs, modules)
+  item.attrs = parser.parse(item.attrs, tree.filePath()).tree()
 }
 
 module.exports = {
-  check: function (helper, item, modules) {
+  check: function (tree, item) {
     switch (item.type) {
       case 'open_tag':
-        handleAttrs(item, modules)
+        handleAttrs(tree, item)
 
         if (~singleTags.indexOf(item.value)) {
           item.type = 'single_tag'
+          tree.push(item)
         } else {
-          helper.neste(item.value)
+          item.type = 'tag'
+          tree.open(item, item.value)
         }
 
         return true
       case 'close_tag':
-        helper.closeNeste(item.value)
+        tree.close(item.value)
 
         return true
       case 'single_tag':
-        handleAttrs(item, modules)
+        handleAttrs(tree, item)
+        tree.push(item)
 
         return true
       case 'comment':
+        tree.push(item)
 
         // do nothing just catch this case
         return true
       case 'param':
+        tree.push(item)
 
         // do nothing just catch this case
         return true

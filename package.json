@@ -6,7 +6,7 @@
   "scripts": {
     "test": "mocha test/test.js",
     "generate": "jison ./parsers/html-parser.jison -o ./parsers/html-parser.js && jison ./parsers/logic-parser.jison -o ./parsers/logic-parser.js",
-    "jslint": "jscs ./{,modules/,stringifiers/,test/}*.js && jshint ./{,modules/,stringifiers/,test/}*.js"
+    "jslint": "jscs ./ && jshint ./"
   },
   "author": "",
   "license": "ISC",

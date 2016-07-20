@@ -61,5 +61,11 @@
   "requireCommaBeforeLineBreak": true,
   "requireCapitalizedConstructors": true,
   "requireCapitalizedConstructors": true,
-  "disallowTabs": true
+  "disallowTabs": true,
+  "excludeFiles": [
+    "./parsers/html-parser.js",
+    "./parsers/logic-parser.js",
+    ".git/",
+    "./node_modules/"
+  ]
 }

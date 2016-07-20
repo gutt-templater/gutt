@@ -111,7 +111,7 @@ function switchNode (node) {
   var result = ''
 
   switch (node.type) {
-    case 'open_tag':
+    case 'tag':
       result += '<' + node.value + reduce(node.attrs.childs) + '>'
       result += reduce(node.childs)
       result += '</' + node.value + '>'
@@ -178,16 +178,16 @@ function switchNode (node) {
       return result
     case 'param':
       if (node.value) {
-        if (node.value.length) {
-          result += reduce(node.value)
+        if (node.value.childs.length) {
+          result += reduce(node.value.childs)
         }
 
         return ' ' + node.name + (result.length ? '="' + result + '"' : '')
       }
 
       if (node.string) {
-        if (node.string.length) {
-          result += reduce(node.string)
+        if (node.string.childs.length) {
+          result += reduce(node.string.childs)
         }
 
         return ' ' + (result.length ? '"' + result + '"' : '')
