@@ -1,6 +1,7 @@
 /* globals describe, it */
 
 var parser = require('../parsers/parser')([
+  require('../modules/import'),
   require('../modules/tag'),
   require('../modules/if'),
   require('../modules/foreach'),
@@ -69,7 +70,7 @@ describe('PHP stringifier', function () {
     resultFile.php.should.be.equal(getTestFile('isset.expected.php'))
   })
 
-  it.skip ('import and inlude', function () {
+  it ('import and inlude', function () {
     var resultFile = parser.parseFile(testFilesDirPath + '/include.txt').strings()
 
     resultFile.php.should.be.equal(getTestFile('include.expected.php'))

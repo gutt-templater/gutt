@@ -1,22 +1,19 @@
-{ import (FormItem, './includes/form-item') }
+{ import (Section, './includes/section') }
+{ import (Aside, './includes/aside') }
+{ import (Footer, './includes/footer') }
 
-<form action="/cms/configs/{ if (id?) }{ alias }{ else }add{ endif }/" class="form" role="configs-add-form">
-  { include ("./includes/form-head") }{ endinclude }
+<Aside>
+  <form>
+    <Section>
+      <table></table>
+      <span>
+        <Section>
+          <label for="label1">Лейбл1</label>
+          <hr />
+        </Section>
 
-  <FormItem label="Название" id="name">
-    <label for=""></label>
-    <input type="text" class="form__inp" value="{ title }" name="name" id="name" role="configs-add-title" />
-  </FormItem>
-  <FormItem label="Веб-имя" id="alias">
-    <label for=""></label>
-    <input type="text" class="form__inp" { if (value?) }value="{ alias }"{ endif } name="alias" id="alias" role="configs-add-alias"{ if (id?) } disabled{ endif } />
-  </FormItem>
-
-  <div>
-  { include ("./includes/form-group", fields) }
-    <FormItem label="Веб-имя" id="alias">
-      <input type="text" class="form__inp" { if (value?) }value="{ alias }"{ endif } name="alias" id="alias" role="configs-add-alias"{ if (id?) } disabled{ endif } />
-    </FormItem>
-  { endinclude }
-  </div>
-</form>
+        <dt><Footer>Just text</Footer></dt>
+      </span>
+    </Section>
+  </form>
+</Aside>

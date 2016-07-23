@@ -1,29 +1,29 @@
-<?php echo import($FormItem, "./includes/form-item"); ?>
+<aside>
+  
+  <form>
+    <article>
+  <section>
+    
+      <table></table>
+      <span>
+        <article>
+  <section>
+    
+          <label for="label1">Лейбл1</label>
+          <hr />
+        
+  </section>
+</article>
+<audio />
 
-<form action="/cms/configs/<?php if (isset($id)) { ?><?php echo $alias; ?><?php } else { ?>add<?php } ?>/" class="form" role="configs-add-form">
-  <?php echo include("./includes/form-head"); ?><?php echo $endinclude; ?>
+        <dt><footer>
+  Just text
+</footer></dt>
+      </span>
+    
+  </section>
+</article>
+<audio />
+  </form>
 
-  <div class="form__holder">
-  
-    <label for></label>
-    <input type="text" class="form__inp" value="<?php echo $title; ?>" name="name" id="name" role="configs-add-title" />
-  
-</div>
-  <div class="form__holder">
-  
-    <label for></label>
-    <input type="text" class="form__inp" value="<?php echo $title; ?>" name="name" id="name" role="configs-add-title" />
-  
-</div>
-
-  <div>
-  <?php echo include("./includes/form-group", $fields); ?>
-    <div class="form__holder">
-  
-    <label for></label>
-    <input type="text" class="form__inp" value="<?php echo $title; ?>" name="name" id="name" role="configs-add-title" />
-  
-</div>
-  <?php echo $endinclude; ?>
-  </div>
-</form>
+</aside>

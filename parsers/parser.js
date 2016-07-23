@@ -121,8 +121,37 @@ Parser.prototype.close = function (keyword) {
   this._checked = true
 }
 
+Parser.prototype.skip = function () {
+  this._checked = true
+}
+
 Parser.prototype.filePath = function () {
   return this._filePath
+}
+
+Parser.prototype.replace = function (node, tree) {
+  var i
+  var len
+  var nodeIndex
+  var parent = node.parent
+
+  for (i = 0, len = parent.childs.length; i < len; i += 1) {
+    if (parent.childs[i] === node) {
+      nodeIndex = i
+    }
+  }
+
+  if (typeof nodeIndex !== 'undefined') {
+    parent.childs.splice(nodeIndex, 1)
+
+    for (i = nodeIndex + tree.length; i > nodeIndex; i -= 1) {
+      parent.childs.splice(nodeIndex, 0, tree[i - nodeIndex - 1])
+    }
+  }
+
+  for (i = 0, len = tree.length; i < len; i += 1) {
+    tree[i].parent = node.parent
+  }
 }
 
 Parser.prototype.tree = function () {
@@ -138,7 +167,7 @@ Parser.prototype.strings = function () {
   var results = {}
 
   this._stringifiers.forEach(function (stringifier) {
-    results[stringifier.ext] = stringifier.stringify(self._tree)
+    results[stringifier.ext] = stringifier.stringify(self._tree).trim()
   })
 
   return results
