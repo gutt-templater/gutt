@@ -1,7 +1,9 @@
-var cachedCopyElements = []
+var cachedCopyElements = {
+}
 
 function copyChildElements (node) {
-  cachedCopyElements = []
+  cachedCopyElements.origin = []
+  cachedCopyElements.copy = []
 
   return clone(node)
 }
@@ -25,13 +27,14 @@ function clone (obj) {
 
   // Handle Array
   if (obj instanceof Array) {
-    if (~cachedCopyElements.indexOf(obj)) {
-      return obj
+    if (~cachedCopyElements.origin.indexOf(obj)) {
+      return cachedCopyElements.copy[cachedCopyElements.origin.indexOf(obj)]
     }
 
-    cachedCopyElements.push(obj)
-
     copy = []
+
+    cachedCopyElements.copy.push(copy)
+    cachedCopyElements.origin.push(obj)
 
     for (i = 0, len = obj.length; i < len; i++) {
       copy[i] = clone(obj[i])
@@ -42,13 +45,15 @@ function clone (obj) {
 
   // Handle Object
   if (obj instanceof Object) {
-    if (~cachedCopyElements.indexOf(obj)) {
-      return obj
+
+    if (~cachedCopyElements.origin.indexOf(obj)) {
+      return cachedCopyElements.copy[cachedCopyElements.origin.indexOf(obj)]
     }
 
-    cachedCopyElements.push(obj)
-
     copy = {}
+
+    cachedCopyElements.copy.push(copy)
+    cachedCopyElements.origin.push(obj)
 
     for (attr in obj) {
       if (obj.hasOwnProperty(attr)) {
