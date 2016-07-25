@@ -17,8 +17,8 @@ function Parser (source, filePath, modules, stringifiers) {
   this._stringifiers = stringifiers
 
   this._tree = {
-    childs: [],
-    type: 'root'
+    type: 'root',
+    childs: []
   }
 
   this.currentNode = this._tree
@@ -176,11 +176,11 @@ Parser.prototype.strings = function () {
 module.exports = function (modules, stringifiers) {
   return {
     parse: function (str, filePath) {
-      return new Parser (str, filePath, modules, stringifiers);
+      return new Parser (str, filePath, modules, stringifiers)
     },
 
     parseFile: function (filePath) {
-      return this.parse(fs.readFileSync(filePath, 'utf-8').trim(), filePath, modules, stringifiers);
+      return this.parse(fs.readFileSync(filePath, 'utf-8').trim(), filePath, modules, stringifiers)
     }
   }
 }
