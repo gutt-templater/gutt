@@ -1,6 +1,6 @@
-{ import (Section, './includes/section') }
-{ import (Aside, './includes/aside') }
-{ import (Footer, './includes/footer') }
+{ import (Section, './include/section') }
+{ import (Aside, './include/aside') }
+{ import (Footer, './include/footer') }
 
 <Aside>
   <form>

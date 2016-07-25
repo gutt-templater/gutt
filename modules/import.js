@@ -1,19 +1,5 @@
 var path = require('path')
 var cacheTemplates = {}
-var Parser = require('../parsers/parser')
-var clone = require('../parsers/clone')
-
-function insertChildsToTemplate (tree, templates, nodes) {
-  templates.forEach(function (item) {
-    if (tree.match(item, 'type[expr].type[var].childs')) {
-      tree.replace(item, nodes)
-    }
-
-    if (item.childs && item.childs.length) {
-      insertChildsToTemplate(tree, item.childs, nodes)
-    }
-  })
-}
 
 function setParent (parent, item) {
   item.parent = parent
@@ -24,12 +10,11 @@ module.exports = {
     var funcParams
     var includePath
     var nameSpace = tree.filePath()
-    var childs
     var i
     var len
-    var parser = Parser(tree.modules())
-    var template
     var parent
+    var currentNode
+    var includeNode
 
     if (tree.match(item, 'type[logic].type[expr].type[func].type[var].import')) {
       funcParams = item.value.value.attrs
@@ -48,11 +33,8 @@ module.exports = {
 
       if (!cacheTemplates[includePath]) {
         cacheTemplates[includePath] = {
-          template: null,
           names: {}
         }
-
-        cacheTemplates[includePath].template = parser.parseFile(includePath + '.txt')
       }
 
       if (!cacheTemplates[includePath].names[nameSpace]) {
@@ -62,24 +44,39 @@ module.exports = {
       cacheTemplates[includePath].names[nameSpace].push(funcParams[0].value)
 
       tree.skip()
-    } else if (item.type === 'close_tag') {
+    } else if (item.type === 'close_tag' || item.type === 'single_tag') {
       for (includePath in cacheTemplates) {
         if (cacheTemplates[includePath].names[nameSpace]) {
           for (i = 0, len = cacheTemplates[includePath].names[nameSpace].length; i < len; i += 1) {
             if (cacheTemplates[includePath].names[nameSpace][i] === item.value) {
-              parent = tree.currentNode.parent
+              currentNode = tree.currentNode
 
-              template = clone(cacheTemplates[includePath].template.tree())
+              if (item.type === 'single_tag') {
+                currentNode = item
+              }
 
-              childs = tree.currentNode.childs
+              if (!currentNode.childs) {
+                currentNode.childs = []
+              }
 
-              insertChildsToTemplate(tree, template.childs, childs)
+              parent = currentNode.parent
+              includeNode = {
+                type: 'include',
+                childs: currentNode.childs,
+                parent: currentNode.parent,
+                variable: item.value,
+                path: includePath
+              }
 
-              tree.replace(tree.currentNode, template.childs)
+              if (item.type === 'single_tag') {
+                tree.push(includeNode)
+              } else {
+                tree.replace(currentNode, [includeNode])
 
-              parent.childs.forEach(setParent.bind(null, parent))
+                includeNode.childs.forEach(setParent.bind(null, includeNode))
 
-              tree.currentNode = template.childs[template.childs.length - 1]
+                tree.currentNode = includeNode
+              }
             }
           }
         }

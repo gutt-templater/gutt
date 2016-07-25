@@ -13,6 +13,11 @@ var postfix = '<?php\n' +
 '  ob_end_clean();\n' +
 '  return $content;\n' +
 '};'
+var variableIncrement = 0
+
+function getVariableIncrement () {
+  return variableIncrement++
+}
 
 function expression (tree) {
   var str = ''
@@ -21,6 +26,10 @@ function expression (tree) {
 
   switch (tree.type) {
     case 'var':
+      if (tree.value === 'childs') {
+        tree.value = '_childsTemplate'
+      }
+
       str += (~consts.indexOf(tree.value) ? '' : '$') + tree.value + tree.keys.map(function (key) {
         return '[' + expression(key) + ']'
       }).join('')
@@ -123,6 +132,8 @@ function expression (tree) {
 
 function switchNode (node) {
   var result = ''
+  var randomVar
+  var randomHeredoc
 
   switch (node.type) {
     case 'tag':
@@ -208,6 +219,18 @@ function switchNode (node) {
       }
 
       return ''
+    case 'include':
+      randomVar = '$childs' + getVariableIncrement()
+      randomHeredoc = 'HEREDOC' + getVariableIncrement()
+
+      result += '<?php $_' + node.variable + ' = include \'' + node.path + '.php\'; ?>'
+      result += '<?php ob_start(); ?>\n'
+      result += reduce(node.childs)
+      result += '\n<?php\n'
+      result += randomVar + ' = ob_get_contents(); ob_end_clean(); '
+      result += 'echo $_' + node.variable + '([], ' + randomVar + '); ?>'
+
+      return result
   }
 
   return ''
