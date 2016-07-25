@@ -1,4 +1,18 @@
 var consts = ['true', 'false']
+var prefix = '<?php\n' +
+'return function ($_data, $_childsTemplate = false) {\n' +
+'  foreach ($_data as $_key => $_value) {\n' +
+'    $$_key = $_value;\n' +
+'  }\n' +
+'  ob_start();\n' +
+'// >>> GENERATED CODE\n' +
+'?>\n'
+var postfix = '<?php\n' +
+'// <<< GENERATED CODE\n' +
+'  $content = ob_get_contents();\n' +
+'  ob_end_clean();\n' +
+'  return $content;\n' +
+'};'
 
 function expression (tree) {
   var str = ''
@@ -192,6 +206,8 @@ function switchNode (node) {
 
         return ' ' + (result.length ? '"' + result + '"' : '')
       }
+
+      return ''
   }
 
   return ''
@@ -210,6 +226,6 @@ function reduce (tree) {
 module.exports = {
   ext: 'php',
   stringify: function (tree) {
-    return reduce(tree.childs)
+    return prefix + reduce(tree.childs) + postfix
   }
 }

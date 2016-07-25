@@ -1,3 +1,11 @@
+<?php
+return function ($_data, $_childsTemplate = false) {
+  foreach ($_data as $_key => $_value) {
+    $$_key = $_value;
+  }
+  ob_start();
+// >>> GENERATED CODE
+?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html lang="en">
 <head>
@@ -25,4 +33,9 @@
     </div>
   </div>
 </body>
-</html>
+</html><?php
+// <<< GENERATED CODE
+  $content = ob_get_contents();
+  ob_end_clean();
+  return $content;
+};
