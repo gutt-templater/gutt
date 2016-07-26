@@ -133,7 +133,7 @@ function expression (tree) {
 function switchNode (node) {
   var result = ''
   var randomVar
-  var randomHeredoc
+  var params
 
   switch (node.type) {
     case 'tag':
@@ -221,14 +221,22 @@ function switchNode (node) {
       return ''
     case 'include':
       randomVar = '$childs' + getVariableIncrement()
-      randomHeredoc = 'HEREDOC' + getVariableIncrement()
 
       result += '<?php $_' + node.variable + ' = include \'' + node.path + '.php\'; ?>'
       result += '<?php ob_start(); ?>\n'
       result += reduce(node.childs)
       result += '\n<?php\n'
       result += randomVar + ' = ob_get_contents(); ob_end_clean(); '
-      result += 'echo $_' + node.variable + '([], ' + randomVar + '); ?>'
+
+      params = node.params.childs.map(function (param) {
+        if (param.value[0].type === 'expr') {
+          return '\'' + param.name + '\' => ' + expression(param.value[0].value);
+        }
+
+        return '\'' + param.name + '\' => ' + reduce(param.value)
+      })
+
+      result += 'echo $_' + node.variable + '([' + params.join(',\n') + '], ' + randomVar + '); ?>'
 
       return result
   }
@@ -249,6 +257,8 @@ function reduce (tree) {
 module.exports = {
   ext: 'php',
   stringify: function (tree) {
+    variableIncrement = 0
+
     return prefix + reduce(tree.childs) + postfix
   }
 }

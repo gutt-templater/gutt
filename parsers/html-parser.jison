@@ -111,6 +111,8 @@ attr
     { $$ = {type: 'param', name: $1, value: []}; }
   | ID '=' string
     { $$ = {type: 'param', name: $1, value: $3}; }
+  | ID '=' LOGIC_LITERAL LOGIC_CLOSE_AT_ATTRIBUTE
+    { $$ = {type: 'param', name: $1, value: {type: 'logic', value: $3.substr(1).trim()}}; }
   | string
     { $$ = {type: 'param', string: $1}; }
   | LOGIC_LITERAL LOGIC_CLOSE_AT_ATTRIBUTE

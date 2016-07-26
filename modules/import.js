@@ -1,8 +1,16 @@
 var path = require('path')
 var cacheTemplates = {}
+var Parser = require('../parsers/parser')
+var parser
 
 function setParent (parent, item) {
   item.parent = parent
+}
+
+function prepareAttr (tree, attr) {
+  if (attr.value.type === 'logic') {
+    attr.value = parser.parse([attr.value], tree.filePath()).tree().childs
+  }
 }
 
 module.exports = {
@@ -15,6 +23,10 @@ module.exports = {
     var parent
     var currentNode
     var includeNode
+
+    if (!parser) {
+      parser = Parser(tree.modules())
+    }
 
     if (tree.match(item, 'type[logic].type[expr].type[func].type[var].import')) {
       funcParams = item.value.value.attrs
@@ -53,15 +65,20 @@ module.exports = {
 
               if (item.type === 'single_tag') {
                 currentNode = item
+                currentNode.attrs = parser.parse(currentNode.attrs, tree.filePath()).tree()
               }
 
               if (!currentNode.childs) {
                 currentNode.childs = []
+
               }
+
+              currentNode.attrs.childs.forEach(prepareAttr.bind(null, tree))
 
               parent = currentNode.parent
               includeNode = {
                 type: 'include',
+                params: currentNode.attrs,
                 childs: currentNode.childs,
                 parent: currentNode.parent,
                 variable: item.value,

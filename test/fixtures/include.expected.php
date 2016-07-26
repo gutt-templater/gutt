@@ -23,16 +23,16 @@ return function ($_data, $_childsTemplate = false) {
           <hr />
         
 <?php
-$childs4 = ob_get_contents(); ob_end_clean(); echo $_Section([], $childs4); ?>
+$childs2 = ob_get_contents(); ob_end_clean(); echo $_Section([], $childs2); ?>
 
         <dt><?php $_Footer = include '/Users/makingoff/Projects/html-parser/test/fixtures/include/footer.php'; ?><?php ob_start(); ?>
 Just text
 <?php
-$childs6 = ob_get_contents(); ob_end_clean(); echo $_Footer([], $childs6); ?></dt>
+$childs3 = ob_get_contents(); ob_end_clean(); echo $_Footer([], $childs3); ?></dt>
       </span>
     
 <?php
-$childs2 = ob_get_contents(); ob_end_clean(); echo $_Section([], $childs2); ?>
+$childs1 = ob_get_contents(); ob_end_clean(); echo $_Section([], $childs1); ?>
   </form>
 
 <?php

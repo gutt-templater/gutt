@@ -72,12 +72,12 @@
   }
 */
 var htmlParser = (function(){
-var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[5,7,13,14],$V1=[20,22],$V2=[14,16,18,20,27,28,30,33,37],$V3=[16,37],$V4=[1,24],$V5=[1,25],$V6=[1,27],$V7=[1,28],$V8=[1,33],$V9=[1,32],$Va=[5,7,13,14,16,37],$Vb=[2,26],$Vc=[1,45],$Vd=[16,32,34];
+var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[5,7,13,14],$V1=[20,22],$V2=[14,16,18,20,27,28,30,33,37],$V3=[16,37],$V4=[1,24],$V5=[1,25],$V6=[1,27],$V7=[1,28],$V8=[1,33],$V9=[1,32],$Va=[5,7,13,14,16,37],$Vb=[2,27],$Vc=[1,47],$Vd=[16,32,34];
 var parser = {trace: function trace() { },
 yy: {},
 symbols_: {"error":2,"document":3,"nodes":4,"EOF":5,"node":6,"<":7,"sl":8,"tagname":9,"attrs":10,"ss":11,"text":12,"COMMENT_LITERAL":13,"LOGIC_LITERAL":14,"close_logic":15,"TEXT_AFTER_LOGIC":16,"}":17,"/":18,"se":19,"ID":20,":":21,"!":22,"attr":23,"=":24,"string":25,"LOGIC_CLOSE_AT_ATTRIBUTE":26,"STRING_DOUBLE_QUOTE_LITERAL":27,"STRING_SINGLE_QUOTE_LITERAL":28,"string_element":29,"STRING_DOUBLE_QUOTE_BEFORE_LOGIC":30,"logic_other_elements":31,"TEXT_TAIL_AFTER_LOGIC_BEFORE_DOUBLE_QUOTE":32,"STRING_SINGLE_QUOTE_BEFORE_LOGIC":33,"TEXT_TAIL_AFTER_LOGIC_BEFORE_SINGLE_QUOTE":34,"logic_other_element":35,"text_element":36,"TEXT_AFTER_TAG":37,"$accept":0,"$end":1},
 terminals_: {2:"error",5:"EOF",7:"<",13:"COMMENT_LITERAL",14:"LOGIC_LITERAL",16:"TEXT_AFTER_LOGIC",17:"}",18:"/",20:"ID",21:":",22:"!",24:"=",26:"LOGIC_CLOSE_AT_ATTRIBUTE",27:"STRING_DOUBLE_QUOTE_LITERAL",28:"STRING_SINGLE_QUOTE_LITERAL",30:"STRING_DOUBLE_QUOTE_BEFORE_LOGIC",32:"TEXT_TAIL_AFTER_LOGIC_BEFORE_DOUBLE_QUOTE",33:"STRING_SINGLE_QUOTE_BEFORE_LOGIC",34:"TEXT_TAIL_AFTER_LOGIC_BEFORE_SINGLE_QUOTE",37:"TEXT_AFTER_TAG"},
-productions_: [0,[3,2],[4,0],[4,2],[6,6],[6,1],[6,2],[15,1],[15,1],[11,0],[11,1],[9,2],[9,4],[19,0],[19,1],[10,0],[10,2],[23,1],[23,3],[23,1],[23,2],[25,1],[25,1],[25,1],[29,4],[29,4],[31,0],[31,2],[35,2],[8,0],[8,1],[12,1],[12,2],[36,1],[36,1]],
+productions_: [0,[3,2],[4,0],[4,2],[6,6],[6,1],[6,2],[15,1],[15,1],[11,0],[11,1],[9,2],[9,4],[19,0],[19,1],[10,0],[10,2],[23,1],[23,3],[23,4],[23,1],[23,2],[25,1],[25,1],[25,1],[29,4],[29,4],[31,0],[31,2],[35,2],[8,0],[8,1],[12,1],[12,2],[36,1],[36,1]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
 
@@ -86,10 +86,10 @@ switch (yystate) {
 case 1:
  return $$[$0-1]; 
 break;
-case 2: case 15: case 26:
+case 2: case 15: case 27:
  this.$ = []; 
 break;
-case 3: case 27:
+case 3: case 28:
  this.$ = $$[$0-1].concat($$[$0]); 
 break;
 case 4:
@@ -105,7 +105,7 @@ case 6:
       prepareText(this.$, $$[$0].substr(1));
     
 break;
-case 9: case 13: case 29:
+case 9: case 13: case 30:
  this.$ = ''; 
 break;
 case 10:
@@ -127,18 +127,21 @@ case 18:
  this.$ = {type: 'param', name: $$[$0-2], value: $$[$0]}; 
 break;
 case 19:
- this.$ = {type: 'param', string: $$[$0]}; 
+ this.$ = {type: 'param', name: $$[$0-3], value: {type: 'logic', value: $$[$0-1].substr(1).trim()}}; 
 break;
 case 20:
- this.$ = {type: 'logic', value: $$[$0-1].substr(1).trim()}; 
+ this.$ = {type: 'param', string: $$[$0]}; 
 break;
 case 21:
- this.$ = []; prepareText(this.$, prepareDoubleQuoteString($$[$0])); 
+ this.$ = {type: 'logic', value: $$[$0-1].substr(1).trim()}; 
 break;
 case 22:
+ this.$ = []; prepareText(this.$, prepareDoubleQuoteString($$[$0])); 
+break;
+case 23:
  this.$ = []; prepareText(this.$, prepareSingleQuoteString($$[$0])); 
 break;
-case 24: case 25:
+case 25: case 26:
 
       this.$ = [];
       prepareText(this.$, $$[$0-3].substr(1));
@@ -147,25 +150,25 @@ case 24: case 25:
       prepareText(this.$, $$[$0].substr(1, $$[$0].length - 2));
     
 break;
-case 28:
+case 29:
 
       this.$ = [];
       prepareText(this.$, $$[$0-1].substr(1));
       prepareLogic(this.$, $$[$0].substr(1));
     
 break;
-case 31:
+case 32:
  this.$ = []; prepareText(this.$, $$[$0]); 
 break;
-case 32:
+case 33:
  this.$ = $$[$0-1]; prepareText($$[$0-1], $$[$0]); 
 break;
-case 33: case 34:
+case 34: case 35:
  this.$ = $$[$0].substr(1); 
 break;
 }
 },
-table: [o($V0,[2,2],{3:1,4:2}),{1:[3]},{5:[1,3],6:4,7:[1,5],13:[1,6],14:[1,7]},{1:[2,1]},o($V0,[2,3]),o($V1,[2,29],{8:8,18:[1,9]}),o($V0,[2,5]),{15:10,16:[1,11],17:[1,12]},{9:13,19:14,20:[2,13],22:[1,15]},o($V1,[2,30]),o($V0,[2,6]),o($V0,[2,7]),o($V0,[2,8]),o($V2,[2,15],{10:16}),{20:[1,17]},{20:[2,14]},o($V3,[2,9],{11:18,23:19,25:22,29:26,14:[1,23],18:[1,20],20:[1,21],27:$V4,28:$V5,30:$V6,33:$V7}),o($V2,[2,11],{21:[1,29]}),{12:30,16:$V8,36:31,37:$V9},o($V2,[2,16]),o($V3,[2,10]),o($V2,[2,17],{24:[1,34]}),o($V2,[2,19]),{26:[1,35]},o($V2,[2,21]),o($V2,[2,22]),o($V2,[2,23]),{14:[1,36]},{14:[1,37]},{20:[1,38]},o($V0,[2,4],{36:39,16:$V8,37:$V9}),o($Va,[2,31]),o($Va,[2,33]),o($Va,[2,34]),{25:40,27:$V4,28:$V5,29:26,30:$V6,33:$V7},o($V2,[2,20]),o([16,32],$Vb,{31:41}),o([16,34],$Vb,{31:42}),o($V2,[2,12]),o($Va,[2,32]),o($V2,[2,18]),{16:$Vc,32:[1,43],35:44},{16:$Vc,34:[1,46],35:44},o($V2,[2,24]),o($Vd,[2,27]),{14:[1,47]},o($V2,[2,25]),o($Vd,[2,28])],
+table: [o($V0,[2,2],{3:1,4:2}),{1:[3]},{5:[1,3],6:4,7:[1,5],13:[1,6],14:[1,7]},{1:[2,1]},o($V0,[2,3]),o($V1,[2,30],{8:8,18:[1,9]}),o($V0,[2,5]),{15:10,16:[1,11],17:[1,12]},{9:13,19:14,20:[2,13],22:[1,15]},o($V1,[2,31]),o($V0,[2,6]),o($V0,[2,7]),o($V0,[2,8]),o($V2,[2,15],{10:16}),{20:[1,17]},{20:[2,14]},o($V3,[2,9],{11:18,23:19,25:22,29:26,14:[1,23],18:[1,20],20:[1,21],27:$V4,28:$V5,30:$V6,33:$V7}),o($V2,[2,11],{21:[1,29]}),{12:30,16:$V8,36:31,37:$V9},o($V2,[2,16]),o($V3,[2,10]),o($V2,[2,17],{24:[1,34]}),o($V2,[2,20]),{26:[1,35]},o($V2,[2,22]),o($V2,[2,23]),o($V2,[2,24]),{14:[1,36]},{14:[1,37]},{20:[1,38]},o($V0,[2,4],{36:39,16:$V8,37:$V9}),o($Va,[2,32]),o($Va,[2,34]),o($Va,[2,35]),{14:[1,41],25:40,27:$V4,28:$V5,29:26,30:$V6,33:$V7},o($V2,[2,21]),o([16,32],$Vb,{31:42}),o([16,34],$Vb,{31:43}),o($V2,[2,12]),o($Va,[2,33]),o($V2,[2,18]),{26:[1,44]},{16:$Vc,32:[1,45],35:46},{16:$Vc,34:[1,48],35:46},o($V2,[2,19]),o($V2,[2,25]),o($Vd,[2,28]),{14:[1,49]},o($V2,[2,26]),o($Vd,[2,29])],
 defaultActions: {3:[2,1],15:[2,14]},
 parseError: function parseError(str, hash) {
     if (hash.recoverable) {

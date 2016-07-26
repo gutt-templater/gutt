@@ -75,4 +75,10 @@ describe('PHP stringifier', function () {
 
     resultFile.php.should.be.equal(getTestFile('include.expected.php'))
   })
+
+  it ('include with recursive parameters', function () {
+    var resultFile = parser.parseFile(testFilesDirPath + '/comments.txt').strings()
+
+    resultFile.php.should.be.equal(getTestFile('comments.expected.php'))
+  })
 })
