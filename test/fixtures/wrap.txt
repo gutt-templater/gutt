@@ -1,0 +1,14 @@
+{ import(Wrapper, './wrapper') }
+{ import(Wrapper2, './wrapper2') }
+
+{ value = 'Hello' }
+
+<section>
+  <Wrapper title="Super form">
+    <Wrapper2>
+      { value = value . ', Alex' }
+      <input type="text" value="{ value }" />
+    </Wrapper2>
+  </Wrapper>
+</section>
+<h1>{ value }</h1>

@@ -81,4 +81,10 @@ describe('PHP stringifier', function () {
 
     resultFile.php.should.be.equal(getTestFile('comments.expected.php'))
   })
+
+  it ('include with common scope of template and childs', function () {
+    var resultFile = parser.parseFile(testFilesDirPath + '/wrap.txt').strings()
+
+    resultFile.php.should.be.equal(getTestFile('wrap.expected.php'))
+  })
 })
