@@ -9,7 +9,7 @@ function setParent (parent, item) {
 
 function prepareAttr (tree, attr) {
   if (attr.value.type === 'logic') {
-    attr.value = parser.parse([attr.value], tree.filePath()).tree().childs
+    attr.value = parser.parse([attr.value], tree.filePath()).tree()
   }
 }
 

@@ -1,6 +1,6 @@
 var consts = ['true', 'false']
 var prefix = '<?php\n' +
-'return function ($_data, $_childsTemplate = false) {\n' +
+'return function ($_data = [], $_childsTemplate = false) {\n' +
 '  foreach ($_data as $_key => $_value) {\n' +
 '    $$_key = $_value;\n' +
 '  }\n' +
@@ -229,11 +229,11 @@ function switchNode (node) {
       result += randomVar + ' = ob_get_contents(); ob_end_clean(); '
 
       params = node.params.childs.map(function (param) {
-        if (param.value[0].type === 'expr') {
-          return '\'' + param.name + '\' => ' + expression(param.value[0].value);
+        if (param.value.childs[0].type === 'expr') {
+          return '\'' + param.name + '\' => ' + expression(param.value.childs[0].value);
         }
 
-        return '\'' + param.name + '\' => ' + reduce(param.value)
+        return '\'' + param.name + '\' => \"' + reduce(param.value.childs) + '\"'
       })
 
       result += 'echo $_' + node.variable + '([' + params.join(',\n') + '], ' + randomVar + '); ?>'

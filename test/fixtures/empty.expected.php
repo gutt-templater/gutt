@@ -1,5 +1,5 @@
 <?php
-return function ($_data, $_childsTemplate = false) {
+return function ($_data = [], $_childsTemplate = false) {
   foreach ($_data as $_key => $_value) {
     $$_key = $_value;
   }
