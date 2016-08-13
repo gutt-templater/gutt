@@ -1,5 +1,4 @@
 var path = require('path')
-var cacheTemplates = {}
 var Parser = require('../parsers/parser')
 var parser
 
@@ -24,6 +23,10 @@ module.exports = {
     var currentNode
     var includeNode
 
+    if (!tree.cacheTemplates) {
+      tree.cacheTemplates = {}
+    }
+
     if (!parser) {
       parser = Parser(tree.modules())
     }
@@ -43,24 +46,24 @@ module.exports = {
 
       includePath = path.resolve(path.dirname(nameSpace), includePath)
 
-      if (!cacheTemplates[includePath]) {
-        cacheTemplates[includePath] = {
+      if (!tree.cacheTemplates[includePath]) {
+        tree.cacheTemplates[includePath] = {
           names: {}
         }
       }
 
-      if (!cacheTemplates[includePath].names[nameSpace]) {
-        cacheTemplates[includePath].names[nameSpace] = []
+      if (!tree.cacheTemplates[includePath].names[nameSpace]) {
+        tree.cacheTemplates[includePath].names[nameSpace] = []
       }
 
-      cacheTemplates[includePath].names[nameSpace].push(funcParams[0].value)
+      tree.cacheTemplates[includePath].names[nameSpace].push(funcParams[0].value)
 
       tree.skip()
     } else if (item.type === 'close_tag' || item.type === 'single_tag') {
-      for (includePath in cacheTemplates) {
-        if (cacheTemplates[includePath].names[nameSpace]) {
-          for (i = 0, len = cacheTemplates[includePath].names[nameSpace].length; i < len; i += 1) {
-            if (cacheTemplates[includePath].names[nameSpace][i] === item.value) {
+      for (includePath in tree.cacheTemplates) {
+        if (tree.cacheTemplates[includePath].names[nameSpace]) {
+          for (i = 0, len = tree.cacheTemplates[includePath].names[nameSpace].length; i < len; i += 1) {
+            if (tree.cacheTemplates[includePath].names[nameSpace][i] === item.value) {
               currentNode = tree.currentNode
 
               if (item.type === 'single_tag') {
@@ -70,7 +73,6 @@ module.exports = {
 
               if (!currentNode.childs) {
                 currentNode.childs = []
-
               }
 
               currentNode.attrs.childs.forEach(prepareAttr.bind(null, tree))

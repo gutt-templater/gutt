@@ -9,7 +9,8 @@ var parser = require('../parsers/parser')([
   require('../modules/text'),
   require('../modules/assignment')
 ], [
-  require('../stringifiers/php')
+  require('../stringifiers/php'),
+  require('../stringifiers/javascript')
 ])
 var chai = require('chai')
 var fs = require('fs')
@@ -86,5 +87,37 @@ describe('PHP stringifier', function () {
     var resultFile = parser.parseFile(testFilesDirPath + '/wrap.txt').strings()
 
     resultFile.php.should.be.equal(getTestFile('wrap.expected.php'))
+  })
+})
+
+describe('Javascript stringifier', function () {
+  it ('empty string', function () {
+    var resultFile = parser.parseFile(testFilesDirPath + '/empty.txt').strings()
+
+    resultFile.js.should.be.equal(getTestFile('empty.expected.js'))
+  })
+
+  it ('echo expression', function () {
+    var resultFile = parser.parseFile(testFilesDirPath + '/expr.txt').strings()
+
+    resultFile.js.should.be.equal(getTestFile('expr.expected.js'))
+  })
+
+  it ('doctype', function () {
+    var resultFile = parser.parseFile(testFilesDirPath + '/doctype.txt').strings()
+
+    resultFile.js.should.be.equal(getTestFile('doctype.expected.js'))
+  })
+
+  it ('include with recursive parameters', function () {
+    var resultFile = parser.parseFile(testFilesDirPath + '/comments.txt').strings()
+
+    resultFile.js.should.be.equal(getTestFile('comments.expected.js'))
+  })
+
+  it ('include with common scope of template and childs', function () {
+    var resultFile = parser.parseFile(testFilesDirPath + '/wrap.txt').strings()
+
+    resultFile.js.should.be.equal(getTestFile('wrap.expected.js'))
   })
 })

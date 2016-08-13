@@ -2,3 +2,4 @@
 node_modules/
 parsers/html-parser.js
 parsers/logic-parser.js
+test/fixtures/

@@ -29,9 +29,7 @@ function Parser (source, filePath, modules, stringifiers) {
   this._checked = false
 
   this.source.forEach(function (rawItem) {
-    var item
-
-    item = clone(rawItem)
+    var item = clone(rawItem)
 
     if (item.type === 'logic') {
       item.value = logicParser.parse(item.value)
@@ -167,7 +165,7 @@ Parser.prototype.strings = function () {
   var results = {}
 
   this._stringifiers.forEach(function (stringifier) {
-    results[stringifier.ext] = stringifier.stringify(self._tree).trim()
+    results[stringifier.ext] = stringifier.stringify(clone(self._tree)).trim()
   })
 
   return results
