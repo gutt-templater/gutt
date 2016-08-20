@@ -37,6 +37,8 @@ function prepareSingleQuoteString(str) {
 "!"                         return '!';
 "?"                         return '?';
 ","                         return ',';
+"..."                       return '...';
+".."                        return '..';
 "."                         return '.';
 \"(\\\"|[^\"])*?\"          return 'DOUBLE_QUOTE_STRING';
 \'(\\\'|[^\'])*?\'          return 'SINGLE_QUOTE_STRING';
@@ -50,7 +52,7 @@ function prepareSingleQuoteString(str) {
 %left '!='
 %left '=='
 %left '>=' '>' '<=' '<'
-%left '.'
+%left '...' '..' '.'
 %left '+' '-'
 %left '*' '/'
 %left UMINUS
@@ -105,6 +107,15 @@ string
     { $$ = '"' + prepareSingleQuoteString($1) + '"'; }
   ;
 
+arr
+  : '[' expression '...' expression ']'
+    { $$ = {type: 'array', range: {type: 'open', value: [$2, $4]}}; }
+  | '[' expression '..' expression ']'
+    { $$ = {type: 'array', range: {type: 'close', value: [$2, $4]}}; }
+  | '[' ']'
+    { $$ = {type: 'array', range: {type: 'empty', value: []}}; }
+  ;
+
 expression
   : expression '||' expression
     { $$ = {type: 'or', value: [$1, $3]}; }
@@ -144,6 +155,7 @@ expression
     { $$ = {type: 'isset', value: $1}; }
   | '(' expression ')'
     { $$ = {type: 'brack', value: $2}; }
+  | arr
   | function
   | variable
   | string

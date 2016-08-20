@@ -99,6 +99,21 @@ describe('PHP stringifier', function () {
     return parsePhp(template, params).should.eventually.equal('5')
   })
 
+  it ('array expressions open range grow up', function () {
+    return parsePhp('{ for(item, [5...end]) }{ item }{ endfor }', {end: 9}).should.eventually.equal('5678')
+  })
+
+  it ('array expressions open range grow down', function () {
+    return parsePhp('{ for(item, [5...end]) }{ item }{ endfor }', {end: 0}).should.eventually.equal('54321')
+  })
+
+  it ('array expressions closed range grow up', function () {
+    return parsePhp('{ for(item, [5..end]) }{ item }{ endfor }', {end: 9}).should.eventually.equal('56789')
+  })
+
+  it ('array expressions closed range grow down', function () {
+    return parsePhp('{ for(item, [5..end]) }{ item }{ endfor }', {end: 0}).should.eventually.equal('543210')
+  })
 
   it ('doctype', function () {
     return parsePhp(
@@ -196,7 +211,29 @@ describe('Javascript stringifier', function () {
     }
 
     return parseJs('{ b + c[d][\'str\'] * 2 }', params).should.eventually.deep.equal([{text: 7, type: 'text'}])
+  })
 
+  it ('array expressions open range grow up', function () {
+    var result = [
+      {
+        text: 5,
+        type: 'text'
+      },
+      {
+        text: 6,
+        type: 'text'
+      },
+      {
+        text: 7,
+        type: 'text'
+      },
+      {
+        text: 8,
+        type: 'text'
+      },
+    ]
+
+    return parseJs('{ for(item, [5...end]) }{ item }{ endfor }', {end: 9}).should.eventually.deep.equal(result)
   })
 
   it ('doctype', function () {

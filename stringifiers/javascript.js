@@ -6,8 +6,35 @@ var prefix =
 '    define([], factory());\n' +
 '  }\n' +
 '})(function () {\n' +
+'  var MKARR_OPEN = 2 << 1;\n' +
+'  var MKARR_CLOSE = 1 << 1;\n' +
+'  function mkArr(start, end, flag) {\n' +
+'    var arr = [], i;\n' +
+'    if (flag & MKARR_OPEN) {\n' +
+'      if (start <= end) {\n' +
+'        for (i = start; i < end; i++) {\n' +
+'          arr.push(i);\n' +
+'        }\n' +
+'      } else {\n' +
+'        for (i = start; i > end; i--) {\n' +
+'          arr.push(i);\n' +
+'        }\n' +
+'      }\n' +
+'    } else if (flag & MKARR_CLOSE) {\n' +
+'      if (start <= end) {\n' +
+'        for (i = start; i <= end; i++) {\n' +
+'          arr.push(i);\n' +
+'        }\n' +
+'      } else {\n' +
+'        for (i = start; i >= end; i--) {\n' +
+'          arr.push(i);\n' +
+'        }\n' +
+'      }\n' +
+'    }\n' +
+'    return arr;\n' +
+'  }\n' +
 '  function create(name, attrs, cb) {\n' +
-'    if (typeof name !== \'string\') return name;\n' +
+'    if (typeof name === \'object\') return name;\n' +
 '    var childs = [];\n' +
 '    if (typeof cb === \'function\') cb(childs);\n' +
 '    if (attrs) {\n' +
@@ -178,6 +205,26 @@ function expression (tree) {
       return tree.value.map(function (item) {
         return expression(item)
       }).join(' + ')
+
+    case 'array':
+      switch (tree.range.type) {
+        case 'empty':
+          return '[]'
+
+        case 'open':
+          str = 'mkArr(' + expression(tree.range.value[0])
+          str += ', ' + expression(tree.range.value[1])
+          str += ', MKARR_OPEN)'
+
+          return str
+
+        case 'close':
+          str = 'mkArr(' + expression(tree.range.value[0])
+          str += ', ' + expression(tree.range.value[1])
+          str += ', MKARR_CLOSE)'
+
+          return str
+      }
   }
 
   return str
@@ -265,24 +312,24 @@ function switchNode (node, mode) {
 
       return result
     case 'for':
+      randomVar = '_arr' + getVariableIncrement()
+      result += 'var ' + randomVar + ' = '
+
+      if (node.value.length === 2) {
+        result += expression(node.value[1])
+      } else if (node.value.length === 3) {
+        result += expression(node.value[2])
+      }
+
+      result += ';\n'
       result += 'for ('
       defineVar(node.value[0].value)
 
-      if (node.value.length === 2) {
-        result += expression(node.value[0]) + ' in ' + expression(node.value[1])
-      } else if (node.value.length === 3) {
-        result += expression(node.value[0]) + ' in ' + expression(node.value[2])
-      }
-
+      result += expression(node.value[0]) + ' in ' + randomVar
       result += ') {\n'
 
-      if (node.value.length === 2) {
-        result += expression(node.value[0]) + ' = ' +
-          expression(node.value[1]) + '[' + expression(node.value[0]) + '];\n'
-      } else if (node.value.length === 3) {
-        result += expression(node.value[1]) + ' = ' +
-          expression(node.value[2]) + '[' + expression(node.value[0]) + '];\n'
-      }
+      result +=
+        expression(node.value[0]) + ' = ' + randomVar + '[' + expression(node.value[0]) + '];\n'
 
       result += reduce(node.childs, mode)
 
@@ -342,11 +389,11 @@ function switchNode (node, mode) {
       result += reduce(node.childs, modeIncludeChilds.bind(null, childsVar)) + ';\n'
 
       params = node.params.childs.map(function (param) {
-        if (param.value.childs[0].type === 'expr') {
+        if (param.value.childs && param.value.childs[0].type === 'expr') {
           return '\'' + param.name + '\': ' + expression(param.value.childs[0].value);
         }
 
-        return '\'' + param.name + '\': ' + reduce(param.value.childs, modePassParam)
+        return '\'' + param.name + '\': ' + reduce(param.value.childs || param.value, modePassParam)
       })
 
       result += 'var ' + randomVar + ' = _' + node.variable + '({' + params.join(',\n') + '}, ' + childsVar + ');\n'

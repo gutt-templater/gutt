@@ -1,5 +1,38 @@
 var consts = ['true', 'false']
 var prefix = '<?php\n' +
+'if (!defined(\'MKARR_OPEN\')) {\n' +
+'  define(\'MKARR_OPEN\', 2 >> 1);\n' +
+'}\n' +
+'if (!defined(\'MKARR_CLOSE\')) {\n' +
+'  define(\'MKARR_OPEN\', 1 >> 1);\n' +
+'}\n' +
+'if (!function_exists(\'mkArr\')) {\n' +
+'  function mkArr($start, $end, $flag) {\n' +
+'    $arr = [];\n' +
+'    if ($flag & MKARR_OPEN) {\n' +
+'      if ($start <= $end) {\n' +
+'        for ($i = $start; $i < $end; $i++) {\n' +
+'          $arr[] = $i;\n' +
+'        }\n' +
+'      } else {\n' +
+'        for ($i = $start; $i > $end; $i--) {\n' +
+'          $arr[] = $i;\n' +
+'        }\n' +
+'      }\n' +
+'    } elseif ($flag & MKARR_CLOSE) {\n' +
+'      if ($start <= $end) {\n' +
+'        for ($i = $start; $i <= $end; $i++) {\n' +
+'          $arr[] = $i;\n' +
+'        }\n' +
+'      } else {\n' +
+'        for ($i = $start; $i >= $end; $i--) {\n' +
+'          $arr[] = $i;\n' +
+'        }\n' +
+'      }\n' +
+'    }\n' +
+'    return $arr;\n' +
+'  }\n' +
+'}\n' +
 'return function ($_data = [], $_childsTemplate = false) {\n' +
 '  foreach ($_data as $_key => $_value) {\n' +
 '    $$_key = $_value;\n' +
@@ -125,6 +158,26 @@ function expression (tree) {
       return tree.value.map(function (item) {
         return expression(item)
       }).join(' . ')
+
+    case 'array':
+      switch (tree.range.type) {
+        case 'empty':
+          return '[]'
+
+        case 'open':
+          str = 'mkArr(' + expression(tree.range.value[0])
+          str += ', ' + expression(tree.range.value[1])
+          str += ', MKARR_OPEN)'
+
+          return str
+
+        case 'close':
+          str = 'mkArr(' + expression(tree.range.value[0])
+          str += ', ' + expression(tree.range.value[1])
+          str += ', MKARR_CLOSE)'
+
+          return str
+      }
   }
 
   return str
