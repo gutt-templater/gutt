@@ -223,17 +223,17 @@ function switchNode (node) {
       randomVar = '$childs' + getVariableIncrement()
 
       result += '<?php $_' + node.variable + ' = include \'' + node.path + '.php\'; ?>'
-      result += '<?php ob_start(); ?>\n'
+      result += '<?php ob_start(); ?>'
       result += reduce(node.childs)
-      result += '\n<?php\n'
+      result += '<?php\n'
       result += randomVar + ' = ob_get_contents(); ob_end_clean(); '
 
       params = node.params.childs.map(function (param) {
-        if (param.value.childs[0].type === 'expr') {
+        if (param.value.childs && param.value.childs[0].type === 'expr') {
           return '\'' + param.name + '\' => ' + expression(param.value.childs[0].value);
         }
 
-        return '\'' + param.name + '\' => \"' + reduce(param.value.childs) + '\"'
+        return '\'' + param.name + '\' => \"' + reduce(param.value.childs || param.value) + '\"'
       })
 
       result += 'echo $_' + node.variable + '([' + params.join(',\n') + '], ' + randomVar + '); ?>'

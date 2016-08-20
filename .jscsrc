@@ -67,6 +67,6 @@
     "./parsers/logic-parser.js",
     ".git/",
     "./node_modules/",
-    "./test/fixtures/"
+    "./tmp/"
   ]
 }
