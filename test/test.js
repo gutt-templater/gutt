@@ -53,6 +53,10 @@ describe('PHP stringifier', function () {
   })
 
   it ('foreach expression without index', function () {
+    var template =
+      '{ for (item, news) }' +
+      '<h1>{ item[\'title\'] }</h1>' +
+      '{ endfor }'
     var params = {
       news: [
         {
@@ -64,7 +68,7 @@ describe('PHP stringifier', function () {
       ]
     }
 
-    return parsePhp('{ for (item, news) }<h1>{ item[\'title\'] }</h1>{ endfor }', params)
+    return parsePhp(template, params)
       .should.eventually.equal('<h1>News</h1><h1>Olds</h1>')
   })
 
@@ -79,14 +83,25 @@ describe('PHP stringifier', function () {
         }
       ]
     }
-    var template = '{ for (index, item, news) }<h1 data-index="{index}">{ item[\'title\'] }</h1>{ endfor }'
+    var template =
+      '{ for (index, item, news) }' +
+      '<h1 data-index="{index}">{ item[\'title\'] }</h1>' +
+      '{ endfor }'
 
     return parsePhp(template, params)
       .should.eventually.equal('<h1 data-index="0">News</h1><h1 data-index="1">Olds</h1>')
   })
 
   it ('if expression', function () {
-    var template = '{ if (a == b) }{ a = a + b }{elseif (a > b && b < a) }{ a = a - b}{else}{ a = b }{ endif }{a}'
+    var template =
+      '{ if (a == b) }' +
+      '{ a = a + b }' +
+      '{elseif (a > b && b < a) }' +
+      '{ a = a - b}' +
+      '{else}' +
+      '{ a = b }' +
+      '{ endif }' +
+      '{a}'
     var params = {a: 5, b: 10}
 
     return parsePhp(template, params).should.eventually.equal('10')
@@ -127,7 +142,12 @@ describe('PHP stringifier', function () {
   })
 
   it ('isset', function () {
-    var template = '{ if (!field[\'hide\']? || (field[\'hide\']? && !field[\'hide\'])) }hidden{else}show{endif }'
+    var template =
+      '{ if (!field[\'hide\']? || (field[\'hide\']? && !field[\'hide\'])) }' +
+      'hidden' +
+      '{else}' +
+      'show' +
+      '{endif }'
 
     return parsePhp(template, {field: {}}).should.eventually.equal('hidden')
   })
@@ -135,11 +155,13 @@ describe('PHP stringifier', function () {
   it ('import and inlude', function () {
     var tempAsideName = 'tmp' + parseInt(Math.random() * 1000)
 
-    return Promise.all([
-      parsePhpAndWriteFile('<aside>{childs}</aside>', tempAsideName + '.php')
-    ])
+    return parsePhpAndWriteFile('<aside>{childs}</aside>', tempAsideName + '.php')
       .then(function () {
-        return parsePhp('{ import (Aside, "./' + tempAsideName + '")}<div><Aside><h1>Hello</h1></Aside></div>')
+        var template =
+          '{ import (Aside, "./' + tempAsideName + '")}' +
+          '<div><Aside><h1>Hello</h1></Aside></div>'
+
+        return parsePhp(template)
       })
       .should.eventually.equal('<div><aside><h1>Hello</h1></aside></div>')
   })
@@ -147,9 +169,12 @@ describe('PHP stringifier', function () {
   it ('include with recursive parameters', function () {
     var tempCommentsName = 'tmp' + parseInt(Math.random() * 1000)
     var template =
-      '{ import(Comments, \'./' + tempCommentsName + '\') }{ for (comment, comments) }<div>{ comment[\'name\'] }<div>' +
+      '{ import(Comments, \'./' + tempCommentsName + '\') }' +
+      '{ for (comment, comments) }' +
+      '<div>{ comment[\'name\'] }<div>' +
       '<Comments comments={ comment[\'childs\'] } /></div>' +
-      '</div>{ endfor }'
+      '</div>' +
+      '{ endfor }'
     var data = {
       comments: [
         {
@@ -178,9 +203,13 @@ describe('PHP stringifier', function () {
     var wrapTemplate = '<wrap title="{ title }">{childs}</wrap>'
     var asideTemplate = '<aside>{ childs }<hr /></aside>'
     var template =
-      '{import(Wrap, \'./' + tempWrapName + '\')}{import(Aside, \'./' + tempAsideName + '\')}' +
+      '{import(Wrap, \'./' + tempWrapName + '\')}' +
+      '{import(Aside, \'./' + tempAsideName + '\')}' +
       '{variable = 1}' +
-      '<Wrap title="Title of Wrap!"><Aside>Text{variable = variable + 1}</Aside></Wrap>{variable}'
+      '<Wrap title="Title of Wrap!">' +
+      '<Aside>Text{variable = variable + 1}</Aside>' +
+      '</Wrap>' +
+      '{variable}'
 
     return Promise.all([
       parsePhpAndWriteFile(wrapTemplate, tempWrapName + '.php'),
@@ -230,10 +259,87 @@ describe('Javascript stringifier', function () {
       {
         text: 8,
         type: 'text'
-      },
+      }
     ]
 
     return parseJs('{ for(item, [5...end]) }{ item }{ endfor }', {end: 9}).should.eventually.deep.equal(result)
+  })
+
+  it ('array expressions open range grow down', function () {
+    var result = [
+      {
+        text: 9,
+        type: 'text'
+      },
+      {
+        text: 8,
+        type: 'text'
+      },
+      {
+        text: 7,
+        type: 'text'
+      },
+      {
+        text: 6,
+        type: 'text'
+      }
+    ]
+
+    return parseJs('{ for(item, [start...5]) }{ item }{ endfor }', {start: 9}).should.eventually.deep.equal(result)
+  })
+
+  it ('array expressions closed range grow up', function () {
+    var result = [
+      {
+        text: 5,
+        type: 'text'
+      },
+      {
+        text: 6,
+        type: 'text'
+      },
+      {
+        text: 7,
+        type: 'text'
+      },
+      {
+        text: 8,
+        type: 'text'
+      },
+      {
+        text: 9,
+        type: 'text'
+      }
+    ]
+
+    return parseJs('{ for(item, [5..end]) }{ item }{ endfor }', {end: 9}).should.eventually.deep.equal(result)
+  })
+
+  it ('array expressions closed range grow down', function () {
+    var result = [
+      {
+        text: 9,
+        type: 'text'
+      },
+      {
+        text: 8,
+        type: 'text'
+      },
+      {
+        text: 7,
+        type: 'text'
+      },
+      {
+        text: 6,
+        type: 'text'
+      },
+      {
+        text: 5,
+        type: 'text'
+      }
+    ]
+
+    return parseJs('{ for(item, [start..5]) }{ item }{ endfor }', {start: 9}).should.eventually.deep.equal(result)
   })
 
   it ('doctype', function () {
