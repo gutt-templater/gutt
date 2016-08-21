@@ -33,6 +33,40 @@ var prefix = '<?php\n' +
 '    return $arr;\n' +
 '  }\n' +
 '}\n' +
+'if (!function_exists(\'str_pos\')) {\n' +
+'  function str_pos($str, $substr) {\n' +
+'    $res = strpos($str, $substr);\n' +
+'    return ($res === false ? -1 : $res);\n' +
+'  }\n' +
+'}\n' +
+'if (!function_exists(\'str_upfirst\')) {\n' +
+'  function str_upfirst($str) {\n' +
+'    $res = explode(\' \', preg_replace(\'/[\\s\\n\\t]+/\', \' \', $str));\n' +
+'    foreach ($res as $index => $word) {\n' +
+'      $res[$index] = mb_strtoupper(mb_substr($word, 0, 1, \'UTF-8\'), \'UTF-8\') . mb_strtolower(mb_substr($word, 1, NULL, \'UTF-8\'), \'UTF-8\');\n' +
+'    }\n' +
+'    return implode(\' \', $res);\n' +
+'  }\n' +
+'}\n' +
+'if (!function_exists(\'str_camel\')) {\n' +
+'  function str_camel($str) {\n' +
+'    $res = explode(\' \', preg_replace(\'/[\\s\\n\\t]+/\', \' \', $str));\n' +
+'    foreach ($res as $index => $word) {\n' +
+'      if (!$index) continue;\n' +
+'      $res[$index] = mb_strtoupper(mb_substr($word, 0, 1, \'UTF-8\'), \'UTF-8\') . mb_strtolower(mb_substr($word, 1, NULL, \'UTF-8\'), \'UTF-8\');\n' +
+'    }\n' +
+'    return implode(\'\', $res);\n' +
+'  }\n' +
+'}\n' +
+'if (!function_exists(\'str_kebab\')) {\n' +
+'  function str_kebab($str) {\n' +
+'    $res = explode(\' \', preg_replace(\'/[\\s\\n\\t]+/\', \' \', $str));\n' +
+'    foreach ($res as $index => $word) {\n' +
+'      $res[$index] = mb_strtolower($word, \'UTF-8\');\n' +
+'    }\n' +
+'    return implode(\'-\', $res);\n' +
+'  }\n' +
+'}\n' +
 'return function ($_data = [], $_childsTemplate = false) {\n' +
 '  foreach ($_data as $_key => $_value) {\n' +
 '    $$_key = $_value;\n' +
@@ -50,6 +84,78 @@ var variableIncrement = 0
 
 function getVariableIncrement () {
   return variableIncrement++
+}
+
+function handleParams (params) {
+  return params.map(function (attr) {
+    return expression(attr)
+  })
+}
+
+function handleFunction (tree) {
+  var funcName
+  var params
+
+  funcName =
+    (tree.value.type === 'var' && !tree.value.keys.length ? tree.value.value : expression(tree.value))
+
+  switch (funcName) {
+    case 'str_sub':
+      params = handleParams(tree.attrs)
+
+      if (params.length < 3) {
+        params.push('NULL')
+      }
+
+      return 'mb_substr' + '(' + params.join(', ') + ', \'UTF-8\')'
+
+    case 'str_len':
+      return 'mb_strlen(' + handleParams(tree.attrs).join(', ') + ', \'UTF-8\')'
+
+    case 'str_replace':
+      params = handleParams(tree.attrs)
+
+      return 'str_replace(' + params[1] + ', ' + params[2] + ', ' + params[0] + ')'
+    case 'str_pad':
+      params = handleParams(tree.attrs)
+
+      if (!params[3]) {
+        params[3] = 'STR_PAD_RIGHT'
+      }
+
+      params[3] = params[3].replace('$STRPADLEFT', 'STR_PAD_LEFT')
+      params[3] = params[3].replace('$STRPADRIGHT', 'STR_PAD_RIGHT')
+      params[3] = params[3].replace('$STRPADBOTH', 'STR_PAD_BOTH')
+
+      return 'str_pad(' + params.join(', ') + ')'
+
+    case 'str_split':
+      params = handleParams(tree.attrs)
+
+      if (params[1] === '""') {
+        return 'str_split(' + params[0] + ')'
+      }
+
+      return 'explode(' + params[1] + ', ' + params[0] + ')'
+    case 'str_lower':
+      return 'mb_strtolower(' + handleParams(tree.attrs).join(', ') + ', \'UTF-8\')'
+    case 'str_upper':
+      return 'mb_strtoupper(' + handleParams(tree.attrs).join(', ') + ', \'UTF-8\')'
+    case 'str_trim':
+      return 'trim(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'str_ltrim':
+      return 'ltrim(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'str_rtrim':
+      return 'rtrim(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'str_urlencode':
+      return 'rawurlencode(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'str_urldecode':
+      return 'rawurldecode(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'str_htmlescape':
+      return 'htmlspecialchars(' + handleParams(tree.attrs).join(', ') + ')'
+    default:
+      return funcName + '(' + handleParams(tree.attrs).join(', ') + ')'
+  }
 }
 
 function expression (tree) {
@@ -145,15 +251,9 @@ function expression (tree) {
 
       return str
     case 'func':
-      str +=
-        (tree.value.type === 'var' && !tree.value.keys.length ? tree.value.value : expression(tree.value))
-      str += '(' + tree.attrs.map(function (attr) {
-
-        return expression(attr)
-      }).join(', ') + ')'
+      str = handleFunction(tree)
 
       return str
-
     case 'concat':
       return tree.value.map(function (item) {
         return expression(item)

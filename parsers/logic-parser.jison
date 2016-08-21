@@ -1,6 +1,6 @@
 %{
 function prepareDoubleQuoteString(str) {
-  return str.substr(1, str.length - 2);
+  return str.substr(1, str.length - 2).replace(/\"/g, '\\"');
 }
 
 function prepareSingleQuoteString(str) {
