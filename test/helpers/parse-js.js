@@ -4,6 +4,7 @@ var path = require('path')
 var fs = require('fs')
 var parser = require('./parser')
 var writeFile = require('./write-file')
+var generateName = require('./generate-name')
 
 var tmpFilesDirPath = path.resolve(__dirname, '../../tmp')
 
@@ -34,7 +35,7 @@ function parseJsAndWriteFile (test, tmpFileName) {
 }
 
 function parseJs (test, data) {
-  var tmpFileName = 'tmp' + parseInt(Math.random() * 1000) + '.js'
+  var tmpFileName = generateName() + '.js'
 
   if (!data) {
     data = {}

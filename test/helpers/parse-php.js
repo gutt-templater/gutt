@@ -6,6 +6,7 @@ var tmpFilesDirPath = path.resolve(__dirname, '../../tmp')
 var exec = require('child_process').exec
 var parser = require('./parser')
 var writeFile = require('./write-file')
+var generateName = require('./generate-name')
 
 function runPhpTemplate (templatePath, params) {
   if (!params) {
@@ -38,7 +39,7 @@ function parsePhpAndWriteFile (test, tmpFileName) {
 }
 
 function parsePhp (test, data) {
-  var tmpFileName = 'tmp' + parseInt(Math.random() * 1000) + '.php'
+  var tmpFileName = generateName() + '.php'
 
   if (!data) {
     data = {}

@@ -33,6 +33,55 @@ var prefix =
 '    }\n' +
 '    return arr;\n' +
 '  }\n' +
+'  function str_replace(str, src, rep) {\n' +
+'    while (~str.indexOf(src)) {\n' +
+'      str = str.replace(src, rep);\n' +
+'    }\n' +
+'    return str;\n' +
+'  }\n' +
+'  var STRPADRIGHT = 1 << 1;\n' +
+'  var STRPADLEFT = 2 << 1;\n' +
+'  var STRPADBOTH = 4 << 1;\n' +
+'  function __str_pad_repeater(str, len) {\n' +
+'    var collect = \'\', i;\n' +
+'    while(collect.length < len) collect += str;\n' +
+'    collect = collect.substr(0, len);\n' +
+'    return collect;\n' +
+'  }\n' +
+'  function str_pad(str, len, sub, type) {\n' +
+'    if (typeof type === \'undefined\') type = STRPADRIGHT;\n' +
+'    var half = \'\', pad_to_go;\n' +
+'    if ((pad_to_go = len - str.length) > 0) {\n' +
+'      if (type & STRPADLEFT) { str = __str_pad_repeater(sub, pad_to_go) + str; }\n' +
+'      else if (type & STRPADRIGHT) {str = str + __str_pad_repeater(sub, pad_to_go); }\n' +
+'      else if (type & STRPADBOTH) {\n' +
+'        half = __str_pad_repeater(sub, Math.ceil(pad_to_go/2));\n' +
+'        str = half + str + half;\n' +
+'        str = str.substr(0, len);\n' +
+'      }\n' +
+'    }\n' +
+'    return str;\n' +
+'  }\n' +
+'  function str_htmlescape(html) {\n' +
+'    return html.replace(/&/g, "&amp;")\n' +
+'    .replace(/</g, "&lt;")\n' +
+'    .replace(/>/g, "&gt;")\n' +
+'    .replace(/"/g, "&quot;");\n' +
+'  }\n' +
+'  function str_upfirst(str) {\n' +
+'    return str.split(/[\\s\\n\\t]+/).map(function (item) {\n' +
+'      return item.substr(0, 1).toUpperCase() + item.substr(1).toLowerCase();\n' +
+'    }).join(\' \');\n' +
+'  }\n' +
+'  function str_camel(str) {\n' +
+'    return str.split(/[\\s\\n\\t]+/).map(function (item, index) {\n' +
+'      if (!index) return item;\n' +
+'      return item.substr(0, 1).toUpperCase() + item.substr(1).toLowerCase();\n' +
+'    }).join(\'\');\n' +
+'  }\n' +
+'  function str_kebab(str) {\n' +
+'    return str.split(/[\\s\\n\\t]+/).join(\'-\');\n' +
+'  }\n' +
 '  function create(name, attrs, cb) {\n' +
 '    if (typeof name === \'object\') return name;\n' +
 '    var childs = [];\n' +
@@ -57,7 +106,15 @@ var postfix =
 '  };\n' +
 '});'
 var variableIncrement = 0
-var definedVars = ['data', 'childs']
+var definedVars = [
+  'data',
+  'childs',
+  'MKARR_OPEN',
+  'MKARR_CLOSE',
+  'STRPADRIGHT',
+  'STRPADLEFT',
+  'STRPADBOTH'
+]
 var undefinedVars = []
 
 function prepareText (text) {
@@ -83,25 +140,98 @@ function defineVars (vars) {
 }
 
 function modeChilds (value) {
-  return '_childs.push(create(' + value + '));\n'
+  return '_childs.push(create(' + (value) + '));\n'
 }
 
 function modeVariableConcat (variable, value) {
-  return variable + ' += ' + value + ';\n'
+  return variable + ' += ' + (value) + ';\n'
 }
 
 function modeIncludeChilds (childs, value) {
-  return childs + '.push(create(' + value + '));\n'
+  return childs + '.push(create(' + (value) + '));\n'
 }
 
 function modePassParam (value) {
   return value
 }
 
+function handleParams (params) {
+  return params.map(function (attr) {
+    return expression(attr)
+  })
+}
+
+function handleFunction (tree) {
+  var strParam
+  var funcName
+  var params
+
+  funcName =
+    (tree.value.type === 'var' && !tree.value.keys.length ? tree.value.value : expression(tree.value))
+
+  switch (funcName) {
+    case 'str_sub':
+      params = handleParams(tree.attrs)
+      strParam = params.shift()
+
+      if (params[1]) {
+        params[1] = '(' + params[1] + ' < 0 ? ' + strParam + '.length  + (' + params[1] + ') - ' + params[0] + ' : ' + params[1] + ')'
+      }
+
+      return strParam + '.substr(' + params.join(', ') + ')'
+    case 'str_len':
+      params = handleParams(tree.attrs)
+      strParam = params.shift()
+
+      return strParam + '.length'
+    case 'str_pos':
+      params = handleParams(tree.attrs)
+      strParam = params.shift()
+
+      return strParam + '.indexOf(' + params.join(', ') + ')'
+    case 'str_split':
+      params = handleParams(tree.attrs)
+      strParam = params.shift()
+
+      return strParam + '.split(' + params.join(', ') + ')'
+    case 'str_lower':
+      params = handleParams(tree.attrs)
+      strParam = params.shift()
+
+      return strParam + '.toLowerCase()'
+    case 'str_upper':
+      params = handleParams(tree.attrs)
+      strParam = params.shift()
+
+      return strParam + '.toUpperCase()'
+    case 'str_trim':
+      params = handleParams(tree.attrs)
+      strParam = params.shift()
+
+      return strParam + '.trim()'
+    case 'str_ltrim':
+      params = handleParams(tree.attrs)
+      strParam = params.shift()
+
+      return strParam + '.replace(/^[\\s\\n\\t]*/, \'\')'
+    case 'str_rtrim':
+      params = handleParams(tree.attrs)
+      strParam = params.shift()
+
+      return strParam + '.replace(/[\\s\\n\\t]*$/, \'\')'
+    case 'str_urlencode':
+      return 'encodeURIComponent(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'str_urldecode':
+      return 'decodeURIComponent(' + handleParams(tree.attrs).join(', ') + ')'
+    default:
+      return funcName + '(' + handleParams(tree.attrs).join(', ') + ')'
+  }
+}
+
 function expression (tree) {
   var str = ''
 
-  if (typeof tree === 'string') return tree
+  if (typeof tree === 'string') return prepareText(tree)
 
   switch (tree.type) {
     case 'var':
@@ -199,13 +329,11 @@ function expression (tree) {
         return expression(attr)
       }).join(', ') + ')'
 
-      return str
-
+      return handleFunction(tree)
     case 'concat':
       return tree.value.map(function (item) {
         return expression(item)
       }).join(' + ')
-
     case 'array':
       switch (tree.range.type) {
         case 'empty':
