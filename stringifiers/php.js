@@ -67,6 +67,52 @@ var prefix = '<?php\n' +
 '    return implode(\'-\', $res);\n' +
 '  }\n' +
 '}\n' +
+'if (!function_exists(\'arr_push\')) {\n' +
+'  function arr_push(& $arr, $value) {\n' +
+'    array_push($arr, $value);\n' +
+'    return \'\';\n' +
+'  }\n' +
+'}\n' +
+'if (!function_exists(\'arr_unshift\')) {\n' +
+'  function arr_unshift(& $arr, $value) {\n' +
+'    array_unshift($arr, $value);\n' +
+'    return \'\';\n' +
+'  }\n' +
+'}\n' +
+'if (!function_exists(\'arr_rand\')) {\n' +
+'  function arr_rand($arr) {\n' +
+'    $keys = array_keys($arr);\n' +
+'    return $arr[$keys[rand(0, count($keys) - 1)]];\n' +
+'  }\n' +
+'}\n' +
+'if (!function_exists(\'arr_sort\')) {\n' +
+'  function arr_sort($arr) {\n' +
+'    $sorted = $arr;\n' +
+'    sort($sorted);\n' +
+'    return $sorted;\n' +
+'  }\n' +
+'}\n' +
+'if (!function_exists(\'arr_sort_reverse\')) {\n' +
+'  function arr_sort_reverse($arr) {\n' +
+'    $sorted = $arr;\n' +
+'    rsort($sorted);\n' +
+'    return $sorted;\n' +
+'  }\n' +
+'}\n' +
+'if (!function_exists(\'arr_keysort\')) {\n' +
+'  function arr_keysort($arr) {\n' +
+'    $sorted = $arr;\n' +
+'    ksort($sorted);\n' +
+'    return $sorted;\n' +
+'  }\n' +
+'}\n' +
+'if (!function_exists(\'arr_keysort_reverse\')) {\n' +
+'  function arr_keysort_reverse($arr) {\n' +
+'    $sorted = $arr;\n' +
+'    krsort($sorted);\n' +
+'    return $sorted;\n' +
+'  }\n' +
+'}\n' +
 'return function ($_data = [], $_childsTemplate = false) {\n' +
 '  foreach ($_data as $_key => $_value) {\n' +
 '    $$_key = $_value;\n' +
@@ -153,9 +199,73 @@ function handleFunction (tree) {
       return 'rawurldecode(' + handleParams(tree.attrs).join(', ') + ')'
     case 'str_htmlescape':
       return 'htmlspecialchars(' + handleParams(tree.attrs).join(', ') + ')'
+
+    case 'arr_keys':
+      return 'array_keys(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'arr_contain':
+      params = handleParams(tree.attrs)
+
+      return '(array_search(' + params[1] + ', ' + params[0] + ') !== false)'
+    case 'arr_values':
+      return 'array_values(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'arr_len':
+      return 'count(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'arr_pop':
+      return 'array_pop(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'arr_shift':
+      return 'array_shift(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'arr_slice':
+      return 'array_slice(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'arr_splice':
+      return 'array_splice(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'arr_pad':
+      return 'array_pad(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'arr_reverse':
+      return 'array_reverse(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'arr_unique':
+      return 'array_unique(' + handleParams(tree.attrs).join(', ') + ')'
     default:
       return funcName + '(' + handleParams(tree.attrs).join(', ') + ')'
   }
+}
+
+function handleArray (source) {
+  var key = 0
+  var isKeyProper = true
+  var result = []
+  var str = ''
+
+  source.forEach(function (item) {
+    if (item.key !== null) {
+      isKeyProper = false;
+    }
+  })
+
+  if (isKeyProper) {
+    source.forEach(function (item) {
+      result.push(expression(item.value))
+    })
+
+    return '[' + result.join(',') + ']'
+  }
+
+  result = {}
+
+  source.forEach(function (item) {
+    if (item.key === null) {
+      result[key++] = expression(item.value)
+    } else {
+      result[expression(item.key)] = expression(item.value)
+    }
+  })
+
+  str = []
+
+  for (key in result) {
+    str.push(key + ' => ' + result[key])
+  }
+
+  return '[' + str.join(', ') + ']'
 }
 
 function expression (tree) {
@@ -260,24 +370,28 @@ function expression (tree) {
       }).join(' . ')
 
     case 'array':
-      switch (tree.range.type) {
-        case 'empty':
-          return '[]'
+      if (tree.range) {
+        switch (tree.range.type) {
+          case 'empty':
+            return '[]'
 
-        case 'open':
-          str = 'mkArr(' + expression(tree.range.value[0])
-          str += ', ' + expression(tree.range.value[1])
-          str += ', MKARR_OPEN)'
+          case 'open':
+            str = 'mkArr(' + expression(tree.range.value[0])
+            str += ', ' + expression(tree.range.value[1])
+            str += ', MKARR_OPEN)'
 
-          return str
+            return str
 
-        case 'close':
-          str = 'mkArr(' + expression(tree.range.value[0])
-          str += ', ' + expression(tree.range.value[1])
-          str += ', MKARR_CLOSE)'
+          case 'close':
+            str = 'mkArr(' + expression(tree.range.value[0])
+            str += ', ' + expression(tree.range.value[1])
+            str += ', MKARR_CLOSE)'
 
-          return str
+            return str
+        }
       }
+
+      return handleArray(tree.values)
   }
 
   return str

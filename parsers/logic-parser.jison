@@ -14,6 +14,7 @@ function prepareSingleQuoteString(str) {
 [\s\n\t]+                   /* skip whitespace */
 [0-9]+("."[0-9]+)?\b        return 'NUMBER';
 [a-zA-Z]+([a-zA-Z0-9_]+)?\b return 'WORD';
+":"                         return ':';
 "*"                         return '*';
 "/"                         return '/';
 "-"                         return '-';
@@ -45,6 +46,7 @@ function prepareSingleQuoteString(str) {
 
 /lex
 
+%left ':'
 %left '||'
 %left '&&'
 %left '|'
@@ -112,8 +114,35 @@ arr
     { $$ = {type: 'array', range: {type: 'open', value: [$2, $4]}}; }
   | '[' expression '..' expression ']'
     { $$ = {type: 'array', range: {type: 'close', value: [$2, $4]}}; }
-  | '[' ']'
-    { $$ = {type: 'array', range: {type: 'empty', value: []}}; }
+  | '[' arr_elements ']'
+    { $$ = {type: 'array', values: $2}; }
+  ;
+
+arr_elements
+  :
+    { $$ = []; }
+  | arr_element
+    { $$ = [$1]; }
+  | arr_elements ',' arr_element
+    { $1.push($3); $$ = $1; }
+  ;
+
+arr_element
+  : expression
+    { $$ = {key: null, value: $1}; }
+  | arr_key ':' expression
+    { $$ = {key: $1, value: $3}; }
+  ;
+
+arr_key
+  : string
+  | numb
+  | variable
+  ;
+
+numb
+  : NUMBER
+    { $$ = {type: 'num', value: $1}; }
   ;
 
 expression
@@ -157,8 +186,5 @@ expression
     { $$ = {type: 'brack', value: $2}; }
   | arr
   | function
-  | variable
-  | string
-  | NUMBER
-    { $$ = {type: 'num', value: $1}; }
+  | arr_key
   ;

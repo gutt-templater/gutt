@@ -335,24 +335,28 @@ function expression (tree) {
         return expression(item)
       }).join(' + ')
     case 'array':
-      switch (tree.range.type) {
-        case 'empty':
-          return '[]'
+      if (tree.range) {
+        switch (tree.range.type) {
+          case 'empty':
+            return '[]'
 
-        case 'open':
-          str = 'mkArr(' + expression(tree.range.value[0])
-          str += ', ' + expression(tree.range.value[1])
-          str += ', MKARR_OPEN)'
+          case 'open':
+            str = 'mkArr(' + expression(tree.range.value[0])
+            str += ', ' + expression(tree.range.value[1])
+            str += ', MKARR_OPEN)'
 
-          return str
+            return str
 
-        case 'close':
-          str = 'mkArr(' + expression(tree.range.value[0])
-          str += ', ' + expression(tree.range.value[1])
-          str += ', MKARR_CLOSE)'
+          case 'close':
+            str = 'mkArr(' + expression(tree.range.value[0])
+            str += ', ' + expression(tree.range.value[1])
+            str += ', MKARR_CLOSE)'
 
-          return str
+            return str
+        }
       }
+
+      return ''
   }
 
   return str
