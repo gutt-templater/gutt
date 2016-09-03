@@ -33,6 +33,21 @@ var prefix =
 '    }\n' +
 '    return arr;\n' +
 '  }\n' +
+'  function str(str, len, sprtr) {\n' +
+'    if (!len) len = 0;\n' +
+'    if (typeof str.toString === \'function\') str = str.toString();\n' +
+'    if (!sprtr) sprtr = \'.\';\n' +
+'    if (~str.indexOf(\'.\')) {\n' +
+'      if (len > 0) {\n' +
+'        str = str.substr(0, str.indexOf(\'.\') + len + 1);\n' +
+'      } else {\n' +
+'        str = str.substr(0, str.indexOf(\'.\') + len);\n' +
+'      }\n' +
+'    } else {\n' +
+'      str = str_pad(str + \'.\', str.length + 1 + len, \'0\');\n' +
+'    }\n' +
+'    return str.replace(\'.\', sprtr);\n' +
+'  }\n' +
 '  function str_replace(str, src, rep) {\n' +
 '    while (~str.indexOf(src)) {\n' +
 '      str = str.replace(src, rep);\n' +

@@ -17,6 +17,23 @@ before(function (done) {
 })
 
 describe ('JS string functions', function () {
+  it ('str with no params', function () {
+    return parseJs('{ str(11/3) }').should.eventually.deep.equal([{type: 'text', text: '3'}])
+  })
+
+  it ('str with one param', function () {
+    return parseJs('{ str(11/3, 2) }').should.eventually.deep.equal([{type: 'text', text: '3.66'}])
+  })
+
+  it ('str with nulls after coma', function () {
+    return parseJs('{ str(12/3, 2) }').should.eventually.deep.equal([{type: 'text', text: '4.00'}])
+  })
+
+  it ('str with two params', function () {
+    return parseJs('{ str(11/3, 3, \',\') }')
+      .should.eventually.deep.equal([{type: 'text', text: '3,666'}])
+  })
+
   it ('str_sub with one param', function () {
     return parseJs('{ str_sub(\'string\', 2) }')
       .should.eventually.deep.equal([{type: 'text', text: 'ring'}])

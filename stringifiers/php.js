@@ -33,6 +33,18 @@ var prefix = '<?php\n' +
 '    return $arr;\n' +
 '  }\n' +
 '}\n' +
+'if (!function_exists(\'toFixed\')) {\n' +
+'  function toFixed($num, $len, $sprtr1) {\n' +
+'    if (strpos($num, \'.\') !== false) {\n' +
+'      if ($len > 0) {\n' +
+'        $num = substr($num, 0, strpos($num, \'.\') + $len + 1);\n' +
+'      } else {\n' +
+'        $num = substr($num, 0, strpos($num, \'.\'));\n' +
+'      }\n' +
+'    }\n' +
+'    return number_format($num, $len, $sprtr1, \'\');\n' +
+'  }\n' +
+'}\n' +
 'if (!function_exists(\'str_pos\')) {\n' +
 '  function str_pos($str, $substr) {\n' +
 '    $res = strpos($str, $substr);\n' +
@@ -192,6 +204,17 @@ function handleFunction (tree) {
       return 'rawurldecode(' + handleParams(tree.attrs).join(', ') + ')'
     case 'str_htmlescape':
       return 'htmlspecialchars(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'str':
+      params = handleParams(tree.attrs)
+      if (!params[1]) {
+        params[1] = 0
+      }
+
+      if (!params[2]) {
+        params[2] = '\'.\''
+      }
+
+      return 'toFixed(' + params.join(', ') + ')'
 
     case 'arr_keys':
       return 'array_keys(' + handleParams(tree.attrs).join(', ') + ')'

@@ -17,6 +17,22 @@ before(function (done) {
 })
 
 describe ('PHP string functions', function () {
+  it ('str with no params', function () {
+    return parsePhp('{ str(11/3) }').should.eventually.equal('3')
+  })
+
+  it ('str with one param', function () {
+    return parsePhp('{ str(11/3, 2) }').should.eventually.equal('3.66')
+  })
+
+  it ('str with nulls after coma', function () {
+    return parsePhp('{ str(12/3, 2) }').should.eventually.equal('4.00')
+  })
+
+  it ('str with two params', function () {
+    return parsePhp('{ str(11/3, 3, \',\') }').should.eventually.equal('3,666')
+  })
+
   it ('str_sub with one param', function () {
     return parsePhp('{ str_sub(\'string\', 2) }').should.eventually.equal('ring')
   })
