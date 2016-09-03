@@ -99,18 +99,11 @@ var prefix = '<?php\n' +
 '    return $sorted;\n' +
 '  }\n' +
 '}\n' +
-'if (!function_exists(\'arr_keysort\')) {\n' +
-'  function arr_keysort($arr) {\n' +
-'    $sorted = $arr;\n' +
-'    ksort($sorted);\n' +
-'    return $sorted;\n' +
-'  }\n' +
-'}\n' +
-'if (!function_exists(\'arr_keysort_reverse\')) {\n' +
-'  function arr_keysort_reverse($arr) {\n' +
-'    $sorted = $arr;\n' +
-'    krsort($sorted);\n' +
-'    return $sorted;\n' +
+'if (!function_exists(\'arr_key\')) {\n' +
+'  function arr_key($arr, $value) {\n' +
+'    $key = array_search($value, $arr);\n' +
+'    if ($key === false) return -1;\n' +
+'    return $key;\n' +
 '  }\n' +
 '}\n' +
 'return function ($_data = [], $_childsTemplate = false) {\n' +

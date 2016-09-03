@@ -29,30 +29,30 @@ describe ('PHP array functions', function () {
 
   it ('arr_contain positive', function () {
     var template =
-    '{ result = arr_contain([1, 2, \'a\': 3, 5, 6, 7], 1) }' +
-    '{ if (result) }' +
-    'found' +
-    '{ endif }'
+      '{ result = arr_contain([1, 2, \'a\': 3, 5, 6, 7], 1) }' +
+      '{ if (result) }' +
+      'found' +
+      '{ endif }'
 
     return parsePhp(template).should.eventually.equal('found')
   })
 
   it ('arr_contain negative', function () {
     var template =
-    '{ result = arr_contain([1, 2, 3, 5, 6, 7], 0) }' +
-    '{ if (result) }' +
-    'found' +
-    '{ endif }'
+      '{ result = arr_contain([1, 2, 3, 5, 6, 7], 0) }' +
+      '{ if (result) }' +
+      'found' +
+      '{ endif }'
 
     return parsePhp(template).should.eventually.equal('')
   })
 
   it ('arr_values', function () {
     var template =
-    '{ result = arr_values([1, 2, \'a\':3, 5, "str", 12:6, 7]) }' +
-    '{ for (item, result) }' +
-    '{ item },' +
-    '{ endfor }'
+      '{ result = arr_values([1, 2, \'a\':3, 5, "str", 12:6, 7]) }' +
+      '{ for (item, result) }' +
+      '{ item },' +
+      '{ endfor }'
 
     return parsePhp(template).should.eventually.equal('1,2,5,str,7,6,3,')
   })
@@ -226,21 +226,6 @@ describe ('PHP array functions', function () {
     return parsePhp(template).should.eventually.equal('1,1,2,2,2,3,3,4,5,-1,2,3,2,1,4,5,3,2,')
   })
 
-  it ('arr_keysort', function () {
-    var template =
-      '{ origin = ["e":1, "c":2, "f":3, "a":2, "b":1, "d":4, "i":5, "h":3, "g":2] }' +
-      '{ sorted = arr_keysort(origin) }' +
-      '{ for (item, sorted) }' +
-      '{ item },' +
-      '{ endfor }' +
-      '-' +
-      '{ for (item, origin) }' +
-      '{ item },' +
-      '{ endfor }'
-
-    return parsePhp(template).should.eventually.equal('2,1,2,4,1,3,2,3,5,-1,2,3,2,1,4,5,3,2,')
-  })
-
   it ('arr_sort_reverse', function () {
     var template =
       '{ origin = [1, 2, 3, 2, 1, 4, 5, 3, 2] }' +
@@ -256,33 +241,11 @@ describe ('PHP array functions', function () {
     return parsePhp(template).should.eventually.equal('5,4,3,3,2,2,2,1,1,-1,2,3,2,1,4,5,3,2,')
   })
 
-  it ('arr_keysort_reverse', function () {
-    var template =
-      '{ origin = ["e":1, "c":2, "f":3, "a":2, "b":1, "d":4, "i":5, "h":3, "g":2] }' +
-      '{ sorted = arr_keysort_reverse(origin) }' +
-      '{ for (item, sorted) }' +
-      '{ item },' +
-      '{ endfor }' +
-      '-' +
-      '{ for (item, origin) }' +
-      '{ item },' +
-      '{ endfor }'
-
-    return parsePhp(template).should.eventually.equal('5,3,2,3,1,4,2,1,2,-1,2,3,2,1,4,5,3,2,')
-  })
-
   it ('arr_key', function () {
     var template =
       '{ origin = ["e":1, "c":2, "f":3, "a":2, "b":1, "d":4, "i":5, "h":3, "g":2] }' +
-      '{ sorted = arr_keysort_reverse(origin) }' +
-      '{ for (item, sorted) }' +
-      '{ item },' +
-      '{ endfor }' +
-      '-' +
-      '{ for (item, origin) }' +
-      '{ item },' +
-      '{ endfor }'
+      '{ arr_key(origin, 3) }'
 
-    return parsePhp(template).should.eventually.equal('5,3,2,3,1,4,2,1,2,-1,2,3,2,1,4,5,3,2,')
+    return parsePhp(template).should.eventually.equal('f')
   })
 })
