@@ -1,20 +1,11 @@
-/* globals before, describe, it */
+/* globals describe, it */
 
 var chai = require('chai')
 var chaiAsPromised = require('chai-as-promised')
-var clearDir = require('clear-dir')
-var path = require('path')
-
-var tmpFilesDirPath = path.resolve(__dirname, '../tmp')
-
 var parsePhp = require('./helpers/parse-php').parsePhp
 
 chai.use(chaiAsPromised)
 chai.should()
-
-before(function (done) {
-  clearDir(tmpFilesDirPath, done)
-})
 
 describe ('PHP array functions', function () {
   it ('arr_keys', function () {

@@ -1,11 +1,7 @@
-/* globals before, describe, it, Promise */
+/* globals describe, it, Promise */
 
 var chai = require('chai')
 var chaiAsPromised = require('chai-as-promised')
-var clearDir = require('clear-dir')
-var path = require('path')
-
-var tmpFilesDirPath = path.resolve(__dirname, '../tmp')
 
 var generateName = require('./helpers/generate-name')
 var parsePhp = require('./helpers/parse-php').parsePhp
@@ -14,10 +10,6 @@ var runPhpTemplate = require('./helpers/parse-php').runPhpTemplate
 
 chai.use(chaiAsPromised)
 chai.should()
-
-before(function (done) {
-  clearDir(tmpFilesDirPath, done)
-})
 
 describe ('PHP stringifier', function () {
   this.timeout(3000)

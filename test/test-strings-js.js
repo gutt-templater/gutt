@@ -1,20 +1,11 @@
-/* globals before, describe, it */
+/* globals describe, it */
 
 var chai = require('chai')
 var chaiAsPromised = require('chai-as-promised')
-var clearDir = require('clear-dir')
-var path = require('path')
-
-var tmpFilesDirPath = path.resolve(__dirname, '../tmp')
-
 var parseJs = require('./helpers/parse-js').parseJs
 
 chai.use(chaiAsPromised)
 chai.should()
-
-before(function (done) {
-  clearDir(tmpFilesDirPath, done)
-})
 
 describe ('JS string functions', function () {
   it ('str with no params', function () {

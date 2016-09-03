@@ -1,11 +1,7 @@
-/* globals before, describe, it, Promise */
+/* globals describe, it, Promise */
 
 var chai = require('chai')
 var chaiAsPromised = require('chai-as-promised')
-var clearDir = require('clear-dir')
-var path = require('path')
-
-var tmpFilesDirPath = path.resolve(__dirname, '../tmp')
 
 var generateName = require('./helpers/generate-name')
 var parseJs = require('./helpers/parse-js').parseJs
@@ -14,10 +10,6 @@ var runJsTemplate = require('./helpers/parse-js').runJsTemplate
 
 chai.use(chaiAsPromised)
 chai.should()
-
-before(function (done) {
-  clearDir(tmpFilesDirPath, done)
-})
 
 describe ('Javascript stringifier', function () {
   it ('empty string', function () {
