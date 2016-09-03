@@ -96,6 +96,18 @@ describe ('PHP stringifier', function () {
     return parsePhp(template, params).should.eventually.equal('10')
   })
 
+  it ('foreach and if statements at attributes at single tag', function () {
+    var template = '<input title="Hello"{for (item, [0..3])} {if (item > 1) }tabindex{endif}{endfor} />'
+
+    return parsePhp(template).should.eventually.equal('<input title="Hello" tabindex tabindex />')
+  })
+
+  it ('foreach and if statements at attributes at couple tag', function () {
+    var template = '<div title="Hello"{for (item, [0..3])} {if (item > 1) }tabindex="item{item}"{endif}{endfor}></div>'
+
+    return parsePhp(template).should.eventually.equal('<div title="Hello" tabindex="item2" tabindex="item3"></div>')
+  })
+
   it ('if expression', function () {
     var template = '{ if (a == b) }{ a = a + b }{elseif (a > b && b < a) }{ a = a - b}{else}{ a = b }{ endif }{a}'
     var params = {a: 10, b: 5}

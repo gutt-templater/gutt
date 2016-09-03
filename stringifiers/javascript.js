@@ -236,6 +236,12 @@ function modePassParam (value) {
   return value
 }
 
+function modeAppendAttr (paramsArr, attrValueVar, name, value) {
+  return reduce(value, modeVariableConcat.bind(null, attrValueVar)) +
+    paramsArr + '.push({name: \'' + name +  '\', value: ' + attrValueVar + '});' +
+    attrValueVar + ' = \'\';\n'
+}
+
 function handleParams (params) {
   return params.map(function (attr) {
     return expression(attr)
@@ -559,8 +565,15 @@ function switchNode (node, mode) {
 
         result += '(function () {\n'
         result += '  var ' + attrValueVar + ' = \'\';\n'
-        result += reduce(attr.value.childs, modeVariableConcat.bind(null, attrValueVar))
-        result += paramsArr + '.push({name: \'' + attr.name + '\', value: ' + attrValueVar + '});\n'
+
+        if (attr.value && attr.value.childs) {
+          result += reduce(attr.value.childs, modeVariableConcat.bind(null, attrValueVar))
+          result += paramsArr + '.push({name: \'' + attr.name + '\', value: ' + attrValueVar +
+            '});' + attrValueVar + ' = \'\';\n'
+        } else if (attr.value) {
+          result += reduce([attr], modeAppendAttr.bind(null, paramsArr, attrValueVar))
+        }
+
         result += '})();\n'
       })
 
@@ -580,13 +593,18 @@ function switchNode (node, mode) {
         result += '(function () {\n'
         result += '  var ' + attrValueVar + ' = \'\';\n'
 
-        if (attr.value) {
+        if (attr.value && attr.value.childs) {
           result += reduce(attr.value.childs, modeVariableConcat.bind(null, attrValueVar));
+          result += paramsArr + '.push({name: \'' + attr.name + '\', value: ' + attrValueVar +
+            '});' + attrValueVar + ' = \'\';\n'
         } else if (attr.string) {
           result += reduce(attr.string.childs, modeVariableConcat.bind(null, attrValueVar));
+          result += paramsArr + '.push({name: \'' + attr.name + '\', value: ' + attrValueVar +
+            '});' + attrValueVar + ' = \'\';\n'
+        } else if (attr.value) {
+          result += reduce([attr], modeAppendAttr.bind(null, paramsArr, attrValueVar))
         }
 
-        result += paramsArr + '.push({name: \'' + attr.name + '\', value: ' + attrValueVar + '});\n'
         result += '})();\n'
       })
 
@@ -594,13 +612,9 @@ function switchNode (node, mode) {
 
       return result
     case 'comment':
-      result += ''
-
-      return result
+      return ''
     case 'assign':
-      result += expression(node.value) + ' = ' + expression(node.expr) + ';\n'
-
-      return result
+      return expression(node.value) + ' = ' + expression(node.expr) + ';\n'
     case 'if':
       result += 'if (' + expression(node.value) + ') {\n'
       result += reduce(node.childs, mode)
@@ -617,9 +631,7 @@ function switchNode (node, mode) {
 
       return result
     case 'endif':
-      result += '}\n'
-
-      return result
+      return '}\n'
     case 'for':
       randomVar = '_arr' + getVariableIncrement()
       result += 'var ' + randomVar + ' = '
@@ -674,10 +686,10 @@ function switchNode (node, mode) {
     case 'param':
       if (node.value) {
         if (node.value.childs.length) {
-          result += reduce(node.value.childs, mode)
+          return mode(node.name, node.value.childs)
         }
 
-        return ' ' + node.name + (result.length ? '=\'' + result + '\'' : '')
+        return mode(node.name, [])
       }
 
       if (node.string) {

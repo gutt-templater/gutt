@@ -30,6 +30,60 @@ describe ('Javascript stringifier', function () {
     return parseJs('{ b + c[d][\'str\'] * 2 }', params).should.eventually.deep.equal([{text: 7, type: 'text'}])
   })
 
+  it ('foreach and if statements at attributes at couple tag', function () {
+    var template = '<div title="Hello"{for (item, [0..3])} {if (item > 1) }tabindex="item{item}"{endif}{endfor}></div>'
+    var result = [
+      {
+        type: 'node',
+        name: 'div',
+        attrs: [
+          {
+            name: 'title',
+            value: 'Hello'
+          },
+          {
+            name: 'tabindex',
+            value: 'item2'
+          },
+          {
+            name: 'tabindex',
+            value: 'item3'
+          },
+        ],
+        childs: []
+      }
+    ]
+
+    return parseJs(template).should.eventually.deep.equal(result)
+  })
+
+  it ('foreach and if statements at attributes at single tag', function () {
+    var template = '<input title="Hello"{for (item, [0..3])} {if (item > 1) }tabindex{endif}{endfor} />'
+    var result = [
+      {
+        type: 'node',
+        name: 'input',
+        attrs: [
+          {
+            name: 'title',
+            value: 'Hello'
+          },
+          {
+            name: 'tabindex',
+            value: ''
+          },
+          {
+            name: 'tabindex',
+            value: ''
+          },
+        ],
+        childs: []
+      }
+    ]
+
+    return parseJs(template).should.eventually.deep.equal(result)
+  })
+
   it ('array expressions open range grow up', function () {
     var result = [
       {
