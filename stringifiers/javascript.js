@@ -325,6 +325,42 @@ function handleFunction (tree) {
       if (params[1]) params[1] = parseInt(params[0], 10) + parseInt(params[1], 10)
 
       return strParam + '.slice(' + params.join(', ') + ')'
+
+    case 'num_int':
+      params = handleParams(tree.attrs)
+      strParam = params.shift()
+
+      return 'parseInt(' + strParam + ', 10)'
+    case 'num_float':
+      params = handleParams(tree.attrs)
+      strParam = params.shift()
+
+      return 'parseFloat(' + strParam + ')'
+    case 'num_pow':
+      return 'Math.pow(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'num_abs':
+      return 'Math.abs(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'num_sin':
+      return 'Math.sin(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'num_cos':
+      return 'Math.cos(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'num_tan':
+      return 'Math.tan(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'num_acos':
+      return 'Math.acos(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'num_asin':
+      return 'Math.asin(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'num_atan':
+      return 'Math.atan(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'num_round':
+      params = handleParams(tree.attrs)
+      strParam = params.shift()
+
+      return '(' + strParam + ' < 0 ? Math.round(' + strParam + ') : Math.round(' + strParam + '))'
+    case 'num_rand':
+      return 'Math.random()'
+    case 'num_sqrt':
+      return 'Math.sqrt(' + handleParams(tree.attrs).join(', ') + ')'
     default:
       return funcName + '(' + handleParams(tree.attrs).join(', ') + ')'
   }
