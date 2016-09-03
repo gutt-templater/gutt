@@ -1,10 +1,10 @@
 var consts = ['true', 'false']
 var prefix = '<?php\n' +
 'if (!defined(\'MKARR_OPEN\')) {\n' +
-'  define(\'MKARR_OPEN\', 2 >> 1);\n' +
+'  define(\'MKARR_OPEN\', 2 << 1);\n' +
 '}\n' +
 'if (!defined(\'MKARR_CLOSE\')) {\n' +
-'  define(\'MKARR_OPEN\', 1 >> 1);\n' +
+'  define(\'MKARR_CLOSE\', 1 << 1);\n' +
 '}\n' +
 'if (!function_exists(\'mkArr\')) {\n' +
 '  function mkArr($start, $end, $flag) {\n' +
