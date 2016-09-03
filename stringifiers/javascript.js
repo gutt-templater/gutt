@@ -82,6 +82,72 @@ var prefix =
 '  function str_kebab(str) {\n' +
 '    return str.split(/[\\s\\n\\t]+/).join(\'-\');\n' +
 '  }\n' +
+'  function arr_values(obj) {\n' +
+'    var values = [], i;\n' +
+'    for(i in obj) if (Object.prototype.hasOwnProperty.call(obj, i)) values.push(obj[i]);\n' +
+'    return values;\n' +
+'  }\n' +
+'  function arr_contain(obj, value) {\n' +
+'    if(typeof obj.indexOf === \'function\') return obj.indexOf(value) !== -1;\n' +
+'    var i;\n' +
+'    for(i in obj) if (Object.prototype.hasOwnProperty.call(obj, i)) if (obj[i] === value) return true;\n' +
+'    return false;\n' +
+'  }\n' +
+'  function arr_len(obj) {\n' +
+'    if(typeof obj.length !== \'undefined\') return obj.length;\n' +
+'    var i, length = 0;\n' +
+'    for(i in obj) if (Object.prototype.hasOwnProperty.call(obj, i)) length++;\n' +
+'    return length;\n' +
+'  }\n' +
+'  function arr_push(arr, value) {\n' +
+'    arr.push(value);\n' +
+'    return \'\';\n' +
+'  }\n' +
+'  function arr_unshift(arr, value) {\n' +
+'    arr.unshift(value);\n' +
+'    return \'\';\n' +
+'  }\n' +
+'  function arr_rand(arr, value) {\n' +
+'    var keys = Object.keys(arr);\n' +
+'    return arr[keys[parseInt(Math.random() * arr_len(arr) - 1)]];\n' +
+'  }\n' +
+'  function arr_splice(arr, st, en, els) {\n' +
+'    var prms = [st];\n' +
+'    if (typeof en !== \'undefined\') prms.push(en);\n' +
+'    return Array.prototype.splice.apply(arr, prms.concat(els));\n' +
+'  }\n' +
+'  function arr_pad(src, len, el) {\n' +
+'    var i, arr = src.slice(0);\n' +
+'    if(len > 0) for(i = arr_len(arr);i < len;i++) arr.push(el);\n' +
+'    if(len < 0) for(i = arr_len(arr);i < -len;i++) arr.unshift(el);\n' +
+'    return arr;\n' +
+'  }\n' +
+'  function arr_reverse(src) {\n' +
+'    var arr = src.slice(0);\n' +
+'    arr.reverse();\n' +
+'    return arr;\n' +
+'  }\n' +
+'  function arr_sort(src) {\n' +
+'    var arr = src.slice(0);\n' +
+'    arr.sort();\n' +
+'    return arr;\n' +
+'  }\n' +
+'  function arr_sort_reverse(src) {\n' +
+'    var arr = src.slice(0);\n' +
+'    arr.sort();\n' +
+'    arr.reverse();\n' +
+'    return arr;\n' +
+'  }\n' +
+'  function arr_unique(src) {\n' +
+'    var i, arr = [];\n' +
+'    for(i in src) if (Object.prototype.hasOwnProperty.call(src, i)) if (!~arr.indexOf(src[i])) arr.push(src[i]);\n' +
+'    return arr;\n' +
+'  }\n' +
+'  function arr_key(arr, value) {\n' +
+'    var i;\n' +
+'    for(i in arr) if (Object.prototype.hasOwnProperty.call(arr, i)) if (value == arr[i]) return i;\n' +
+'    return -1;\n' +
+'  }\n' +
 '  function create(name, attrs, cb) {\n' +
 '    if (typeof name === \'object\') return name;\n' +
 '    var childs = [];\n' +
@@ -223,9 +289,69 @@ function handleFunction (tree) {
       return 'encodeURIComponent(' + handleParams(tree.attrs).join(', ') + ')'
     case 'str_urldecode':
       return 'decodeURIComponent(' + handleParams(tree.attrs).join(', ') + ')'
+
+    case 'arr_keys':
+      return 'Object.keys(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'arr_values':
+      return 'arr_values(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'arr_pop':
+      params = handleParams(tree.attrs)
+      strParam = params.shift()
+
+      return strParam + '.pop()'
+    case 'arr_shift':
+      params = handleParams(tree.attrs)
+      strParam = params.shift()
+
+      return strParam + '.shift()'
+    case 'arr_slice':
+      params = handleParams(tree.attrs)
+      strParam = params.shift()
+      if (params[1]) params[1] = parseInt(params[0], 10) + parseInt(params[1], 10)
+
+      return strParam + '.slice(' + params.join(', ') + ')'
     default:
       return funcName + '(' + handleParams(tree.attrs).join(', ') + ')'
   }
+}
+
+function handleArray (source) {
+  var key = 0
+  var isKeyProper = true
+  var result = []
+  var str = ''
+
+  source.forEach(function (item) {
+    if (item.key !== null) {
+      isKeyProper = false;
+    }
+  })
+
+  if (isKeyProper) {
+    source.forEach(function (item) {
+      result.push(expression(item.value))
+    })
+
+    return '[' + result.join(',') + ']'
+  }
+
+  result = {}
+
+  source.forEach(function (item) {
+    if (item.key === null) {
+      result[key++] = expression(item.value)
+    } else {
+      result[expression(item.key)] = expression(item.value)
+    }
+  })
+
+  str = []
+
+  for (key in result) {
+    str.push('_arr[' + key + '] = ' + result[key] + ';')
+  }
+
+  return '(function () { var _arr = {}; ' + str.join(' ') + ' return _arr;})()'
 }
 
 function expression (tree) {
@@ -356,7 +482,7 @@ function expression (tree) {
         }
       }
 
-      return ''
+      return handleArray(tree.values)
   }
 
   return str
