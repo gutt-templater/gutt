@@ -240,6 +240,36 @@ function handleFunction (tree) {
       return 'array_reverse(' + handleParams(tree.attrs).join(', ') + ')'
     case 'arr_unique':
       return 'array_unique(' + handleParams(tree.attrs).join(', ') + ')'
+
+    case 'num_int':
+      return 'intval(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'num_float':
+      return 'floatval(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'num_pow':
+      return 'pow(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'num_abs':
+      return 'abs(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'num_acos':
+      return 'acos(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'num_asin':
+      return 'asin(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'num_atan':
+      return 'atan(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'num_cos':
+      return 'cos(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'num_sin':
+      return 'sin(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'num_tan':
+      return 'tan(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'num_round':
+      params = handleParams(tree.attrs)
+      params = params[0]
+
+      return '(' + params + ' < 0 ? round(' + params + ', 0, PHP_ROUND_HALF_DOWN) : round(' + params + ', 0, PHP_ROUND_HALF_UP))'
+    case 'num_sqrt':
+      return 'sqrt(' + handleParams(tree.attrs).join(', ') + ')'
+    case 'num_rand':
+      return '((float)rand()/(float)getrandmax())'
     default:
       return funcName + '(' + handleParams(tree.attrs).join(', ') + ')'
   }
