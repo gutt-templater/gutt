@@ -172,9 +172,10 @@ var prefix =
 '        type: \'node\',\n' +
 '        name: name,\n' +
 '        attrs: attrs,\n' +
-'        childs: childs\n' +
+'        childs: childs.filter(function (_child) { return _child !== null; })\n' +
 '      };\n' +
 '    }\n' +
+'    if (typeof name.toString === \'function\') name = name.toString();\n' +
 '    return {\n' +
 '      type: \'text\',\n' +
 '      text: name\n' +
@@ -188,6 +189,8 @@ var postfix =
 '});'
 var variableIncrement = 0
 var definedVars = [
+  'true',
+  'false',
   'data',
   'childs',
   'MKARR_OPEN',
@@ -489,9 +492,8 @@ function expression (tree) {
 
       return str
     case 'isset':
-      str += 'isset(' + expression(tree.value) + ')'
-
-      return str
+      str = expression(tree.value)
+      return '(typeof ' + str + ' !== \'undefined\' ? ' + str + ' : \'\')'
     case 'not':
       str += '!' + expression(tree.value)
 
@@ -649,8 +651,13 @@ function switchNode (node, mode) {
       result += expression(node.value[0]) + ' in ' + randomVar
       result += ') {\n'
 
-      result +=
-        expression(node.value[0]) + ' = ' + randomVar + '[' + expression(node.value[0]) + '];\n'
+      if (node.value.length === 2) {
+        result +=
+          expression(node.value[0]) + ' = ' + randomVar + '[' + expression(node.value[0]) + '];\n'
+      } else if (node.value.length === 3) {
+        result +=
+          expression(node.value[1]) + ' = ' + randomVar + '[' + expression(node.value[0]) + '];\n'
+      }
 
       result += reduce(node.childs, mode)
 
@@ -671,7 +678,7 @@ function switchNode (node, mode) {
       if (node.value.type === 'isset') {
         variable = expression(node.value.value)
 
-        value = 'typeof ' + variable + ' !== \'undefined\' ? ' + variable + ' : \'\''
+        value = '(typeof ' + variable + ' !== \'undefined\' ? ' + variable + ' : \'\')'
       } else {
         value = expression(node.value)
       }
@@ -747,7 +754,7 @@ module.exports = {
 
     undefinedVars.splice(0)
 
-    result = reduce(tree.childs, modeChilds)
+    result = reduce(tree.childs, modeChilds).trim()
 
     return prefix + defineVars(undefinedVars) + result + postfix
   }

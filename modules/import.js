@@ -22,6 +22,7 @@ module.exports = {
     var parent
     var currentNode
     var includeNode
+    var rootPath = tree.getRootPath() || path.dirname(nameSpace)
 
     if (!tree.cacheTemplates) {
       tree.cacheTemplates = {}
@@ -44,7 +45,7 @@ module.exports = {
 
       includePath = funcParams[1].substr(1, funcParams[1].length - 2)
 
-      includePath = path.resolve(path.dirname(nameSpace), includePath)
+      includePath = path.resolve(rootPath, includePath)
 
       if (!tree.cacheTemplates[includePath]) {
         tree.cacheTemplates[includePath] = {

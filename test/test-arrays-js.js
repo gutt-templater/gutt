@@ -65,19 +65,19 @@ describe ('JS array functions', function () {
       '{ item },' +
       '{ endfor }'
     var result = [
-      {type: 'text', text: 1},
+      {type: 'text', text: '1'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','},
-      {type: 'text', text: 5},
+      {type: 'text', text: '5'},
       {type: 'text', text: ','},
       {type: 'text', text: 'str'},
       {type: 'text', text: ','},
-      {type: 'text', text: 7},
+      {type: 'text', text: '7'},
       {type: 'text', text: ','},
-      {type: 'text', text: 6},
+      {type: 'text', text: '6'},
       {type: 'text', text: ','},
-      {type: 'text', text: 3},
+      {type: 'text', text: '3'},
       {type: 'text', text: ','},
     ]
 
@@ -89,7 +89,7 @@ describe ('JS array functions', function () {
       '{ result = arr_len([]) }' +
       '{ result }'
 
-    return parseJs(template).should.eventually.deep.equal([{type: 'text', text: 0}])
+    return parseJs(template).should.eventually.deep.equal([{type: 'text', text: '0'}])
   })
 
   it ('arr_len for array not equal zero', function () {
@@ -97,7 +97,7 @@ describe ('JS array functions', function () {
       '{ result = arr_len([1, 2, 3, 5, "str", 6, 7]) }' +
       '{ result }'
 
-    return parseJs(template).should.eventually.deep.equal([{type: 'text', text: 7}])
+    return parseJs(template).should.eventually.deep.equal([{type: 'text', text: '7'}])
   })
 
   it ('arr_len for object not equal zero', function () {
@@ -105,7 +105,7 @@ describe ('JS array functions', function () {
       '{ result = arr_len([1, 2, \'a\':3, 5, "str", 12:6, 7]) }' +
       '{ result }'
 
-    return parseJs(template).should.eventually.deep.equal([{type: 'text', text: 7}])
+    return parseJs(template).should.eventually.deep.equal([{type: 'text', text: '7'}])
   })
 
   it ('arr_push', function () {
@@ -116,8 +116,8 @@ describe ('JS array functions', function () {
       '{ a[6] }'
     var result = [
       {type: 'text', text: ''},
-      {type: 'text', text: 8},
-      {type: 'text', text: 7}
+      {type: 'text', text: '8'},
+      {type: 'text', text: '7'}
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
@@ -131,8 +131,8 @@ describe ('JS array functions', function () {
       '{ a[0] }'
     var result = [
       {type: 'text', text: ''},
-      {type: 'text', text: 8},
-      {type: 'text', text: 10}
+      {type: 'text', text: '8'},
+      {type: 'text', text: '10'}
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
@@ -144,8 +144,8 @@ describe ('JS array functions', function () {
       '{ arr_pop(a) }' +
       '{ arr_len(a) }'
     var result = [
-      {type: 'text', text: 7},
-      {type: 'text', text: 6}
+      {type: 'text', text: '7'},
+      {type: 'text', text: '6'}
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
@@ -157,8 +157,8 @@ describe ('JS array functions', function () {
       '{ arr_shift(a) }' +
       '{ arr_len(a) }'
     var result = [
-      {type: 'text', text: 1},
-      {type: 'text', text: 6}
+      {type: 'text', text: '1'},
+      {type: 'text', text: '6'}
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
@@ -186,13 +186,13 @@ describe ('JS array functions', function () {
       '{ endfor }' +
       '{ arr_len(a) }'
     var result = [
-      {type: 'text', text: 4},
+      {type: 'text', text: '4'},
       {type: 'text', text: ','},
-      {type: 'text', text: 5},
+      {type: 'text', text: '5'},
       {type: 'text', text: ','},
-      {type: 'text', text: 6},
+      {type: 'text', text: '6'},
       {type: 'text', text: ','},
-      {type: 'text', text: 8}
+      {type: 'text', text: '8'}
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
@@ -210,30 +210,30 @@ describe ('JS array functions', function () {
       '{ item },' +
       '{ endfor }'
     var result = [
-      {type: 'text', text: 4},
+      {type: 'text', text: '4'},
       {type: 'text', text: ','},
-      {type: 'text', text: 5},
+      {type: 'text', text: '5'},
       {type: 'text', text: ','},
-      {type: 'text', text: 6},
+      {type: 'text', text: '6'},
       {type: 'text', text: ','},
       {type: 'text', text: '-'},
-      {type: 'text', text: 1},
+      {type: 'text', text: '1'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','},
-      {type: 'text', text: 3},
+      {type: 'text', text: '3'},
       {type: 'text', text: ','},
-      {type: 'text', text: 1},
+      {type: 'text', text: '1'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','},
-      {type: 'text', text: 3},
+      {type: 'text', text: '3'},
       {type: 'text', text: ','},
-      {type: 'text', text: 4},
+      {type: 'text', text: '4'},
       {type: 'text', text: ','},
-      {type: 'text', text: 7},
+      {type: 'text', text: '7'},
       {type: 'text', text: ','},
-      {type: 'text', text: 8},
+      {type: 'text', text: '8'},
       {type: 'text', text: ','}
     ]
 
@@ -249,21 +249,21 @@ describe ('JS array functions', function () {
       '{ endfor }' +
       '{ arr_len(arr) }'
     var result = [
-      {type: 'text', text: 1},
+      {type: 'text', text: '1'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','},
-      {type: 'text', text: 3},
+      {type: 'text', text: '3'},
       {type: 'text', text: ','},
-      {type: 'text', text: 9},
+      {type: 'text', text: '9'},
       {type: 'text', text: ','},
-      {type: 'text', text: 9},
+      {type: 'text', text: '9'},
       {type: 'text', text: ','},
-      {type: 'text', text: 9},
+      {type: 'text', text: '9'},
       {type: 'text', text: ','},
-      {type: 'text', text: 9},
+      {type: 'text', text: '9'},
       {type: 'text', text: ','},
-      {type: 'text', text: 3}
+      {type: 'text', text: '3'}
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
@@ -278,21 +278,21 @@ describe ('JS array functions', function () {
       '{ endfor }' +
       '{ arr_len(arr) }'
     var result = [
-      {type: 'text', text: 9},
+      {type: 'text', text: '9'},
       {type: 'text', text: ','},
-      {type: 'text', text: 9},
+      {type: 'text', text: '9'},
       {type: 'text', text: ','},
-      {type: 'text', text: 9},
+      {type: 'text', text: '9'},
       {type: 'text', text: ','},
-      {type: 'text', text: 9},
+      {type: 'text', text: '9'},
       {type: 'text', text: ','},
-      {type: 'text', text: 1},
+      {type: 'text', text: '1'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','},
-      {type: 'text', text: 3},
+      {type: 'text', text: '3'},
       {type: 'text', text: ','},
-      {type: 'text', text: 3}
+      {type: 'text', text: '3'}
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
@@ -305,11 +305,11 @@ describe ('JS array functions', function () {
       '{ item },' +
       '{ endfor }'
     var result = [
-      {type: 'text', text: 1},
+      {type: 'text', text: '1'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','},
-      {type: 'text', text: 3},
+      {type: 'text', text: '3'},
       {type: 'text', text: ','}
     ]
 
@@ -323,11 +323,11 @@ describe ('JS array functions', function () {
       '{ item },' +
       '{ endfor }'
     var result = [
-      {type: 'text', text: 1},
+      {type: 'text', text: '1'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','},
-      {type: 'text', text: 3},
+      {type: 'text', text: '3'},
       {type: 'text', text: ','}
     ]
 
@@ -345,17 +345,17 @@ describe ('JS array functions', function () {
       '{ item },' +
       '{ endfor }'
     var result = [
-      {type: 'text', text: 3},
+      {type: 'text', text: '3'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','},
-      {type: 'text', text: 1},
+      {type: 'text', text: '1'},
       {type: 'text', text: ','},
-      {type: 'text', text: 1},
+      {type: 'text', text: '1'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','},
-      {type: 'text', text: 3},
+      {type: 'text', text: '3'},
       {type: 'text', text: ','}
     ]
 
@@ -369,15 +369,15 @@ describe ('JS array functions', function () {
       '{ item },' +
       '{ endfor }'
     var result = [
-      {type: 'text', text: 1},
+      {type: 'text', text: '1'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','},
-      {type: 'text', text: 3},
+      {type: 'text', text: '3'},
       {type: 'text', text: ','},
-      {type: 'text', text: 4},
+      {type: 'text', text: '4'},
       {type: 'text', text: ','},
-      {type: 'text', text: 5},
+      {type: 'text', text: '5'},
       {type: 'text', text: ','}
     ]
 
@@ -396,42 +396,42 @@ describe ('JS array functions', function () {
       '{ item },' +
       '{ endfor }'
     var result = [
-      {type: 'text', text: 1},
+      {type: 'text', text: '1'},
       {type: 'text', text: ','},
-      {type: 'text', text: 1},
+      {type: 'text', text: '1'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','},
-      {type: 'text', text: 3},
+      {type: 'text', text: '3'},
       {type: 'text', text: ','},
-      {type: 'text', text: 3},
+      {type: 'text', text: '3'},
       {type: 'text', text: ','},
-      {type: 'text', text: 4},
+      {type: 'text', text: '4'},
       {type: 'text', text: ','},
-      {type: 'text', text: 5},
+      {type: 'text', text: '5'},
       {type: 'text', text: ','},
       {type: 'text', text: '-'},
-      {type: 'text', text: 1},
+      {type: 'text', text: '1'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','},
-      {type: 'text', text: 3},
+      {type: 'text', text: '3'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','},
-      {type: 'text', text: 1},
+      {type: 'text', text: '1'},
       {type: 'text', text: ','},
-      {type: 'text', text: 4},
+      {type: 'text', text: '4'},
       {type: 'text', text: ','},
-      {type: 'text', text: 5},
+      {type: 'text', text: '5'},
       {type: 'text', text: ','},
-      {type: 'text', text: 3},
+      {type: 'text', text: '3'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','}
     ]
 
@@ -450,42 +450,42 @@ describe ('JS array functions', function () {
       '{ item },' +
       '{ endfor }'
     var result = [
-      {type: 'text', text: 5},
+      {type: 'text', text: '5'},
       {type: 'text', text: ','},
-      {type: 'text', text: 4},
+      {type: 'text', text: '4'},
       {type: 'text', text: ','},
-      {type: 'text', text: 3},
+      {type: 'text', text: '3'},
       {type: 'text', text: ','},
-      {type: 'text', text: 3},
+      {type: 'text', text: '3'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','},
-      {type: 'text', text: 1},
+      {type: 'text', text: '1'},
       {type: 'text', text: ','},
-      {type: 'text', text: 1},
+      {type: 'text', text: '1'},
       {type: 'text', text: ','},
       {type: 'text', text: '-'},
-      {type: 'text', text: 1},
+      {type: 'text', text: '1'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','},
-      {type: 'text', text: 3},
+      {type: 'text', text: '3'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','},
-      {type: 'text', text: 1},
+      {type: 'text', text: '1'},
       {type: 'text', text: ','},
-      {type: 'text', text: 4},
+      {type: 'text', text: '4'},
       {type: 'text', text: ','},
-      {type: 'text', text: 5},
+      {type: 'text', text: '5'},
       {type: 'text', text: ','},
-      {type: 'text', text: 3},
+      {type: 'text', text: '3'},
       {type: 'text', text: ','},
-      {type: 'text', text: 2},
+      {type: 'text', text: '2'},
       {type: 'text', text: ','}
     ]
 

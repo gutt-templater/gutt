@@ -167,13 +167,43 @@ describe ('PHP stringifier', function () {
       .should.eventually.equal('<div><aside><h1>Hello</h1></aside></div>')
   })
 
-  it ('include with recursive parameters', function () {
+  it ('include with recursive parameters for single tag', function () {
     var tempCommentsName = generateName()
     var template =
       '{ import(Comments, \'./' + tempCommentsName + '\') }' +
       '{ for (comment, comments) }' +
       '<div>{ comment[\'name\'] }<div>' +
       '<Comments comments={ comment[\'childs\'] } /></div>' +
+      '</div>' +
+      '{ endfor }'
+    var data = {
+      comments: [
+        {
+          name: 'Aleksei',
+          childs: [
+            {
+              name: 'Natasha',
+              childs: []
+            }
+          ]
+        }
+      ]
+    }
+
+    return parsePhpAndWriteFile(template, tempCommentsName + '.php')
+      .then(function () {
+        return runPhpTemplate(tempCommentsName, data)
+      })
+      .should.eventually.equal('<div>Aleksei<div><div>Natasha<div></div></div></div></div>')
+  })
+
+  it ('include with recursive parameters for couple tag', function () {
+    var tempCommentsName = generateName()
+    var template =
+      '{ import(Comments, \'./' + tempCommentsName + '\') }' +
+      '{ for (comment, comments) }' +
+      '<div>{ comment[\'name\'] }<div>' +
+      '<Comments comments={ comment[\'childs\'] }></Comments></div>' +
       '</div>' +
       '{ endfor }'
     var data = {

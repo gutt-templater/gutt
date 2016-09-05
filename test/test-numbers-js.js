@@ -10,11 +10,11 @@ chai.should()
 
 describe ('JS number functions', function () {
   it ('num_int', function () {
-    return parseJs('{ num_int(11/3) }').should.eventually.deep.equal([{type: 'text', text: 3}])
+    return parseJs('{ num_int(11/3) }').should.eventually.deep.equal([{type: 'text', text: '3'}])
   })
 
   it ('num_int from string', function () {
-    return parseJs('{ num_int(\'123.456\') }').should.eventually.deep.equal([{type: 'text', text: 123}])
+    return parseJs('{ num_int(\'123.456\') }').should.eventually.deep.equal([{type: 'text', text: '123'}])
   })
 
   it ('num_float', function () {
@@ -108,31 +108,31 @@ describe ('JS number functions', function () {
   })
 
   it ('num_round to up', function () {
-    return parseJs('{ num_round(11/3) }').should.eventually.deep.equal([{type: 'text', text: 4}])
+    return parseJs('{ num_round(11/3) }').should.eventually.deep.equal([{type: 'text', text: '4'}])
   })
 
   it ('num_round to down', function () {
-    return parseJs('{ num_round(15/7) }').should.eventually.deep.equal([{type: 'text', text: 2}])
+    return parseJs('{ num_round(15/7) }').should.eventually.deep.equal([{type: 'text', text: '2'}])
   })
 
   it ('num_round half to up', function () {
-    return parseJs('{ num_round(15/2) }').should.eventually.deep.equal([{type: 'text', text: 8}])
+    return parseJs('{ num_round(15/2) }').should.eventually.deep.equal([{type: 'text', text: '8'}])
   })
 
   it ('num_round negative to up', function () {
-    return parseJs('{ num_round(-11/3) }').should.eventually.deep.equal([{type: 'text', text: -4}])
+    return parseJs('{ num_round(-11/3) }').should.eventually.deep.equal([{type: 'text', text: '-4'}])
   })
 
   it ('num_round negative to down', function () {
-    return parseJs('{ num_round(-15/7) }').should.eventually.deep.equal([{type: 'text', text: -2}])
+    return parseJs('{ num_round(-15/7) }').should.eventually.deep.equal([{type: 'text', text: '-2'}])
   })
 
   it ('num_round negative half to up', function () {
-    return parseJs('{ num_round(-15/2) }').should.eventually.deep.equal([{type: 'text', text: -7}])
+    return parseJs('{ num_round(-15/2) }').should.eventually.deep.equal([{type: 'text', text: '-7'}])
   })
 
   it ('num_sqrt', function () {
-    return parseJs('{ num_sqrt(16) }').should.eventually.deep.equal([{type: 'text', text: 4}])
+    return parseJs('{ num_sqrt(16) }').should.eventually.deep.equal([{type: 'text', text: '4'}])
   })
 
   it ('num_rand', function () {

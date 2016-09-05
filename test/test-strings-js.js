@@ -42,12 +42,12 @@ describe ('JS string functions', function () {
 
   it ('str_len for not empty string', function () {
     return parseJs('{ str_len(\'string\') }')
-      .should.eventually.deep.equal([{type: 'text', text: 6}])
+      .should.eventually.deep.equal([{type: 'text', text: '6'}])
   })
 
   it ('str_len for empty string', function () {
     return parseJs('{ str_len(\'\') }')
-      .should.eventually.deep.equal([{type: 'text', text: 0}])
+      .should.eventually.deep.equal([{type: 'text', text: '0'}])
   })
 
   it ('str_replace symbol to another symbol', function () {
@@ -145,17 +145,17 @@ describe ('JS string functions', function () {
 
   it ('str_pos returns negative', function () {
     return parseJs('{ str_pos(\'accessabillity\', \'~\') }')
-      .should.eventually.deep.equal([{type: 'text', text: -1}])
+      .should.eventually.deep.equal([{type: 'text', text: '-1'}])
   })
 
   it ('str_pos returns zero', function () {
     return parseJs('{ str_pos(\'accessabillity\', \'a\') }')
-      .should.eventually.deep.equal([{type: 'text', text: 0}])
+      .should.eventually.deep.equal([{type: 'text', text: '0'}])
   })
 
   it ('str_pos returns positive', function () {
     return parseJs('{ str_pos(\'accessabillity\', \'llity\') }')
-      .should.eventually.deep.equal([{type: 'text', text: 9}])
+      .should.eventually.deep.equal([{type: 'text', text: '9'}])
   })
 
   it ('str_lower', function () {

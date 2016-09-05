@@ -3,10 +3,11 @@ var logicParser = require('./logic-parser').parser
 var clone = require('./clone')
 var fs = require('fs')
 
-function Parser (source, filePath, modules, stringifiers) {
+function Parser (source, filePath, rootPath, modules, stringifiers) {
   var self = this
 
   this.source = source
+  this.rootPath = rootPath
 
   if (typeof this.source === 'string') {
     this.source = htmlParser.parse(this.source)
@@ -119,6 +120,10 @@ Parser.prototype.close = function (keyword) {
   this._checked = true
 }
 
+Parser.prototype.getRootPath = function () {
+  return this.rootPath
+}
+
 Parser.prototype.skip = function () {
   this._checked = true
 }
@@ -173,12 +178,12 @@ Parser.prototype.strings = function () {
 
 module.exports = function (modules, stringifiers) {
   return {
-    parse: function (str, filePath) {
-      return new Parser (str, filePath, modules, stringifiers)
+    parse: function (str, filePath, rootPath) {
+      return new Parser (str, filePath, rootPath, modules, stringifiers)
     },
 
-    parseFile: function (filePath) {
-      return this.parse(fs.readFileSync(filePath, 'utf-8').trim(), filePath, modules, stringifiers)
+    parseFile: function (filePath, rootPath) {
+      return this.parse(fs.readFileSync(filePath, 'utf-8').trim(), filePath, rootPath)
     }
   }
 }

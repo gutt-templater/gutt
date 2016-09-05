@@ -27,7 +27,7 @@ describe ('Javascript stringifier', function () {
       d: 'variable'
     }
 
-    return parseJs('{ b + c[d][\'str\'] * 2 }', params).should.eventually.deep.equal([{text: 7, type: 'text'}])
+    return parseJs('{ b + c[d][\'str\'] * 2 }', params).should.eventually.deep.equal([{text: '7', type: 'text'}])
   })
 
   it ('foreach and if statements at attributes at couple tag', function () {
@@ -87,19 +87,19 @@ describe ('Javascript stringifier', function () {
   it ('array expressions open range grow up', function () {
     var result = [
       {
-        text: 5,
+        text: '5',
         type: 'text'
       },
       {
-        text: 6,
+        text: '6',
         type: 'text'
       },
       {
-        text: 7,
+        text: '7',
         type: 'text'
       },
       {
-        text: 8,
+        text: '8',
         type: 'text'
       }
     ]
@@ -110,19 +110,19 @@ describe ('Javascript stringifier', function () {
   it ('array expressions open range grow down', function () {
     var result = [
       {
-        text: 9,
+        text: '9',
         type: 'text'
       },
       {
-        text: 8,
+        text: '8',
         type: 'text'
       },
       {
-        text: 7,
+        text: '7',
         type: 'text'
       },
       {
-        text: 6,
+        text: '6',
         type: 'text'
       }
     ]
@@ -133,23 +133,23 @@ describe ('Javascript stringifier', function () {
   it ('array expressions closed range grow up', function () {
     var result = [
       {
-        text: 5,
+        text: '5',
         type: 'text'
       },
       {
-        text: 6,
+        text: '6',
         type: 'text'
       },
       {
-        text: 7,
+        text: '7',
         type: 'text'
       },
       {
-        text: 8,
+        text: '8',
         type: 'text'
       },
       {
-        text: 9,
+        text: '9',
         type: 'text'
       }
     ]
@@ -160,23 +160,23 @@ describe ('Javascript stringifier', function () {
   it ('array expressions closed range grow down', function () {
     var result = [
       {
-        text: 9,
+        text: '9',
         type: 'text'
       },
       {
-        text: 8,
+        text: '8',
         type: 'text'
       },
       {
-        text: 7,
+        text: '7',
         type: 'text'
       },
       {
-        text: 6,
+        text: '6',
         type: 'text'
       },
       {
-        text: 5,
+        text: '5',
         type: 'text'
       }
     ]
@@ -370,7 +370,7 @@ describe ('Javascript stringifier', function () {
       },
       {
         type: 'text',
-        text: 2
+        text: '2'
       }
     ]
 

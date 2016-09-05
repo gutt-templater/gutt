@@ -572,6 +572,6 @@ module.exports = {
   stringify: function (tree) {
     variableIncrement = 0
 
-    return prefix + reduce(tree.childs) + postfix
+    return prefix + reduce(tree.childs).trim() + postfix
   }
 }

@@ -24,7 +24,11 @@ function handleAttrs (tree, item) {
   item.attrs.forEach(function (attr) {
     if (attr.type === 'param') {
       if (attr.value) {
-        attr.value = parser.parse(attr.value, tree.filePath()).tree()
+        if (attr.value && attr.value.type && attr.value.type === 'logic') {
+          attr.value = parser.parse([attr.value], tree.filePath()).tree()
+        } else {
+          attr.value = parser.parse(attr.value, tree.filePath()).tree()
+        }
       } else if (attr.string) {
         attr.string = parser.parse(attr.string, tree.filePath()).tree()
       }
