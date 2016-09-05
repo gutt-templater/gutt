@@ -241,7 +241,7 @@ function modePassParam (value) {
 
 function modeAppendAttr (paramsArr, attrValueVar, name, value) {
   return reduce(value, modeVariableConcat.bind(null, attrValueVar)) +
-    paramsArr + '.push({name: \'' + name +  '\', value: ' + attrValueVar + '});' +
+    paramsArr + '[\'' + name +  '\'] = ' + attrValueVar + ';\n' +
     attrValueVar + ' = \'\';\n'
 }
 
@@ -560,7 +560,7 @@ function switchNode (node, mode) {
   switch (node.type) {
     case 'tag':
       paramsArr = '_params' + getVariableIncrement()
-      result += 'var ' + paramsArr + ' = [];\n'
+      result += 'var ' + paramsArr + ' = {};\n'
 
       node.attrs.childs.forEach(function (attr) {
         attrValueVar = '_attrValue' + getVariableIncrement()
@@ -570,8 +570,8 @@ function switchNode (node, mode) {
 
         if (attr.value && attr.value.childs) {
           result += reduce(attr.value.childs, modeVariableConcat.bind(null, attrValueVar))
-          result += paramsArr + '.push({name: \'' + attr.name + '\', value: ' + attrValueVar +
-            '});' + attrValueVar + ' = \'\';\n'
+          result += paramsArr + '[\'' + attr.name + '\'] = ' + attrValueVar + ';\n'
+          result += attrValueVar + ' = \'\';\n'
         } else if (attr.value) {
           result += reduce([attr], modeAppendAttr.bind(null, paramsArr, attrValueVar))
         }
@@ -587,7 +587,7 @@ function switchNode (node, mode) {
       return result
     case 'single_tag':
       paramsArr = '_params' + getVariableIncrement()
-      result += 'var ' + paramsArr + ' = [];\n'
+      result += 'var ' + paramsArr + ' = {};\n'
 
       node.attrs.childs.forEach(function (attr) {
         attrValueVar = '_attrValue' + getVariableIncrement()
@@ -597,12 +597,12 @@ function switchNode (node, mode) {
 
         if (attr.value && attr.value.childs) {
           result += reduce(attr.value.childs, modeVariableConcat.bind(null, attrValueVar));
-          result += paramsArr + '.push({name: \'' + attr.name + '\', value: ' + attrValueVar +
-            '});' + attrValueVar + ' = \'\';\n'
+          result += paramsArr + '[\'' + attr.name + '\'] = ' + attrValueVar + ';\n'
+          result += attrValueVar + ' = \'\';\n'
         } else if (attr.string) {
           result += reduce(attr.string.childs, modeVariableConcat.bind(null, attrValueVar));
-          result += paramsArr + '.push({name: \'' + attr.name + '\', value: ' + attrValueVar +
-            '});' + attrValueVar + ' = \'\';\n'
+          result += paramsArr + '[\'' + attr.name + '\'] = ' + attrValueVar + ';\n'
+          result += attrValueVar + ' = \'\';\n'
         } else if (attr.value) {
           result += reduce([attr], modeAppendAttr.bind(null, paramsArr, attrValueVar))
         }

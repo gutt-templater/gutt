@@ -36,20 +36,10 @@ describe ('Javascript stringifier', function () {
       {
         type: 'node',
         name: 'div',
-        attrs: [
-          {
-            name: 'title',
-            value: 'Hello'
-          },
-          {
-            name: 'tabindex',
-            value: 'item2'
-          },
-          {
-            name: 'tabindex',
-            value: 'item3'
-          },
-        ],
+        attrs: {
+          'title': 'Hello',
+          'tabindex': 'item3'
+        },
         childs: []
       }
     ]
@@ -63,20 +53,10 @@ describe ('Javascript stringifier', function () {
       {
         type: 'node',
         name: 'input',
-        attrs: [
-          {
-            name: 'title',
-            value: 'Hello'
-          },
-          {
-            name: 'tabindex',
-            value: ''
-          },
-          {
-            name: 'tabindex',
-            value: ''
-          },
-        ],
+        attrs: {
+          'title': 'Hello',
+          'tabindex': ''
+        },
         childs: []
       }
     ]
@@ -193,59 +173,40 @@ describe ('Javascript stringifier', function () {
         type: 'node',
         name: '!DOCTYPE',
         childs: [],
-        attrs: [
-          {
-            name: 'html',
-            value: ''
-          },
-          {
-            name: 'PUBLIC',
-            value: ''
-          },
-          {
-            name: 'undefined',
-            value: '-//W3C//DTD XHTML 1.0 Transitional//EN'
-          },
-          {
-            name: 'undefined',
-            value: 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'
-          }
-        ]
+        attrs: {
+          'html': '',
+          'PUBLIC': '',
+          'undefined': 'http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd'
+        }
       },
       {
         type: 'node',
         name: 'html',
-        attrs: [
-          {
-            name: 'lang',
-            value: 'en'
-          }
-        ],
+        attrs: {
+          'lang': 'en'
+        },
         childs: [
           {
             type: 'node',
             name: 'head',
-            attrs: [],
+            attrs: {},
             childs: [
               {
                 type: 'node',
                 name: 'meta',
-                attrs: [
-                  {
-                    name: 'charset',
-                    value: 'UTF-8'
-                  }
-                ],
+                attrs: {
+                  'charset': 'UTF-8'
+                },
                 childs: []
               },
               {
                 type: 'node',
                 name: 'title',
-                attrs: [],
+                attrs: {},
                 childs: [
                   {
                     type: 'text',
-                    value: 'Document'
+                    text: 'Document'
                   }
                 ]
               }
@@ -254,14 +215,14 @@ describe ('Javascript stringifier', function () {
           {
             type: 'node',
             name: 'body',
-            attrs: [],
+            attrs: {},
             childs: []
           }
         ]
       }
     ]
 
-    parseJs(template).should.eventually.deep.equal(result)
+    return parseJs(template).should.eventually.deep.equal(result)
   })
 
   it ('include with recursive parameters', function () {
@@ -287,7 +248,7 @@ describe ('Javascript stringifier', function () {
       {
         type: 'node',
         name: 'div',
-        attrs: [],
+        attrs: {},
         childs: [
           {
             type: 'text',
@@ -296,12 +257,12 @@ describe ('Javascript stringifier', function () {
           {
             type: 'node',
             name: 'div',
-            attrs: [],
+            attrs: {},
             childs: [
               {
                 type: 'node',
                 name: 'div',
-                attrs: [],
+                attrs: {},
                 childs: [
                   {
                     type: 'text',
@@ -310,7 +271,7 @@ describe ('Javascript stringifier', function () {
                   {
                     type: 'node',
                     name: 'div',
-                    attrs: [],
+                    attrs: {},
                     childs: []
                   }
                 ]
@@ -342,17 +303,14 @@ describe ('Javascript stringifier', function () {
       {
         type: 'node',
         name: 'wrap',
-        attrs: [
-          {
-            name: 'title',
-            value: 'Title of Wrap!'
-          }
-        ],
+        attrs: {
+          'title': 'Title of Wrap!'
+        },
         childs: [
           {
             type: 'node',
             name: 'aside',
-            attrs: [],
+            attrs: {},
             childs: [
               {
                 type: 'text',
@@ -361,7 +319,7 @@ describe ('Javascript stringifier', function () {
               {
                 type: 'node',
                 name: 'hr',
-                attrs: [],
+                attrs: {},
                 childs: []
               }
             ]
