@@ -67,6 +67,7 @@
     "./parsers/logic-parser.js",
     ".git/",
     "./node_modules/",
-    "./tmp/"
+    "./tmp/",
+    "covreporter/"
   ]
 }
