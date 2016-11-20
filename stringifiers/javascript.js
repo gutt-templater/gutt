@@ -181,7 +181,7 @@ var prefix =
 '      text: name\n' +
 '    };\n' +
 '  }\n' +
-'  return function (data, childs) {\n' +
+'  return function (__data, childs) {\n' +
 '    var _childs = [];\n'
 var postfix =
 '    return _childs;\n' +
@@ -191,7 +191,7 @@ var variableIncrement = 0
 var definedVars = [
   'true',
   'false',
-  'data',
+  '__data',
   'childs',
   'MKARR_OPEN',
   'MKARR_CLOSE',
@@ -423,7 +423,7 @@ function expression (tree) {
     case 'var':
       if (!~definedVars.indexOf(tree.value)) {
         tree.keys.unshift('\'' + tree.value + '\'')
-        tree.value = 'data'
+        tree.value = '__data'
       }
 
       str += tree.value + tree.keys.map(function (key) {
@@ -581,7 +581,7 @@ function switchNode (node, mode) {
 
       result +=
         mode('\'' + node.value + '\', ' + paramsArr + ', function (_childs) {\n' +
-        reduce(node.childs, mode) +
+        reduce(node.childs, modeChilds) +
         '}')
 
       return result

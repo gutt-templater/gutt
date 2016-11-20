@@ -1,8 +1,6 @@
-var path = require('path')
-var parserPath = './parsers'
-var htmlParser = require(path.resolve(parserPath, 'html-parser')).parser
-var logicParser = require(path.resolve(parserPath, 'logic-parser')).parser
-var clone = require(path.resolve(parserPath, 'clone'))
+var htmlParser = require('./html-parser').parser
+var logicParser = require('./logic-parser').parser
+var clone = require('./clone')
 var fs = require('fs')
 
 function Parser (source, filePath, rootPath, modules, stringifiers) {
