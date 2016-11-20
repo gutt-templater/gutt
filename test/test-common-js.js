@@ -30,6 +30,20 @@ describe ('Javascript stringifier', function () {
     return parseJs('{ b + c[d][\'str\'] * 2 }', params).should.eventually.deep.equal([{text: '7', type: 'text'}])
   })
 
+  it ('echo expression 2', function () {
+    var params = {
+      b: 1,
+      c: {
+        variable: {
+          str: 3
+        }
+      },
+      d: 'variable'
+    }
+
+    return parseJs('{ b + c[d].str * 2 }', params).should.eventually.deep.equal([{text: '7', type: 'text'}])
+  })
+
   it ('foreach and if statements at attributes at couple tag', function () {
     var template = '<div title="Hello"{for (item, [0..3])} {if (item > 1) }tabindex="item{item}"{endif}{endfor}></div>'
     var result = [

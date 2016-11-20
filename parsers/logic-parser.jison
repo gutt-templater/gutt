@@ -18,6 +18,7 @@ function prepareSingleQuoteString(str) {
 "*"                         return '*';
 "/"                         return '/';
 "-"                         return '-';
+"++"                        return '++';
 "+"                         return '+';
 "^"                         return '^';
 "("                         return '(';
@@ -54,7 +55,7 @@ function prepareSingleQuoteString(str) {
 %left '!='
 %left '=='
 %left '>=' '>' '<=' '<'
-%left '...' '..' '.'
+%left '...' '..' '++'
 %left '+' '-'
 %left '*' '/'
 %left UMINUS
@@ -84,6 +85,8 @@ assignment
 variable
   : variable '[' expression ']'
     { $1.keys.push($3); $$ = $1; }
+  | variable '.' WORD
+    { $1.keys.push('\'' + $3 + '\''); $$ = $1; }
   | WORD
     { $$ = {type: 'var', value: $1, keys: []}; }
   ;
@@ -166,7 +169,7 @@ expression
     { $$ = {type: 'ltequal', value: [$1, $3]}; }
   | expression '<' expression
     { $$ = {type: 'lt', value: [$1, $3]}; }
-  | expression '.' expression
+  | expression '++' expression
     { $$ = {type: 'concat', value: [$1, $3]}; }
   | expression '+' expression
     { $$ = {type: 'plus', value: [$1, $3]}; }
