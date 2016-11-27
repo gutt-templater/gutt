@@ -23,7 +23,7 @@ function prepareLogic(arr, text) {
 %%
 [\s\n\t]+                   /* skip whitespace */
 <<EOF>>                     return 'EOF';
-[a-zA-Z][a-zA-Z\-0-9]*\b    return 'ID';
+[a-zA-Z_][a-zA-Z\-_0-9]*\b  return 'ID';
 \<\!\-\-.*?\-\-\>           return 'COMMENT_LITERAL';
 ':'                         return ':';
 '<'                         return '<';
