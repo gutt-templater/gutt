@@ -30,7 +30,9 @@ function prepareSingleQuoteString(str) {
 "<="                        return '<=';
 ">="                        return '>=';
 "="                         return '=';
+"<<"                        return '<<';
 "<"                         return '<';
+">>"                        return '>>';
 ">"                         return '>';
 "&&"                        return '&&';
 "||"                        return '||';
@@ -56,6 +58,7 @@ function prepareSingleQuoteString(str) {
 %left '=='
 %left '>=' '>' '<=' '<'
 %left '...' '..' '++'
+%left '>>' '<<'
 %left '+' '-'
 %left '*' '/'
 %left UMINUS
@@ -175,6 +178,10 @@ expression
     { $$ = {type: 'plus', value: [$1, $3]}; }
   | expression '-' expression
     { $$ = {type: 'minus', value: [$1, $3]}; }
+  | expression '<<' expression
+    { $$ = {type: 'leftshift', value: [$1, $3]}; }
+  | expression '>>' expression
+    { $$ = {type: 'rightshift', value: [$1, $3]}; }
   | expression '*' expression
     { $$ = {type: 'mult', value: [$1, $3]}; }
   | expression '/' expression

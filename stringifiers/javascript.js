@@ -435,6 +435,14 @@ function expression (tree) {
       str += tree.value
 
       return str
+    case 'leftshift':
+      str += expression(tree.value[0]) + ' << ' + expression(tree.value[1])
+
+      return str
+    case 'rightshift':
+      str += expression(tree.value[0]) + ' >> ' + expression(tree.value[1])
+
+      return str
     case 'plus':
       str += expression(tree.value[0]) + ' + ' + expression(tree.value[1])
 
