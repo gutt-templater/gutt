@@ -1,4 +1,14 @@
 %{
+var Tag = require('./tag');
+var Comment = require('./comment');
+var Text = require('./text');
+var Str = require('./string');
+var Attr = require('./attr');
+var Logic = require('./logic');
+var LogicNode = require('./logic-node');
+var logicParser = require('./logic-parser').parser
+var currentNode;
+
 function prepareDoubleQuoteString(str) {
   return str.substr(1, str.length - 2);
 }
@@ -7,14 +17,23 @@ function prepareSingleQuoteString(str) {
   return str.substr(1, str.length - 2).replace(/\\\'/g, '\'');
 }
 
-function prepareText(arr, text) {
-  if (text.length) {
-    arr.push({type: 'text', value: text});
-  }
-}
-
 function prepareLogic(arr, text) {
   arr.push({type: 'logic', value: text.trim()});
+}
+
+function appendNode(node) {
+  node.parentNode = currentNode;
+
+  if (!currentNode.firstNode) {
+    currentNode.firstNode = node;
+  }
+
+  if (currentNode.lastNode) {
+    currentNode.lastNode.nextNode = node;
+    node.prevNode = currentNode.lastNode;
+  }
+
+  currentNode.lastNode = node;
 }
 %}
 
@@ -24,19 +43,15 @@ function prepareLogic(arr, text) {
 [\s\n\t]+                   /* skip whitespace */
 <<EOF>>                     return 'EOF';
 [a-zA-Z_][a-zA-Z\-_0-9]*\b  return 'ID';
-\<\!\-\-.*?\-\-\>           return 'COMMENT_LITERAL';
+\<\!\-\-.*?\-\-             return 'COMMENT_LITERAL';
 ':'                         return ':';
 '<'                         return '<';
 '/'                         return '/';
 '='                         return '=';
-\}(?=(\{(\\\}|[^\}])*?\}|\"(\\\"|[^\"])*?\"|[^\"\'\{\}\<\>])*\>)       return 'LOGIC_CLOSE_AT_ATTRIBUTE';
-\}[^\"\{\<]*?\"             return 'TEXT_TAIL_AFTER_LOGIC_BEFORE_DOUBLE_QUOTE';
-\}[^\'\{\<]*?\'             return 'TEXT_TAIL_AFTER_LOGIC_BEFORE_SINGLE_QUOTE';
-\>[^<\{]*                   return 'TEXT_AFTER_TAG';
-\}[^><\{]*(?=(\{|\<))       return 'TEXT_AFTER_LOGIC';
+\}(?=(\{(\\\}|[^\}])*?\}|\"(\\\"|[^\"])*?\"|[^\"\'\{\}\<\>])*\>)  return 'LOGIC_CLOSE_AT_ATTRIBUTE';
+\>(\\\{|[^\<\{])*           return 'TEXT_AFTER_TAG';
+\}[^\>\<\{]*(?=(\{|\<))     return 'TEXT_AFTER_LOGIC';
 \{(\\\}|[^}])*              return 'LOGIC_LITERAL';
-\"[^\"\{]*?(?=\{)           return 'STRING_DOUBLE_QUOTE_BEFORE_LOGIC';
-\'[^\'\{]*?(?=\{)           return 'STRING_SINGLE_QUOTE_BEFORE_LOGIC';
 \"(\\\"|[^\"])*?\"          return 'STRING_DOUBLE_QUOTE_LITERAL';
 \'(\\\'|[^\'])*?\'          return 'STRING_SINGLE_QUOTE_LITERAL';
 '}'                         return '}';
@@ -56,26 +71,56 @@ document
 
 nodes
   :
-    { $$ = []; }
+    { $$ = new Tag('root', [], null); currentNode = $$; }
   | nodes node
-    { $$ = $1.concat($2); }
+    { $$ = $1; }
   ;
 
 node
-  : '<' sl tagname attrs ss text
-    { $$ = [{type: ($2.length ? 'close_tag' : ($5.length ? 'single_tag' : 'open_tag')), value: $3, attrs: $4}]; $$ = $$.concat($6); }
-  | COMMENT_LITERAL
-    { $$ = [{type: 'comment', value: $1.substr(4, $1.length - 7)}]; }
-  | LOGIC_LITERAL close_logic
+  : '<' sl tagname attrs ss text_after_tag
     {
-      $$ = [];
-      prepareLogic($$, $1.substr(1));
-      prepareText($$, $2.substr(1));
+      if (!$2.length) {
+        var tag = new Tag($3, $4, $5.length);
+        appendNode(tag);
+
+        if (!tag.isSingle) {
+          currentNode = tag;
+        }
+
+        if ($6) {
+          appendNode($6);
+        }
+      } else {
+        if ($3 !== currentNode.name) {
+          throw new SyntaxError('Syntax error: extected `' + currentNode.name + '` instead of got `' + $3 + '`');
+        }
+
+        currentNode = currentNode.parentNode;
+      }
+    }
+  | COMMENT_LITERAL text_after_tag
+    {
+      var comment = new Comment($1.substr(4, $1.length - 6));
+      appendNode(comment);
+
+      if ($2) {
+        appendNode($2);
+      }
+    }
+  | logic close_logic
+    {
+      var logic = new LogicNode($1);
+
+      appendNode(logic);
+
+      if ($2) {
+        appendNode($2);
+      }
     }
   ;
 
 close_logic
-  : TEXT_AFTER_LOGIC
+  : text_after_logic
   | '}'
   ;
 
@@ -108,58 +153,29 @@ attrs
 
 attr
   : ID
-    { $$ = {type: 'param', name: $1, value: []}; }
+    { $$ = new Attr(new Str($1), null); }
   | ID '=' string
-    { $$ = {type: 'param', name: $1, value: $3}; }
-  | ID '=' LOGIC_LITERAL LOGIC_CLOSE_AT_ATTRIBUTE
-    { $$ = {type: 'param', name: $1, value: {type: 'logic', value: $3.substr(1).trim()}}; }
+    { $$ = new Attr(new Str($1), new Str($3)); }
+  | ID '=' logic LOGIC_CLOSE_AT_ATTRIBUTE
+    { $$ = new Attr(new Str($1), $3); }
   | string
-    { $$ = {type: 'param', string: $1}; }
-  | LOGIC_LITERAL LOGIC_CLOSE_AT_ATTRIBUTE
-    { $$ = {type: 'logic', value: $1.substr(1).trim()}; }
+    { $$ = new Attr(null, new Str($1)); }
+  | logic LOGIC_CLOSE_AT_ATTRIBUTE '=' string
+    { $$ = new Attr($1, new Str($4)); }
+  | logic LOGIC_CLOSE_AT_ATTRIBUTE '=' logic LOGIC_CLOSE_AT_ATTRIBUTE
+    { $$ = new Attr($1, $4); }
+  ;
+
+logic
+  : LOGIC_LITERAL
+    { $$ = new Logic(logicParser.parse($1.substr(1))); }
   ;
 
 string
   : STRING_DOUBLE_QUOTE_LITERAL
-    { $$ = []; prepareText($$, prepareDoubleQuoteString($1)); }
+    { $$ = prepareDoubleQuoteString($1); }
   | STRING_SINGLE_QUOTE_LITERAL
-    { $$ = []; prepareText($$, prepareSingleQuoteString($1)); }
-  | string_element
-  ;
-
-string_element
-  : STRING_DOUBLE_QUOTE_BEFORE_LOGIC LOGIC_LITERAL logic_other_elements TEXT_TAIL_AFTER_LOGIC_BEFORE_DOUBLE_QUOTE
-    {
-      $$ = [];
-      prepareText($$, $1.substr(1));
-      prepareLogic($$, $2.substr(1));
-      $$ = $$.concat($3);
-      prepareText($$, $4.substr(1, $4.length - 2));
-    }
-  | STRING_SINGLE_QUOTE_BEFORE_LOGIC LOGIC_LITERAL logic_other_elements TEXT_TAIL_AFTER_LOGIC_BEFORE_SINGLE_QUOTE
-    {
-      $$ = [];
-      prepareText($$, $1.substr(1));
-      prepareLogic($$, $2.substr(1));
-      $$ = $$.concat($3);
-      prepareText($$, $4.substr(1, $4.length - 2));
-    }
-  ;
-
-logic_other_elements
-  :
-    { $$ = []; }
-  | logic_other_elements logic_other_element
-    { $$ = $1.concat($2); }
-  ;
-
-logic_other_element
-  : TEXT_AFTER_LOGIC LOGIC_LITERAL
-    {
-      $$ = [];
-      prepareText($$, $1.substr(1));
-      prepareLogic($$, $2.substr(1));
-    }
+    { $$ = prepareSingleQuoteString($1); }
   ;
 
 sl
@@ -168,16 +184,22 @@ sl
   | '/'
   ;
 
-text
-  : text_element
-    { $$ = []; prepareText($$, $1); }
-  | text text_element
-    { $$ = $1; prepareText($1, $2); }
+text_after_tag
+  : TEXT_AFTER_TAG
+    { if ($1.length > 1) {
+        $$ = new Text($1.substr(1));
+      } else {
+        $$ = null;
+      }
+    }
   ;
 
-text_element
-  : TEXT_AFTER_TAG
-    { $$ = $1.substr(1); }
-  | TEXT_AFTER_LOGIC
-    { $$ = $1.substr(1); }
+text_after_logic
+  : TEXT_AFTER_LOGIC
+    { if ($1.length > 1) {
+        $$ = new Text($1.substr(1));
+      } else {
+        $$ = null;
+      }
+    }
   ;

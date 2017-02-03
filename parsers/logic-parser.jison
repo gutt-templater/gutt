@@ -75,14 +75,7 @@ document
   ;
 
 expressions
-  : assignment
-  | expression
-    { $$ = {type: 'expr', value: $1}; }
-  ;
-
-assignment
-  : variable '=' expression
-    { $$ = {type: 'assign', value: $1, expr: $3}; }
+  : expression
   ;
 
 variable
@@ -110,9 +103,9 @@ params
 
 string
   : SINGLE_QUOTE_STRING
-    { $$ = '"' + prepareDoubleQuoteString($1) + '"'; }
+    { $$ = prepareDoubleQuoteString($1); }
   | DOUBLE_QUOTE_STRING
-    { $$ = '"' + prepareSingleQuoteString($1) + '"'; }
+    { $$ = prepareSingleQuoteString($1); }
   ;
 
 arr
@@ -142,6 +135,7 @@ arr_element
 
 arr_key
   : string
+    { $$ = {type: 'str', value: $1}; }
   | numb
   | variable
   ;
