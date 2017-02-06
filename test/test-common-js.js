@@ -44,8 +44,8 @@ describe ('Javascript stringifier', function () {
     return parseJs('{ b + c[d].str * 2 }', params).should.eventually.deep.equal([{text: '7', type: 'text'}])
   })
 
-  it ('foreach and if statements at attributes at couple tag', function () {
-    var template = '<div title="Hello"{for (item, [0..3])} {if (item > 1) }tabindex="item{item}"{endif}{endfor}></div>'
+  it.only ('foreach and if statements at attributes at couple tag', function () {
+    var template = '<div title="Hello" tabindex={\'item\' ++ item}></div>'
     var result = [
       {
         type: 'node',
@@ -58,11 +58,11 @@ describe ('Javascript stringifier', function () {
       }
     ]
 
-    return parseJs(template).should.eventually.deep.equal(result)
+    return parseJs(template, {item: 3}).should.eventually.deep.equal(result)
   })
 
   it ('foreach and if statements at attributes at single tag', function () {
-    var template = '<input title="Hello"{for (item, [0..3])} {if (item > 1) }tabindex{endif}{endfor} />'
+    var template = '<input title="Hello" tabindex />'
     var result = [
       {
         type: 'node',
@@ -307,7 +307,7 @@ describe ('Javascript stringifier', function () {
     var tempWrapName = generateName()
     var tempAsideName = generateName()
     var tempName = generateName()
-    var wrapTemplate = '<wrap title="{ title }">{childs}</wrap>'
+    var wrapTemplate = '<wrap title={ title }>{childs}</wrap>'
     var asideTemplate = '<aside>{ childs }<hr /></aside>'
     var template =
       '{import(Wrap, \'./' + tempWrapName + '\')}{import(Aside, \'./' + tempAsideName + '\')}' +

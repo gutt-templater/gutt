@@ -202,7 +202,7 @@ var definedVars = [
 var undefinedVars = []
 
 function prepareText (text) {
-  return text.replace(/\n/g, '\\n')
+  return text.replace(/\n/g, '\\n').replace(/\'/g, '\\\'')
 }
 
 function getVariableIncrement () {
@@ -414,6 +414,16 @@ function handleArray (source) {
   return '(function () { var _arr = {}; ' + str.join(' ') + ' return _arr;})()'
 }
 
+function prepareVariableKey (key) {
+  switch (key.type) {
+    case 'num':
+    case 'var':
+      return expression(key.value);
+    case 'str':
+      return '\'' + expression(key.value) + '\'';
+  }
+}
+
 function expression (tree) {
   var str = ''
 
@@ -427,7 +437,7 @@ function expression (tree) {
       }
 
       str += tree.value + tree.keys.map(function (key) {
-        return '[' + expression(key) + ']'
+        return '[' + prepareVariableKey(key) + ']'
       }).join('')
 
       return str

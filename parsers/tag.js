@@ -8,10 +8,10 @@ function Tag (name, attrs, isSingle) {
   this.id = id++;
 
   this.parentNode = null
-  this.firstNode = null
-  this.lastNode = null
-  this.nextNode = null
-  this.prevNode = null
+  this.firstChild = null
+  this.lastChild = null
+  this.nextSibling = null
+  this.previousSibling = null
 }
 
 Tag.prototype.clone = function () {

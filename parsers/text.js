@@ -3,8 +3,8 @@ function Text (text) {
   this.text = text;
 
   this.parentNode = null
-  this.nextNode = null
-  this.prevNode = null
+  this.nextSibling = null
+  this.previousSibling = null
 }
 
 module.exports = Text

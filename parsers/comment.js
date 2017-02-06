@@ -3,8 +3,8 @@ function Comment (value) {
   this.value = value
 
   this.parentNode = null
-  this.nextNode = null
-  this.prevNode = null
+  this.nextSibling = null
+  this.previousSibling = null
 }
 
 module.exports = Comment

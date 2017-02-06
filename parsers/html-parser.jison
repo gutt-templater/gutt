@@ -24,16 +24,16 @@ function prepareLogic(arr, text) {
 function appendNode(node) {
   node.parentNode = currentNode;
 
-  if (!currentNode.firstNode) {
-    currentNode.firstNode = node;
+  if (!currentNode.firstChild) {
+    currentNode.firstChild = node;
   }
 
-  if (currentNode.lastNode) {
-    currentNode.lastNode.nextNode = node;
-    node.prevNode = currentNode.lastNode;
+  if (currentNode.lastChild) {
+    currentNode.lastChild.nextSibling = node;
+    node.previousSibling = currentNode.lastChild;
   }
 
-  currentNode.lastNode = node;
+  currentNode.lastChild = node;
 }
 %}
 

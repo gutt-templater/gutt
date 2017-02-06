@@ -10,10 +10,10 @@ chai.should()
 describe ('JS array functions', function () {
   it ('arr_keys', function () {
     var template =
-      '{ keys = arr_keys([1, 2, 3, a: 5, "str", [3], "t": 6, a > b, 35: 36]) }' +
-      '{ for (key, keys) }' +
+      '<x:var name="keys" expr="arr_keys([1, 2, 3, a: 5, \'tr\', [3], \'t\': 6, a > b, 35: 36])" />' +
+      '<x:for item="key" from="keys">' +
       '{ key },' +
-      '{ endfor }'
+      '</x:for>'
     var result = [
       {type: 'text', text: '0'},
       {type: 'text', text: ','},

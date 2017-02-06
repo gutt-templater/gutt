@@ -194,8 +194,8 @@ function expression (tree) {
 
   switch (tree.type) {
     case 'var':
-      if (tree.value.value === 'childs') {
-        tree.value.value = '_childsTemplate'
+      if (tree.value === 'children') {
+        tree.value = '__children'
       }
 
       str += (~consts.indexOf(tree.value) ? '' : '$') + tree.value + tree.keys.map(function (key) {
@@ -203,6 +203,10 @@ function expression (tree) {
       }).join('')
 
       return str
+
+    case 'str':
+      return expression('"' + tree.value + '"')
+
     case 'num':
       str += tree.value
 

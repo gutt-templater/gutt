@@ -7,6 +7,6 @@ if (empty($jsonParams)) {
   $jsonParams = '{}';
 }
 
-$template = include('./tmp/' . $templateName . '.php');
+$template = include($templateName);
 
 echo $template(json_decode($jsonParams, true));
