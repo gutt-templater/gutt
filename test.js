@@ -20,7 +20,6 @@ var checkboxResult = parser.parse(checkboxTemplate).stringifyWith(phpStringifier
 
 var testTemplate =
   '<x-component>\n' +
-  '  <x-import name="checkbox" from="./checkbox-template" />\n' +
   '  <x-model>\n' +
   '    <x-var name={name} value="default-name" />\n' +
   '    <x-var name={arr} value={[1..6]} />\n' +
@@ -30,6 +29,7 @@ var testTemplate =
   '    <x-var name={b} value="3" />\n' +
   '  </x-model>\n' +
   '  <x-template>\n' +
+  '    <x-import name="checkbox" from="./checkbox-template" />\n' +
   '    <div selected data-role="lalala" {name}={name}>\n' +
   '      <x-for key={index} value={number} from={arr}>\n' +
   '        <x-if test={index / 2 == 1}>\n' +
@@ -58,7 +58,6 @@ var params = {
   name: 'Alex',
   uid: 'unique123',
   userid: '456',
-  a: 6,
   b: 5
 }
 

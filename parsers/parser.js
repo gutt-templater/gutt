@@ -64,7 +64,7 @@ function validateTemplateStructure (tree) {
   var isTemplateDefined = false
   var isAnotherNodeDefined = false
   var currentNode = tree.firstChild.firstChild
-  var modelAndTemplateAndImportNodes = ['x-model', 'x-template', 'x-import']
+  var modelAndTemplateAndImportNodes = ['x-model', 'x-template']
 
   if (~tree.firstChild.type === 'tag' || tree.firstChild.name !== 'x-component') {
     throw new ParseError('Template must be described at <x-component></x-component>', {
@@ -75,11 +75,13 @@ function validateTemplateStructure (tree) {
 
   while (currentNode) {
     if (currentNode.type === 'tag' && currentNode.name === 'x-model') {
-      isModelDefined = true
+      isModelDefined = currentNode
+      currentNode.parentNode = null
     }
 
     if (currentNode.type === 'tag' && currentNode.name === 'x-template') {
-      isTemplateDefined = true
+      isTemplateDefined = currentNode
+      currentNode.parentNode = null
     }
 
     if (currentNode.type === 'logic-node' && !isAnotherNodeDefined) {
@@ -98,10 +100,20 @@ function validateTemplateStructure (tree) {
   }
 
   if ((isModelDefined || isTemplateDefined) && isAnotherNodeDefined) {
-    throw new ParseError('Node shouldn\'t be used with <x-model> or <x-template />. Use simple templates or comlicated, don\'t mix them. Exception is <x-import />', {
+    throw new ParseError('Node shouldn\'t be used with <x-model> or <x-template />. Use simple templates or comlicated, don\'t mix them.', {
       line: isAnotherNodeDefined.line,
       column: isAnotherNodeDefined.column
     })
+  }
+
+  if (!isTemplateDefined) {
+    isTemplateDefined = tree.firstChild
+    isTemplateDefined.parentNode = null
+  }
+
+  return {
+    model: isModelDefined,
+    template: isTemplateDefined
   }
 }
 
@@ -113,7 +125,7 @@ function Parser (source, filePath, rootPath) {
   if (typeof this.source === 'string') {
     try {
       this.source = htmlParser.parse(this.source)
-      validateTemplateStructure(this.source)
+      this.source = validateTemplateStructure(this.source)
     } catch (e) {
       throwError(e, source, this.filePath, this.rootPath)
     }
@@ -131,7 +143,7 @@ Parser.prototype.filePath = function () {
 }
 
 Parser.prototype.stringifyWith = function (stringifier) {
-  return stringifier(this.source)
+  return stringifier(this.source.model, this.source.template)
 }
 
 module.exports = {

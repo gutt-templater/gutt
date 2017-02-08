@@ -37,7 +37,7 @@ function attrValueHandle (attr, id) {
 
 function attrsHandler (fragment, attrs) {
   var result = []
-  var attrsFragment = fragment.firstChild ? phpStringifier(fragment.firstChild) : ''
+  var attrsFragment = fragment.firstChild ? handleTemplate(fragment.firstChild) : ''
 
   attrs.forEach(function (attr) {
     result.push(attrValueHandle(attr, fragment.id))
@@ -72,12 +72,12 @@ function handleDefaultTag (node) {
   linkNodeWithAttrFragment(node, fragment)
 
   if (!node.isSingle) {
-    children = node.firstChild ? phpStringifier(node.firstChild) : ''
+    children = node.firstChild ? handleTemplate(node.firstChild) : ''
   }
 
   attrs = attrsHandler(fragment, node.attrs)
   attrsOutput =
-    ' <?php foreach($attrs' + fragment.id + ' as $key' + fragment.id + ' => $value' + fragment.id + ')\n' +
+    '<?php foreach($attrs' + fragment.id + ' as $key' + fragment.id + ' => $value' + fragment.id + ')\n' +
     ' echo " " . $key' + fragment.id + ' . ($value' + fragment.id + ' ? "=\\"" . $value' + fragment.id + ' . "\\"" : ""); ?>\n'
 
   if (node.isSingle || ~singleTags.indexOf(node.name)) {
@@ -121,13 +121,13 @@ function handleIfStatement (node) {
 
   if (!node.firstChild) return ''
 
-  content = phpStringifier(node.firstChild)
+  content = handleTemplate(node.firstChild)
 
   if (parentNode.type === 'tag' && parentNode.name === 'fragment') {
     mapCurrentFragmentNode[parentNode.id] = node.parentNode
   }
 
-  return '<?php if (' + phpStringifier(params.test) + ') { ?>\n' + content + '<?php } ?>\n'
+  return '<?php if (' + handleTemplate(params.test) + ') { ?>\n' + content + '<?php } ?>\n'
 }
 
 function getParentTagNode (node) {
@@ -162,16 +162,16 @@ function handleForStatement (node) {
 
   if (!node.firstChild) return ''
 
-  content = phpStringifier(node.firstChild)
+  content = handleTemplate(node.firstChild)
 
   if (parentNode.type === 'tag' && parentNode.name === 'fragment') {
     mapCurrentFragmentNode[parentNode.id] = node.parentNode
   }
 
-  eachStatement = (params.key ? phpStringifier(params.key) + ' => ' : '')
+  eachStatement = (params.key ? handleTemplate(params.key) + ' => ' : '')
 
-  return '<?php foreach (' + phpStringifier(params.from) + ' as ' + eachStatement +
-    phpStringifier(params.value) + ') { ?>\n' + content + '<?php } ?>\n'
+  return '<?php foreach (' + handleTemplate(params.from) + ' as ' + eachStatement +
+    handleTemplate(params.value) + ') { ?>\n' + content + '<?php } ?>\n'
 }
 
 function appendNodeToAttrFragment (attrFragment, node, isSetNodeAsCurrentNodeAtFragment) {
@@ -230,7 +230,7 @@ function handleComponent (node) {
   if (!node.isSingle) {
     children =
       '<?php ob_start(); ?>\n' +
-      (node.firstChild ? phpStringifier(node.firstChild) : '') +
+      (node.firstChild ? handleTemplate(node.firstChild) : '') +
       '<?php $children' + node.id + ' = ob_get_contents();\n?>' +
       '<?php ob_end_clean(); ?>'
   }
@@ -339,7 +339,7 @@ function finishNode (node) {
   }
 }
 
-function phpStringifier (node) {
+function handleTemplate (node) {
   var buffer = []
 
   buffer.push(handleNode(node))
@@ -356,6 +356,36 @@ function phpStringifier (node) {
   return buffer.join('')
 }
 
-module.exports = function (tree) {
-  return prefix + phpStringifier(tree.firstChild.firstChild) + postfix
+function handleAttrModelNode (node) {
+  var params = extractValuesFromAttrs(node.attrs, ['name', 'value'])
+  var name = handleNode(params.name)
+  var value = handleNode(params.value)
+
+  return '<?php if (!isset(' + name + ')) ' + name + ' = ' + value + ';?>\n'
+}
+
+function handleModel (node) {
+  var buffer = []
+
+  while (node) {
+    if (node.type === 'tag' && node.name === 'x-var') {
+      buffer.push(handleAttrModelNode(node))
+    }
+
+    if (!node.nextSibling) break;
+
+    node = node.nextSibling
+  }
+
+  if (node.parentNode) {
+    finishNode(node.parentNode)
+  }
+
+  return buffer.join('')
+}
+
+module.exports = function (model, template) {
+  var modelTemplate = model ? handleModel(model.firstChild) : ''
+
+  return prefix + modelTemplate + handleTemplate(template.firstChild) + postfix
 }
