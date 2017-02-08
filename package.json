@@ -24,5 +24,8 @@
   "pre-commit": [
     "test",
     "jslint"
-  ]
+  ],
+  "dependencies": {
+    "chalk": "^1.1.3"
+  }
 }

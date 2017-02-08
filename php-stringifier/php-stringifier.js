@@ -2,12 +2,12 @@ var logicHandler = require('./logic-handler')
 var Attr = require('../parsers/attr')
 var Tag = require('../parsers/tag')
 var reservedTags = [
-  'x:apply-param',
-  'x:param',
-  'x:apply-if',
-  'x:if',
-  'x:apply-for',
-  'x:for'
+  'x-apply-param',
+  'x-param',
+  'x-apply-if',
+  'x-if',
+  'x-apply-for',
+  'x-for'
 ]
 var singleTags = ['input']
 var mapAttrFragments = {}
@@ -92,7 +92,7 @@ function handleTagParam (node) {
   var attrFragment = getAttrFragmentByNode(parentNode)
   var clonedNode = node.clone()
 
-  clonedNode.name = 'x:apply-param'
+  clonedNode.name = 'x-apply-param'
 
   appendNodeToAttrFragment(attrFragment, clonedNode, false)
 
@@ -143,7 +143,7 @@ function handleIfStatementNode (node) {
   var attrFragment = getAttrFragmentByNode(parentNode)
   var clonedNode = node.clone()
 
-  clonedNode.name = 'x:apply-if'
+  clonedNode.name = 'x-apply-if'
 
   appendNodeToAttrFragment(attrFragment, clonedNode)
 
@@ -204,7 +204,7 @@ function handleForStatementNode (node) {
   var parentNode = getParentTagNode(node)
   var attrFragment = getAttrFragmentByNode(parentNode)
 
-  clonedNode.name = 'x:apply-for'
+  clonedNode.name = 'x-apply-for'
 
   appendNodeToAttrFragment(attrFragment, clonedNode)
 
@@ -256,32 +256,32 @@ function handleTag (node) {
   var tagName
 
   switch (node.name) {
-    case 'x:var':
+    case 'x-var':
       return handleVarParam(node)
 
-    case 'x:param':
+    case 'x-param':
       return handleTagParam(node)
 
-    case 'x:apply-param':
+    case 'x-apply-param':
       return handleTagParamApply(node)
 
-    case 'x:if':
+    case 'x-if':
       return handleIfStatementNode(node)
 
-    case 'x:apply-if':
+    case 'x-apply-if':
       return handleIfStatement(node)
 
-    case 'x:for':
+    case 'x-for':
       return handleForStatementNode(node)
 
-    case 'x:apply-for':
+    case 'x-apply-for':
       return handleForStatement(node)
 
-    case 'x:import':
+    case 'x-import':
       return handleImportStatement(node)
 
     default:
-      tagName = node.name.match(/^x\:(.*)$/)
+      tagName = node.name.match(/^x\-(.*)$/)
 
       if (tagName && ~importedComponents.indexOf(tagName[1])) {
         return handleComponent(node)
@@ -329,7 +329,7 @@ function finishNode (node) {
   var currentAttrNode
   var parentNode
 
-  if (node.type === 'tag' && (node.name === 'x:if' || node.name === 'x:for')) {
+  if (node.type === 'tag' && (node.name === 'x-if' || node.name === 'x-for')) {
     parentNode = getParentTagNode(node)
 
     attrFragment = getAttrFragmentByNode(parentNode)
@@ -357,5 +357,5 @@ function phpStringifier (node) {
 }
 
 module.exports = function (tree) {
-  return prefix + phpStringifier(tree.firstChild) + postfix
+  return prefix + phpStringifier(tree.firstChild.firstChild) + postfix
 }

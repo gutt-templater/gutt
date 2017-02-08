@@ -1,189 +1,145 @@
-var htmlParser = require('./html-parser').parser
-var logicParser = require('./logic-parser').parser
-var clone = require('./clone')
+var htmlParser = require('./html-parser')
+var lexerParseError = require('./lexer-parse-error')
+var ParseError = require('./parse-error')
 var fs = require('fs')
+var chalk = require('chalk')
 
-function Parser (source, filePath, rootPath, modules, stringifiers) {
-  var self = this
+htmlParser.parser.lexer.parseError = lexerParseError
 
+function o (character, number) {
+  var i;
+  var c
+
+  if (!number) {
+    number = 1
+  }
+
+  c = new Array(number - 1)
+
+  for (i = 0; i < number; i++) {
+    c[i] = character
+  }
+
+  return c.join('')
+}
+
+function throwError (e, source, filePath, rootPath) {
+  var lines
+  var previousLineNumber
+  var currentLineNumber
+  var nextLineNumber
+  var previousLine = ''
+  var currentLine
+  var arrowLine
+  var nextLine = ''
+  var column
+
+  lines = source.split(/\n/g)
+  currentLineNumber = e.hash.line
+  previousLineNumber = currentLineNumber - 1
+  nextLineNumber = currentLineNumber + 1
+  column = e.hash.column
+
+  if (previousLineNumber) {
+    previousLine = o(' ', 3 - previousLineNumber.toString().length) + previousLineNumber + ' | ' + lines[previousLineNumber - 1] + '\n'
+  }
+
+  if (lines[nextLineNumber]) {
+    nextLine = '\n' + o(' ', 3 - nextLineNumber.toString().length) + nextLineNumber + ' | ' + lines[nextLineNumber - 1] + '\n'
+  }
+
+  currentLine = o(' ', 3 - currentLineNumber.toString().length) + currentLineNumber + ' | ' + lines[currentLineNumber - 1] + '\n'
+
+  arrowLine = o(' ', 3) + ' | ' + o(' ', column) + '^'
+
+  throw new Error(
+    chalk.red(e.message + ' ' + (filePath ? 'in ' + filePath + ':' : 'at ') +
+    '(' + currentLineNumber + ':' + column + ')\n') +
+    previousLine + currentLine + arrowLine + nextLine
+  )
+}
+
+function validateTemplateStructure (tree) {
+  var isModelDefined = false
+  var isTemplateDefined = false
+  var isAnotherNodeDefined = false
+  var currentNode = tree.firstChild.firstChild
+  var modelAndTemplateAndImportNodes = ['x-model', 'x-template', 'x-import']
+
+  if (~tree.firstChild.type === 'tag' || tree.firstChild.name !== 'x-component') {
+    throw new ParseError('Template must be described at <x-component></x-component>', {
+      line: isAnotherNodeDefined.line,
+      column: isAnotherNodeDefined.column
+    })
+  }
+
+  while (currentNode) {
+    if (currentNode.type === 'tag' && currentNode.name === 'x-model') {
+      isModelDefined = true
+    }
+
+    if (currentNode.type === 'tag' && currentNode.name === 'x-template') {
+      isTemplateDefined = true
+    }
+
+    if (currentNode.type === 'logic-node' && !isAnotherNodeDefined) {
+      isAnotherNodeDefined = currentNode
+    }
+
+    if (currentNode.type === 'tag' && !~modelAndTemplateAndImportNodes.indexOf(currentNode.name) && !isAnotherNodeDefined) {
+      isAnotherNodeDefined = currentNode
+    }
+
+    if (currentNode.type === 'text' && !isAnotherNodeDefined && currentNode.text.trim().length) {
+      isAnotherNodeDefined = currentNode
+    }
+
+    currentNode = currentNode.nextSibling
+  }
+
+  if ((isModelDefined || isTemplateDefined) && isAnotherNodeDefined) {
+    throw new ParseError('Node shouldn\'t be used with <x-model> or <x-template />. Use simple templates or comlicated, don\'t mix them. Exception is <x-import />', {
+      line: isAnotherNodeDefined.line,
+      column: isAnotherNodeDefined.column
+    })
+  }
+}
+
+function Parser (source, filePath, rootPath) {
   this.source = source
-  this.rootPath = rootPath
+  this.filePath = filePath || ''
+  this.rootPath = rootPath || ''
 
   if (typeof this.source === 'string') {
-    this.source = htmlParser.parse(this.source)
-  }
-
-  this._filePath = filePath
-  this._modules = modules
-  this._stringifiers = stringifiers
-
-  this._tree = {
-    type: 'root',
-    childs: []
-  }
-
-  this.currentNode = this._tree
-  this.currentParent = this._tree
-
-  this.nesteStack = []
-
-  this._checked = false
-
-  this.source.forEach(function (rawItem) {
-    var item = clone(rawItem)
-
-    if (item.type === 'logic') {
-      item.value = logicParser.parse(item.value)
+    try {
+      this.source = htmlParser.parse(this.source)
+      validateTemplateStructure(this.source)
+    } catch (e) {
+      throwError(e, source, this.filePath, this.rootPath)
     }
-
-    item.parent = self.currentNode
-
-    self._checked = false
-
-    self._modules.forEach(function (module) {
-      if (self._checked) return
-
-      module.check(self, item)
-    })
-  })
-
-  if (this.nesteStack.length) {
-    throw new SyntaxError('Syntax error: there is not closed neste elements: ' + this.nesteStack.join(', '))
-  }
-}
-
-Parser.prototype.match = function (item, rule) {
-  var ruleItems = rule.split('.')
-  var currItem = item
-  var matched = true
-  var field
-  var expr
-  var out
-
-  ruleItems.forEach(function (ruleItem) {
-    if (!matched) return false
-
-    out = ruleItem.match(/([a-z]+)(\[([a-z]+)\])?/i)
-    field = out[1]
-    expr = out[3]
-
-    if (typeof currItem === 'string') {
-      if (expr || currItem !== field) {
-        matched = false
-      }
-    } else if (expr) {
-      if (currItem[field] && currItem[field] === expr) {
-        currItem = currItem.value
-      } else {
-        matched = false
-      }
-    } else if (currItem[field]) {
-      currItem = currItem.value
-    } else {
-      matched = false
-    }
-  })
-
-  return matched
-}
-
-Parser.prototype.push = function (item) {
-  this.currentNode.childs.push(item)
-
-  this._checked = true
-}
-
-Parser.prototype.open = function (item, keyword) {
-  item.childs = []
-  item.parent = this.currentNode
-
-  this.currentNode.childs.push(item)
-
-  this.currentParent = this.currentNode
-  this.currentNode = item
-  this.nesteStack.push(keyword)
-
-  this._checked = true
-}
-
-Parser.prototype.close = function (keyword) {
-  if (this.nesteStack[this.nesteStack.length - 1] === keyword) {
-    this.nesteStack.pop()
-  } else {
-    throw new SyntaxError('Syntax error: extected ' + this.nesteStack[this.nesteStack.length - 1] +
-      ', got ' + keyword)
   }
 
-  this.currentNode = this.currentNode.parent
-  this.currentParent = this.currentNode.parent
-
-  this._checked = true
+  return this
 }
 
 Parser.prototype.getRootPath = function () {
   return this.rootPath
 }
 
-Parser.prototype.skip = function () {
-  this._checked = true
-}
-
 Parser.prototype.filePath = function () {
   return this._filePath
 }
 
-Parser.prototype.replace = function (node, tree) {
-  var i
-  var len
-  var nodeIndex
-  var parent = node.parent
-
-  for (i = 0, len = parent.childs.length; i < len; i += 1) {
-    if (parent.childs[i] === node) {
-      nodeIndex = i
-    }
-  }
-
-  if (typeof nodeIndex !== 'undefined') {
-    parent.childs.splice(nodeIndex, 1)
-
-    for (i = nodeIndex + tree.length; i > nodeIndex; i -= 1) {
-      parent.childs.splice(nodeIndex, 0, tree[i - nodeIndex - 1])
-    }
-  }
-
-  for (i = 0, len = tree.length; i < len; i += 1) {
-    tree[i].parent = node.parent
-  }
+Parser.prototype.stringifyWith = function (stringifier) {
+  return stringifier(this.source)
 }
 
-Parser.prototype.tree = function () {
-  return this._tree
-}
+module.exports = {
+  parse: function (str, filePath, rootPath) {
+    return new Parser (str, filePath, rootPath)
+  },
 
-Parser.prototype.modules = function () {
-  return this._modules
-}
-
-Parser.prototype.strings = function () {
-  var self = this
-  var results = {}
-
-  this._stringifiers.forEach(function (stringifier) {
-    results[stringifier.ext] = stringifier.stringify(clone(self._tree)).trim()
-  })
-
-  return results
-}
-
-module.exports = function (modules, stringifiers) {
-  return {
-    parse: function (str, filePath, rootPath) {
-      return new Parser (str, filePath, rootPath, modules, stringifiers)
-    },
-
-    parseFile: function (filePath, rootPath) {
-      return this.parse(fs.readFileSync(filePath, 'utf-8').trim(), filePath, rootPath)
-    }
+  parseFile: function (filePath, rootPath) {
+    return this.parse(fs.readFileSync(filePath, 'utf-8').trim(), filePath, rootPath)
   }
 }

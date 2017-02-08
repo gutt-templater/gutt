@@ -8,6 +8,7 @@ var Logic = require('./logic');
 var LogicNode = require('./logic-node');
 var logicParser = require('./logic-parser').parser
 var currentNode;
+var ParseError = require('./parse-error')
 
 function prepareDoubleQuoteString(str) {
   return str.substr(1, str.length - 2);
@@ -34,6 +35,21 @@ function appendNode(node) {
   }
 
   currentNode.lastChild = node;
+}
+
+function createLogicNode (node, line, column) {
+  var result;
+
+  try {
+    result = logicParser.parse(node)
+  } catch (e) {
+    e.hash.line += line
+    e.hash.column = column + e.hash.loc.last_column
+
+    throw new ParseError('Unexpected token', e.hash);
+  }
+
+  return new Logic(result);
 }
 %}
 
@@ -80,22 +96,27 @@ node
   : '<' sl tagname attrs ss text_after_tag
     {
       if (!$2.length) {
-        var tag = new Tag($3, $4, $5.length);
+        var tag = new Tag($3, $4, $5.length, @1.first_line, @1.first_column);
         appendNode(tag);
 
         if (!tag.isSingle) {
           currentNode = tag;
         }
-
-        if ($6) {
-          appendNode($6);
-        }
       } else {
         if ($3 !== currentNode.name) {
-          throw new SyntaxError('Syntax error: extected `' + currentNode.name + '` instead of got `' + $3 + '`');
+          throw new ParseError('Expected `' + currentNode.name + '` instead of got `' + $3 + '`', {
+            text: '',
+            token: null,
+            line: @3.first_line,
+            column: @3.first_column
+          });
         }
 
         currentNode = currentNode.parentNode;
+      }
+
+      if ($6) {
+        appendNode($6);
       }
     }
   | COMMENT_LITERAL text_after_tag
@@ -168,7 +189,7 @@ attr
 
 logic
   : LOGIC_LITERAL
-    { $$ = new Logic(logicParser.parse($1.substr(1))); }
+    { $$ = createLogicNode($1.substr(1), @1.first_line, @1.first_column + 2); }
   ;
 
 string
@@ -187,7 +208,7 @@ sl
 text_after_tag
   : TEXT_AFTER_TAG
     { if ($1.length > 1) {
-        $$ = new Text($1.substr(1));
+        $$ = new Text($1.substr(1), @1.first_line, @1.first_column);
       } else {
         $$ = null;
       }
@@ -197,7 +218,7 @@ text_after_tag
 text_after_logic
   : TEXT_AFTER_LOGIC
     { if ($1.length > 1) {
-        $$ = new Text($1.substr(1));
+        $$ = new Text($1.substr(1), @1.first_line, @1.first_column);
       } else {
         $$ = null;
       }
