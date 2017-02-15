@@ -14,16 +14,12 @@ chai.should()
 describe ('PHP stringifier', function () {
   this.timeout(3000)
 
-  it ('empty string', function () {
-    return parsePhp('').should.eventually.equal('')
-  })
-
   it ('html empty comment', function () {
-    return parsePhp('<!---->').should.eventually.equal('<!---->')
+    return parsePhp('<component><!----></component>').should.eventually.equal('<!---->')
   })
 
   it ('html text comment', function () {
-    return parsePhp('<!-- some text 12345 _ # $ % ! - -- = [ ] \{ \} + ; : ( ) " \' \ / ~ _#$%!--=+;:()"\'\/~ qwe123:-_ -->')
+    return parsePhp('<component><!-- some text 12345 _ # $ % ! - -\\- = [ ] \{ \} + ; : ( ) " \' \ / ~ _#$%!-\\-=+;:()"\'\/~ qwe123:-_ --></component>')
       .should.eventually.equal('<!-- some text 12345 _ # $ % ! - -- = [ ] \{ \} + ; : ( ) " \' \ / ~ _#$%!--=+;:()"\'\/~ qwe123:-_ -->')
   })
 
@@ -38,14 +34,14 @@ describe ('PHP stringifier', function () {
       d: 'variable'
     }
 
-    return parsePhp('{ b + c[d][\'str\'] * 2 }', params).should.eventually.equal('7')
+    return parsePhp('<component>{ b + c[d][\'str\'] * 2 }</component>', params).should.eventually.equal('7')
   })
 
   it ('foreach expression without index', function () {
     var template =
-      '{ for (item, news) }' +
-      '<h1>{ item[\'title\'] }</h1>' +
-      '{ endfor }'
+      '<component><for-each item={item} from={news}>' +
+      '<h1>{ item.title }</h1>' +
+      '</for-each></component>'
     var params = {
       news: [
         {
@@ -73,9 +69,9 @@ describe ('PHP stringifier', function () {
       ]
     }
     var template =
-      '{ for (index, item, news) }' +
-      '<h1 data-index={index}>{ item[\'title\'] }</h1>' +
-      '{ endfor }'
+      '<component><for-each key={index} item={item} from={news}>' +
+      '<h1 data-index={index}>{item[\'title\']}</h1>' +
+      '</for-each></component>'
 
     return parsePhp(template, params)
       .should.eventually.equal('<h1 data-index="0">News</h1><h1 data-index="1">Olds</h1>')
@@ -83,58 +79,129 @@ describe ('PHP stringifier', function () {
 
   it ('if expression', function () {
     var template =
-      '{ if (a == b) }' +
-      '{ a = a + b }' +
-      '{elseif (a > b && b < a) }' +
-      '{ a = a - b}' +
-      '{else}' +
-      '{ a = b }' +
-      '{ endif }' +
-      '{a}'
+      '<component><switch><case test={a == b}>' +
+      '<variable name={a} value={a + b} />' +
+      '</case><case test={a > b && b < a}>' +
+      '<variable name={a} value={a - b} />' +
+      '</case><default>' +
+      '<variable name={a} value={b} />' +
+      '</default></switch>' +
+      '{a}</component>'
     var params = {a: 5, b: 10}
 
     return parsePhp(template, params).should.eventually.equal('10')
   })
 
-  it ('foreach and if statements at attributes at single tag', function () {
-    var template = '<input title="Hello" tabindex />'
+  it ('foreach statement at attributes at single tag', function () {
+    var template = '<component><input title="Hello"><for-each item={item} from={[0..3]}>' +
+    '<attribute name={"data-index" ++ item} value={item} /></for-each></input></component>'
 
-    return parsePhp(template).should.eventually.equal('<input title="Hello" tabindex />')
+    return parsePhp(template).should.eventually.equal('<input title="Hello" data-index0="0" data-index1="1" data-index2="2" data-index3="3" />')
   })
 
-  it ('foreach and if statements at attributes at couple tag', function () {
-    var template = '<div title="Hello" tabindex={\'item\' ++ item}></div>'
+  it ('foreach statement at attributes at couple tag', function () {
+    var template = '<component><div title="Hello"><for-each item={item} from={[0..3]}>' +
+    '<attribute name={"data-index" ++ item} value={item} /></for-each></div></component>'
 
-    return parsePhp(template, {item: 2}).should.eventually.equal('<div title="Hello" tabindex="item2"></div>')
+    return parsePhp(template, {item: 2}).should.eventually.equal('<div title="Hello" data-index0="0" data-index1="1" data-index2="2" data-index3="3"></div>')
   })
 
-  it ('if expression', function () {
-    var template = '{ if (a == b) }{ a = a + b }{elseif (a > b && b < a) }{ a = a - b}{else}{ a = b }{ endif }{a}'
+  it ('switch statement for tags with default', function () {
+    var template = '<component><switch><default>default value</default></switch></component>'
+
+    return parsePhp(template, {}).should.eventually.equal('default value')
+  })
+
+  it ('switch statement for tags with positive case 1', function () {
+    var template = '<component><switch><case test={a > b}>case 1</case></switch></component>'
+
+    return parsePhp(template, {a: 2, b: 1}).should.eventually.equal('case 1')
+  })
+
+  it ('switch statement for tags with negative case 1', function () {
+    var template = '<component><switch><case test={a > b}>case 1</case></switch></component>'
+
+    return parsePhp(template, {a: 1, b: 2}).should.eventually.equal('')
+  })
+
+  it ('switch statement for tags with positive case 2', function () {
+    var template = '<component><switch><case test={a > b}>case 1</case>' +
+    '<case test={b > a}>case 2</case></switch></component>'
+
+    return parsePhp(template, {a: 1, b: 2}).should.eventually.equal('case 2')
+  })
+
+  it ('switch statement for tags with positive default statement', function () {
+    var template = '<component><switch><case test={a > b}>case 1</case>' +
+    '<default>default statement</default></switch></component>'
+
+    return parsePhp(template, {a: 1, b: 2}).should.eventually.equal('default statement')
+  })
+
+  it ('switch statement for attributes with default', function () {
+    var template = '<component><div><switch><default><attribute name="data-id" value="qwerty" /></default></switch></div></component>'
+
+    return parsePhp(template, {}).should.eventually.equal('<div data-id="qwerty"></div>')
+  })
+
+  it ('switch statement for attributes with positive case 1', function () {
+    var template = '<component><div><switch><case test={a > b}><attribute name="case" value="1" /></case></switch></div></component>'
+
+    return parsePhp(template, {a: 2, b: 1}).should.eventually.equal('<div case="1"></div>')
+  })
+
+  it ('switch statement for attributes with negative case 1', function () {
+    var template = '<component><div><switch><case test={a > b}><attribute name="case" value="1" /></case></switch></div></component>'
+
+    return parsePhp(template, {a: 1, b: 2}).should.eventually.equal('<div></div>')
+  })
+
+  it ('switch statement for attributes with positive case 2', function () {
+    var template = '<component><div><switch><case test={a > b}><attribute name="case" value="1" /></case>' +
+    '<case test={b > a}><attribute name="case" value="2" /></case></switch></div></component>'
+
+    return parsePhp(template, {a: 1, b: 2}).should.eventually.equal('<div case="2"></div>')
+  })
+
+  it ('switch statement for attributes with positive default statement', function () {
+    var template = '<component><div><switch><case test={a > b}><attribute name="case" value="1" /></case>' +
+    '<default><attribute name="case" value="default statement" /></default></switch></div></component>'
+
+    return parsePhp(template, {a: 1, b: 2}).should.eventually.equal('<div case="default statement"></div>')
+  })
+
+  it ('if expression 2', function () {
+    var template =
+      '<component><switch><case test={a == b}>' +
+      '<variable name={a} value={a + b} /></case><case test={a > b && b < a}>' +
+      '<variable name={a} value={a - b} /></case>' +
+      '<default><variable name={a} value={b} /></default></switch>' +
+      '{a}</component>'
     var params = {a: 10, b: 5}
 
     return parsePhp(template, params).should.eventually.equal('5')
   })
 
   it ('array expressions open range grow up', function () {
-    return parsePhp('{ for(item, [5...end]) }{ item }{ endfor }', {end: 9}).should.eventually.equal('5678')
+    return parsePhp('<component><for-each item={item} from={[5...end]}>{ item }</for-each></component>', {end: 9}).should.eventually.equal('5678')
   })
 
   it ('array expressions open range grow down', function () {
-    return parsePhp('{ for(item, [5...end]) }{ item }{ endfor }', {end: 0}).should.eventually.equal('54321')
+    return parsePhp('<component><for-each item={item} from={[5...end]}>{ item }</for-each></component>', {end: 0}).should.eventually.equal('54321')
   })
 
   it ('array expressions closed range grow up', function () {
-    return parsePhp('{ for(item, [5..end]) }{ item }{ endfor }', {end: 9}).should.eventually.equal('56789')
+    return parsePhp('<component><for-each item={item} from={[5..end]}>{ item }</for-each></component>', {end: 9}).should.eventually.equal('56789')
   })
 
   it ('array expressions closed range grow down', function () {
-    return parsePhp('{ for(item, [5..end]) }{ item }{ endfor }', {end: 0}).should.eventually.equal('543210')
+    return parsePhp('<component><for-each item={item} from={[5..end]}>{ item }</for-each></component>', {end: 0}).should.eventually.equal('543210')
   })
 
   it ('doctype', function () {
     return parsePhp(
-      '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" >' +
-      '<html lang="en"><head><meta charset="UTF-8" /><title>Document</title></head><body></body></html>'
+      '<component><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd" >' +
+      '<html lang="en"><head><meta charset="UTF-8" /><title>Document</title></head><body></body></html></component>'
     )
       .should.eventually.equal(
         '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' +
@@ -144,23 +211,39 @@ describe ('PHP stringifier', function () {
 
   it ('isset', function () {
     var template =
-      '{ if (!field[\'hide\']? || (field[\'hide\']? && !field[\'hide\'])) }' +
+      '<component><switch><case test={!field[\'hide\']? || (field[\'hide\']? && !field[\'hide\'])}>' +
       'hidden' +
-      '{else}' +
+      '</case><default>' +
       'show' +
-      '{endif }'
+      '</default></switch></component>'
 
     return parsePhp(template, {field: {}}).should.eventually.equal('hidden')
+  })
+
+  it ('param with default value', function () {
+    var template =
+      '<component><param name={a} value={1} /><switch><case test={a > b}>first</case>' +
+      '<default>default</default></switch></component>'
+
+    return parsePhp(template, {b: 2}).should.eventually.equal('default')
+  })
+
+  it ('param with rewritten value', function () {
+    var template =
+      '<component><param name={a} value={3} /><switch><case test={a > b}>first</case>' +
+      '<default>default</default></switch></component>'
+
+    return parsePhp(template, {b: 2}).should.eventually.equal('first')
   })
 
   it ('import and inlude', function () {
     var tempAsideName = generateName()
 
-    return parsePhpAndWriteFile('<aside>{childs}</aside>', tempAsideName + '.php')
+    return parsePhpAndWriteFile('<component><aside>{children}</aside></component>', tempAsideName + '.php')
       .then(function () {
         var template =
-          '{ import (Aside, "./' + tempAsideName + '")}' +
-          '<div><Aside><h1>Hello</h1></Aside></div>'
+          '<component><import name="aside-component" from="./' + tempAsideName + '" />' +
+          '<div><aside-component><h1>Hello</h1></aside-component></div></component>'
 
         return parsePhp(template)
       })
@@ -170,20 +253,20 @@ describe ('PHP stringifier', function () {
   it ('include with recursive parameters for single tag', function () {
     var tempCommentsName = generateName()
     var template =
-      '{ import(Comments, \'./' + tempCommentsName + '\') }' +
-      '{ for (comment, comments) }' +
-      '<div>{ comment[\'name\'] }<div>' +
-      '<Comments comments={ comment[\'childs\'] } /></div>' +
+      '<component><import name="user-comments" from="./' + tempCommentsName + '" />' +
+      '<for-each item={comment} from={comments}>' +
+      '<div>{comment.name}<div>' +
+      '<user-comments comments={comment.children} /></div>' +
       '</div>' +
-      '{ endfor }'
+      '</for-each></component>'
     var data = {
       comments: [
         {
           name: 'Aleksei',
-          childs: [
+          children: [
             {
               name: 'Natasha',
-              childs: []
+              children: []
             }
           ]
         }
@@ -200,20 +283,20 @@ describe ('PHP stringifier', function () {
   it ('include with recursive parameters for couple tag', function () {
     var tempCommentsName = generateName()
     var template =
-      '{ import(Comments, \'./' + tempCommentsName + '\') }' +
-      '{ for (comment, comments) }' +
-      '<div>{ comment[\'name\'] }<div>' +
-      '<Comments comments={ comment[\'childs\'] }></Comments></div>' +
+      '<component><import name="user-comments" from="./' + tempCommentsName + '" />' +
+      '<for-each item={comment} from={comments}>' +
+      '<div>{comment[\'name\']}<div>' +
+      '<user-comments comments={comment[\'children\']}></user-comments></div>' +
       '</div>' +
-      '{ endfor }'
+      '</for-each></component>'
     var data = {
       comments: [
         {
           name: 'Aleksei',
-          childs: [
+          children: [
             {
               name: 'Natasha',
-              childs: []
+              children: []
             }
           ]
         }
@@ -227,20 +310,20 @@ describe ('PHP stringifier', function () {
       .should.eventually.equal('<div>Aleksei<div><div>Natasha<div></div></div></div></div>')
   })
 
-  it ('include with common scope of template and childs', function () {
+  it ('include with common scope of template and children', function () {
     var tempWrapName = 'tmp' + generateName()
     var tempAsideName = 'tmp' + generateName()
     var tempName = 'tmp' + generateName()
-    var wrapTemplate = '<wrap title={ title }>{childs}</wrap>'
-    var asideTemplate = '<aside>{ childs }<hr /></aside>'
+    var wrapTemplate = '<component><wrap title={title}>{children}</wrap></component>'
+    var asideTemplate = '<component><aside>{children}<hr /></aside></component>'
     var template =
-      '{import(Wrap, \'./' + tempWrapName + '\')}' +
-      '{import(Aside, \'./' + tempAsideName + '\')}' +
-      '{variable = 1}' +
-      '<Wrap title="Title of Wrap!">' +
-      '<Aside>Text{variable = variable + 1}</Aside>' +
-      '</Wrap>' +
-      '{variable}'
+      '<component><import name="wrap-component" from="./' + tempWrapName + '" />' +
+      '<import name="aside-component" from="./' + tempAsideName + '" />' +
+      '<variable name={variable} value={1} />' +
+      '<wrap-component title="Title of Wrap!">' +
+      '<aside-component>Text<variable name={variable} value={variable + 1} /></aside-component>' +
+      '</wrap-component>' +
+      '{variable}</component>'
 
     return Promise.all([
       parsePhpAndWriteFile(wrapTemplate, tempWrapName + '.php'),

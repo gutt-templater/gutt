@@ -1,6 +1,6 @@
 function Text (text, line, column) {
-  this.type = 'text';
-  this.text = text;
+  this.type = 'text'
+  this.text = text.replace(/\\-/g, '-')
   this.line = line
   this.column = column
 

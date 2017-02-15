@@ -4,7 +4,8 @@ var path = require('path')
 var fs = require('fs')
 var tmpFilesDirPath = path.resolve(__dirname, '../../tmp')
 var exec = require('child_process').exec
-var parser = require('./parser')
+var parser = require('../../parsers/parser')
+var phpStringifier = require('../../php-stringifier/php-stringifier')
 var writeFile = require('./write-file')
 var generateName = require('./generate-name')
 
@@ -33,9 +34,9 @@ function parsePhpAndWriteFile (test, tmpFileName) {
     fs.mkdir(tmpFilesDirPath)
   }
 
-  resultFile = parser.parse(test, tmpFilesDirPath + '/tmp.txt').strings()
+  resultFile = parser.parse(test).stringifyWith(phpStringifier)
 
-  return writeFile(path.resolve(tmpFilesDirPath, tmpFileName), resultFile.php)
+  return writeFile(path.resolve(tmpFilesDirPath, tmpFileName), resultFile)
 }
 
 function parsePhp (test, data) {
@@ -46,9 +47,9 @@ function parsePhp (test, data) {
   }
 
   return parsePhpAndWriteFile(test, tmpFileName)
-  .then(function () {
-    return runPhpTemplate(path.basename(tmpFileName, path.extname(tmpFileName)), data)
-  })
+    .then(function () {
+      return runPhpTemplate(path.basename(tmpFileName, path.extname(tmpFileName)), data)
+    })
 }
 
 module.exports = {

@@ -181,7 +181,7 @@ function prepareVariableKey (key) {
   switch (key.type) {
     case 'num':
     case 'var':
-      return expression(key.value);
+      return expression(key);
     case 'str':
       return '\'' + expression(key.value) + '\'';
   }

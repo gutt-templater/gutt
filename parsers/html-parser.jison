@@ -6,9 +6,12 @@ var Str = require('./string');
 var Attr = require('./attr');
 var Logic = require('./logic');
 var LogicNode = require('./logic-node');
-var logicParser = require('./logic-parser').parser
+var logicParser = require('./logic-parser')
 var currentNode;
 var ParseError = require('./parse-error')
+var lexerParseError = require('./lexer-parse-error')
+
+logicParser.parser.lexer.parseError = lexerParseError;
 
 function prepareDoubleQuoteString(str) {
   return str.substr(1, str.length - 2);
@@ -49,7 +52,7 @@ function createLogicNode (node, line, column) {
     throw new ParseError('Unexpected token', e.hash);
   }
 
-  return new Logic(result);
+  return new Logic(result, line, column);
 }
 %}
 
@@ -96,7 +99,8 @@ node
   : '<' sl tagname attrs ss text_after_tag
     {
       if (!$2.length) {
-        var tag = new Tag($3, $4, $5.length, @1.first_line, @1.first_column);
+        var isSingle = $5.length || $3 === '!DOCTYPE';
+        var tag = new Tag($3, $4, isSingle, @1.first_line, @1.first_column);
         appendNode(tag);
 
         if (!tag.isSingle) {
@@ -121,7 +125,7 @@ node
     }
   | COMMENT_LITERAL text_after_tag
     {
-      var comment = new Comment($1.substr(4, $1.length - 6));
+      var comment = new Comment($1.substr(4, $1.length - 6), @1.first_line, @1.first_column);
       appendNode(comment);
 
       if ($2) {
@@ -130,7 +134,7 @@ node
     }
   | logic close_logic
     {
-      var logic = new LogicNode($1);
+      var logic = new LogicNode($1, @1.first_line, @2.first_column);
 
       appendNode(logic);
 
@@ -174,15 +178,15 @@ attrs
 
 attr
   : ID
-    { $$ = new Attr(new Str($1), null); }
+    { $$ = new Attr(new Str($1, @1.first_line, @1.first_column), null); }
   | ID '=' string
-    { $$ = new Attr(new Str($1), new Str($3)); }
+    { $$ = new Attr(new Str($1, @1.first_line, @1.first_column), $3); }
   | ID '=' logic LOGIC_CLOSE_AT_ATTRIBUTE
-    { $$ = new Attr(new Str($1), $3); }
+    { $$ = new Attr(new Str($1, @1.first_line, @1.first_column), $3); }
   | string
-    { $$ = new Attr(null, new Str($1)); }
+    { $$ = new Attr(null, $1); }
   | logic LOGIC_CLOSE_AT_ATTRIBUTE '=' string
-    { $$ = new Attr($1, new Str($4)); }
+    { $$ = new Attr($1, $4); }
   | logic LOGIC_CLOSE_AT_ATTRIBUTE '=' logic LOGIC_CLOSE_AT_ATTRIBUTE
     { $$ = new Attr($1, $4); }
   ;
@@ -194,9 +198,9 @@ logic
 
 string
   : STRING_DOUBLE_QUOTE_LITERAL
-    { $$ = prepareDoubleQuoteString($1); }
+    { $$ = new Str(prepareDoubleQuoteString($1), @1.first_line, @1.first_column + 1); }
   | STRING_SINGLE_QUOTE_LITERAL
-    { $$ = prepareSingleQuoteString($1); }
+    { $$ = new Str(prepareSingleQuoteString($1), @1.first_line, @1.first_column + 1); }
   ;
 
 sl

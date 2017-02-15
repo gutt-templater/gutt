@@ -2,3 +2,5 @@
 /dist/
 /tmp/
 /covreporter/
+/parsers/html-parser.js
+/parsers/logic-parser.js

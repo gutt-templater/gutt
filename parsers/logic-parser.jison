@@ -82,7 +82,7 @@ variable
   : variable '[' expression ']'
     { $1.keys.push($3); $$ = $1; }
   | variable '.' WORD
-    { $1.keys.push('\'' + $3 + '\''); $$ = $1; }
+    { $1.keys.push({type: 'str', value: $3}); $$ = $1; }
   | WORD
     { $$ = {type: 'var', value: $1, keys: []}; }
   ;

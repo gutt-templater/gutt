@@ -90,7 +90,7 @@ case 3:
  $$[$0-3].keys.push($$[$0-1]); this.$ = $$[$0-3]; 
 break;
 case 4:
- $$[$0-2].keys.push('\'' + $$[$0] + '\''); this.$ = $$[$0-2]; 
+ $$[$0-2].keys.push({type: 'str', value: $$[$0]}); this.$ = $$[$0-2]; 
 break;
 case 5:
  this.$ = {type: 'var', value: $$[$0], keys: []}; 

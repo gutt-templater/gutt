@@ -17,7 +17,7 @@ function Tag (name, attrs, isSingle, line, column) {
 }
 
 Tag.prototype.clone = function () {
-  return new Tag(this.name, this.attrs.slice(0), this.isSingle)
+  return new Tag(this.name, this.attrs.slice(0), this.isSingle, this.line, this.column)
 }
 
 module.exports = Tag
