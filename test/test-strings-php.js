@@ -80,24 +80,36 @@ describe ('PHP string functions', function () {
 
   it ('str_split returns array with origin string', function () {
     var template =
-      '<component><variable name={arr} value={str_split(\'string\', \'wrong splitter\') } />' +
-      '<for-each item={letter} from={arr}>{ letter },</for-each></component>'
+      '<component>' +
+      '<variable name={arr} value={str_split(\'string\', \'wrong splitter\') } />' +
+      '<for-each item={letter} from={arr}>' +
+      '{ letter },' +
+      '</for-each>' +
+      '</component>'
 
     return parsePhp(template).should.eventually.equal('string,')
   })
 
   it ('str_split with empty splitter, returns array of letter', function () {
     var template =
-      '<component><variable name={arr} value={str_split(\'string\', \'\') } />' +
-      '<for-each item={letter} from={arr}>{ letter },</for-each></component>'
+      '<component>' +
+      '<variable name={arr} value={str_split(\'string\', \'\') } />' +
+      '<for-each item={letter} from={arr}>' +
+      '{ letter },' +
+      '</for-each>' +
+      '</component>'
 
     return parsePhp(template).should.eventually.equal('s,t,r,i,n,g,')
   })
 
   it ('str_split with not empty splitter, returns array of substrings', function () {
     var template =
-      '<component><variable name={arr} value={str_split(\'London is The Capital of Greate Britan\', \' \') } />' +
-      '<for-each item={letter} from={arr}>{ letter }-</for-each></component>'
+      '<component>' +
+      '<variable name={arr} value={str_split(\'London is The Capital of Greate Britan\', \' \') } />' +
+      '<for-each item={letter} from={arr}>' +
+      '{ letter }-' +
+      '</for-each>' +
+      '</component>'
 
     return parsePhp(template).should.eventually.equal('London-is-The-Capital-of-Greate-Britan-')
   })

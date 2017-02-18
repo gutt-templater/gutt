@@ -17,7 +17,7 @@ function o (character, number) {
   return c.join('')
 }
 
-function throwError (e, source, filePath, rootPath) {
+function throwError (e, source, filePath) {
   var lines
   var previousLineNumber
   var currentLineNumber

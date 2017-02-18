@@ -127,7 +127,8 @@ module.exports = {
     '  ob_start();\n' +
     '// >>> GENERATED CODE\n' +
     '?>\n',
-  postfix: '<?php\n' +
+  postfix:
+    '<?php\n' +
     '// <<< GENERATED CODE\n' +
     '  $content = ob_get_contents();\n' +
     '  ob_end_clean();\n' +

@@ -72,12 +72,12 @@ function attrValueHandle (attr, id) {
 
   if (attr.name) {
     name = handleNode(attr.name)
-    value = attr.value === null ? 'false' : handleNode(attr.value)
+    value = attr.value === null ? '\'\'' : handleNode(attr.value)
 
-    return '<?php $attrs' + id + '[' + name + '] = ' + value + ';?>'
+    return 'attrs' + id + '[' + name + '] = ' + value + ';\n'
   }
 
-  return '<?php $attrs' + id + '[\'' + handleNode(attr.value) + '\'] = false;?>'
+  return 'attrs' + id + '[\'' + handleNode(attr.value) + '\'] = \'\';\n'
 }
 
 function attrsHandler (fragment, attrs) {
@@ -88,7 +88,7 @@ function attrsHandler (fragment, attrs) {
     result.push(attrValueHandle(attr, fragment.id))
   })
 
-  return '<?php $attrs' + fragment.id + ' = [];?>' + result.join('') + attrsFragment
+  return 'var attrs' + fragment.id + ' = {};\n' + result.join('') + attrsFragment
 }
 
 function linkNodeWithAttrFragment (node, fragment) {
@@ -101,7 +101,7 @@ function getAttrFragmentByNode (node) {
 }
 
 function getMapCurrentFragmentNode (fragment) {
-  return mapCurrentFragmentNode[fragment.id]
+  return mapCurrentFragmentNode[fragment.id];
 }
 
 function setMapCurrentFragmentNode (attrFragment, node) {
@@ -111,7 +111,6 @@ function setMapCurrentFragmentNode (attrFragment, node) {
 function handleDefaultTag (node) {
   var children = ''
   var attrs
-  var attrsOutput
   var fragment = new Tag('fragment')
 
   linkNodeWithAttrFragment(node, fragment)
@@ -121,19 +120,17 @@ function handleDefaultTag (node) {
   }
 
   attrs = attrsHandler(fragment, node.attrs)
-  attrsOutput =
-    '<?php foreach($attrs' + fragment.id + ' as $key' + fragment.id + ' => $value' + fragment.id + ')\n' +
-    ' echo " " . $key' + fragment.id + ' . ($value' + fragment.id + ' !== false && $value' + fragment.id + '!== null ? "=\\"" . $value' + fragment.id + ' . "\\"" : ""); ?>'
 
   if (node.name === '!DOCTYPE') {
-    return attrs + '<' + node.name + attrsOutput + '>'
+    return attrs + '__children.push(__create(\'' + node.name + '\', attrs' + fragment.id + '));\n'
   }
 
   if (node.isSingle || ~singleTags.indexOf(node.name)) {
-    return attrs + '<' + node.name + attrsOutput + ' />'
+    return attrs + '__children.push(__create(\'' + node.name + '\', attrs' + fragment.id + '));\n'
   }
 
-  return attrs + '<' + node.name + attrsOutput + '>' + children + '</' + node.name + '>'
+  return attrs + '__children.push(__create(\'' + node.name + '\', attrs' + fragment.id +
+    ', function (__children) {\n' + children + '}));\n'
 }
 
 function handleTagAttribute (node) {
@@ -204,7 +201,7 @@ function handleParam (node) {
   name = handleNode(params.name)
   value = handleNode(params.value)
 
-  return '<?php if (!isset(' + name + ')) ' + name + ' = ' + value + ';?>'
+  return 'if (typeof ' + name + ' !== \'undefined\') ' + name + ' = ' + value + ';\n'
 }
 
 function getParentTagNode (node) {
@@ -232,7 +229,7 @@ function handleIfStatement (node) {
     mapCurrentFragmentNode[parentNode.id] = node.parentNode
   }
 
-  return '<?php if (' + handleTemplate(params.test) + ') { ?>\n' + content + '<?php } ?>'
+  return 'if (' + handleTemplate(params.test) + ') {\n' + content + '}\n'
 }
 
 function handleIfStatementNode (node) {
@@ -253,9 +250,11 @@ function handleIfStatementNode (node) {
 
 function handleForEachStatement (node) {
   var params = extractValuesFromAttrs(node.attrs, ['key', 'item', 'from'])
+  var fromStatement
+  var itemStatement
+  var keyStatement
   var content
   var parentNode = node
-  var eachStatement
 
   while (parentNode.parentNode) {
     parentNode = parentNode.parentNode
@@ -269,10 +268,19 @@ function handleForEachStatement (node) {
     mapCurrentFragmentNode[parentNode.id] = node.parentNode
   }
 
-  eachStatement = (params.key ? handleTemplate(params.key) + ' => ' : '')
+  fromStatement = handleTemplate(params.from)
+  itemStatement = handleTemplate(params.item)
 
-  return '<?php foreach (' + handleTemplate(params.from) + ' as ' + eachStatement +
-    handleTemplate(params.item) + ') { ?>' + content + '<?php } ?>'
+  if (params.key) {
+    keyStatement = handleTemplate(params.key)
+  }
+
+  return 'var key' + node.id + ';\n' +
+    'var from' + node.id + ' = ' + fromStatement + ';\n' +
+    'for (key' + node.id + ' in from' + node.id + ') {\n' +
+    itemStatement + ' = from' + node.id + '[key' + node.id + '];\n' +
+    (keyStatement ? keyStatement + ' = key' + node.id + ';\n' : '') +
+    content + '}\n'
 }
 
 function handleForEachStatementNode (node) {
@@ -332,11 +340,13 @@ function handleImportStatement (node) {
 
   importedComponents.push(params.name.value)
 
-  return '<?php $__component__' + prepareComponentName(params.name.value) + ' = include(__DIR__ . "/" . ' + handleNode(params.from) + ' . ".php");?>'
+  return 'var __component__' + prepareComponentName(params.name.value) +
+    ' = require(' + handleNode(params.from) + ');\n'
 }
 
 function handleComponent (node) {
-  var children = '<?php $children' + node.id + ' = "";?>'
+  var children = 'var __children' + node.id + ' = [];\n'
+  var componentName
   var attrs
   var attrsOutput
   var fragment = new Tag('fragment')
@@ -344,22 +354,24 @@ function handleComponent (node) {
   linkNodeWithAttrFragment(node, fragment)
 
   if (!node.isSingle) {
-    children =
-      '<?php ob_start(); ?>\n' +
-      (node.firstChild ? handleTemplate(node.firstChild) : '') +
-      '<?php $children' + node.id + ' = ob_get_contents();?>' +
-      '<?php ob_end_clean(); ?>'
+    children +=
+      '(function (__children) {\n' +
+      (node.firstChild ? handleTemplate(node.firstChild) + '\n' : '') +
+      '})(__children' + node.id + ');\n'
   }
 
   attrs = attrsHandler(fragment, node.attrs)
-  attrsOutput = '$attrs' + fragment.id
+  attrsOutput = 'attrs' + fragment.id
+  componentName = '__component__' + prepareComponentName(node.name)
 
   if (node.isSingle || ~singleTags.indexOf(node.name)) {
-    return attrs + '<?php echo $__component__' + prepareComponentName(node.name) + '(' + attrsOutput + ', ""); ?>'
+    return attrs + 'var __result' + node.id + ' = ' + componentName + '(' + attrsOutput + ', []);\n' +
+      '__result' + node.id + '.forEach(function (__item) { __children.push(__item); });\n'
   }
 
-  return attrs + children + '<?php echo $__component__' + prepareComponentName(node.name) +
-    '(' + attrsOutput + ', $children' + node.id + '); ?>'
+  return attrs + children + 'var __result' + node.id + ' = ' + componentName +
+    '(' + attrsOutput + ', __children' + node.id + ');\n' +
+    '__result' + node.id + '.forEach(function (__item) { __children.push(__item); });\n'
 }
 
 function handleVariable (node) {
@@ -379,13 +391,13 @@ function handleVariable (node) {
     })
   }
 
-  return '<?php ' + handleNode(params.name) + ' = ' + handleNode(params.value) + '; ?>'
+  return handleNode(params.name) + ' = ' + handleNode(params.value) + ';\n'
 }
 
 function handleSwitchStatement (node) {
   linkNodeWithSwitchMarker(node)
 
-  return handleTemplate(node.firstChild) + (switchMarker[node.id] & switchMarkerCase ? '<?php } ?>' : '')
+  return handleTemplate(node.firstChild) + (switchMarker[node.id] & switchMarkerCase ? '}\n' : '')
 }
 
 function handleSwitchStatementNode (node) {
@@ -422,12 +434,12 @@ function handleCaseStatement (node) {
   if (isFirstSwitchCase(node)) {
     setSwitchMarkerHasCase(node)
 
-    return '<?php if (' + handleNode(params.test) + ') {' + ' ?>' + children
+    return 'if (' + handleNode(params.test) + ') {\n' + children
   }
 
   params = extractValuesFromAttrs(node.attrs, ['test'])
 
-  return '<?php } else if (' + handleNode(params.test) + ') {' + ' ?>' + children
+  return '} else if (' + handleNode(params.test) + ') {\n' + children
 }
 
 function handleCaseStatementNode (node) {
@@ -461,7 +473,7 @@ function handleDefaultStatement (node) {
   }
 
   setSwitchMarkerHasDefault(node)
-  return '<?php } else {' + ' ?>' + children
+  return '} else {\n' + children
 }
 
 function handleDefaultStatementNode (node) {
@@ -536,8 +548,8 @@ function handleTag (node) {
   }
 }
 
-function handleComment (node) {
-  return '<!--' + node.value + '-->'
+function handleComment () {
+  return ''
 }
 
 function handleText (node) {
@@ -545,18 +557,22 @@ function handleText (node) {
     throw new ParseError('Text node must not be placed inside <switch />', {
       line: node.line,
       column: node.column
-    })
+    });
   }
 
-  return node.text
+  return '__children.push(\'' + node.text.replace(/\n/g, '\\n').replace(/\'/g, '\\\'') + '\')\n'
 }
 
 function handleString (node) {
-  return '"' + node.value + '"'
+  return '"' + node.value.replace(/\n/g, '\\n').replace(/\'/g, '\\\'') + '"'
 }
 
 function logicNodeHandler (node) {
-  return '<?php echo ' + logicHandler(node.expr) + ';?>'
+  if (node.type === 'logic-node' && node.expr.type === 'logic' && node.expr.expr.type === 'var' && node.expr.expr.value === 'children') {
+    return '___children.forEach(function (__item) { __children.push(__item); });\n'
+  }
+
+  return '__children.push(' + logicHandler(node.expr) + ');\n'
 }
 
 function handleNode (node) {

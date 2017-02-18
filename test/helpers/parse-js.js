@@ -2,7 +2,8 @@
 
 var path = require('path')
 var fs = require('fs')
-var parser = require('./parser')
+var parser = require('../../parsers/parser')
+var jsStringifier = require('../../js-stringifier/js-stringifier')
 var writeFile = require('./write-file')
 var generateName = require('./generate-name')
 
@@ -29,9 +30,9 @@ function parseJsAndWriteFile (test, tmpFileName) {
     fs.mkdir(tmpFilesDirPath)
   }
 
-  resultFile = parser.parse(test, tmpFilesDirPath + '/tmp.txt').strings()
+  resultFile = parser.parse(test).stringifyWith(jsStringifier)
 
-  return writeFile(path.resolve(tmpFilesDirPath, tmpFileName), resultFile.js)
+  return writeFile(path.resolve(tmpFilesDirPath, tmpFileName), resultFile)
 }
 
 function parseJs (test, data) {

@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test/*.js",
+    "test": "mocha test/*.js --reporter dot",
     "test-cov": "mocha -r jscoverage --covout=html --covignore=.covignore test/*.js",
     "generate": "jison ./parsers/html-parser.jison -o ./parsers/html-parser.js && jison ./parsers/logic-parser.jison -o ./parsers/logic-parser.js",
     "jslint": "jscs ./ && jshint ./"

@@ -10,27 +10,29 @@ chai.should()
 describe ('JS array functions', function () {
   it ('arr_keys', function () {
     var template =
-      '<x:var name="keys" expr="arr_keys([1, 2, 3, a: 5, \'tr\', [3], \'t\': 6, a > b, 35: 36])" />' +
-      '<x:for item="key" from="keys">' +
+      '<component>' +
+      '<variable name={keys} value={arr_keys([1, 2, 3, a: 5, \'tr\', [3], \'t\': 6, a > b, 35: 36])} />' +
+      '<for-each item={key} from={keys}>' +
       '{ key },' +
-      '</x:for>'
+      '</for-each>' +
+      '</component>'
     var result = [
-      {type: 'text', text: '0'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '1'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '3'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '4'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '5'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '35'},
-      {type: 'text', text: ','},
-      {type: 'text', text: 't'},
-      {type: 'text', text: ','},
+      '0',
+      ',',
+      '1',
+      ',',
+      '2',
+      ',',
+      '3',
+      ',',
+      '4',
+      ',',
+      '5',
+      ',',
+      '35',
+      ',',
+      't',
+      ','
     ]
 
     return parseJs(template, {a: 4, b: 5}).should.eventually.deep.equal(result)
@@ -38,47 +40,52 @@ describe ('JS array functions', function () {
 
   it ('arr_contain positive', function () {
     var template =
-      '{ result = arr_contain([1, 2, \'a\': 3, 5, 6, 7], 1) }' +
-      '{ if (result) }' +
-      'found' +
-      '{ else }' +
-      '{ result }' +
-      '{ endif }'
+      '<component>' +
+      '<variable name={result} value={arr_contain([1, 2, \'a\': 3, 5, 6, 7], 1) } />' +
+      '<switch>' +
+      '<case test={result}>found</case>' +
+      '<default>{ result }</default>' +
+      '</switch>' +
+      '</component>'
 
-    return parseJs(template).should.eventually.deep.equal([{type: 'text', text: 'found'}])
+    return parseJs(template).should.eventually.deep.equal(['found'])
   })
 
   it ('arr_contain negative', function () {
     var template =
-      '{ result = arr_contain([1, 2, 3, 5, 6, 7], 0) }' +
-      '{ if (result) }' +
+      '<component>' +
+      '<variable name={result} value={arr_contain([1, 2, 3, 5, 6, 7], 0) } />' +
+      '<if test={(result)}>' +
       'found' +
-      '{ endif }'
+      '</if>' +
+      '</component>'
 
     return parseJs(template).should.eventually.deep.equal([])
   })
 
   it ('arr_values', function () {
     var template =
-      '{ result = arr_values([1, 2, \'a\':3, 5, "str", 12:6, 7]) }' +
-      '{ for (item, result) }' +
+      '<component>' +
+      '<variable name={result} value={arr_values([1, 2, \'a\':3, 5, "str", 12:6, 7]) } />' +
+      '<for-each item={item} from={result}>' +
       '{ item },' +
-      '{ endfor }'
+      '</for-each>' +
+      '</component>'
     var result = [
-      {type: 'text', text: '1'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '5'},
-      {type: 'text', text: ','},
-      {type: 'text', text: 'str'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '7'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '6'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '3'},
-      {type: 'text', text: ','},
+      1,
+      ',',
+      2,
+      ',',
+      5,
+      ',',
+      'str',
+      ',',
+      7,
+      ',',
+      6,
+      ',',
+      3,
+      ','
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
@@ -86,38 +93,46 @@ describe ('JS array functions', function () {
 
   it ('arr_len equal zero', function () {
     var template =
-      '{ result = arr_len([]) }' +
-      '{ result }'
+      '<component>' +
+      '<variable name={result} value={arr_len([]) } />' +
+      '{ result }' +
+      '</component>'
 
-    return parseJs(template).should.eventually.deep.equal([{type: 'text', text: '0'}])
+    return parseJs(template).should.eventually.deep.equal([0])
   })
 
   it ('arr_len for array not equal zero', function () {
     var template =
-      '{ result = arr_len([1, 2, 3, 5, "str", 6, 7]) }' +
-      '{ result }'
+      '<component>' +
+      '<variable name={result} value={ arr_len([1, 2, 3, 5, "str", 6, 7]) } />' +
+      '{ result }' +
+      '</component>'
 
-    return parseJs(template).should.eventually.deep.equal([{type: 'text', text: '7'}])
+    return parseJs(template).should.eventually.deep.equal([7])
   })
 
   it ('arr_len for object not equal zero', function () {
     var template =
-      '{ result = arr_len([1, 2, \'a\':3, 5, "str", 12:6, 7]) }' +
-      '{ result }'
+      '<component>' +
+      '<variable name={result} value={ arr_len([1, 2, \'a\':3, 5, "str", 12:6, 7]) } />' +
+      '{ result }' +
+      '</component>'
 
-    return parseJs(template).should.eventually.deep.equal([{type: 'text', text: '7'}])
+    return parseJs(template).should.eventually.deep.equal([7])
   })
 
   it ('arr_push', function () {
     var template =
-      '{ a = [1, 2, 3, 5, "str", 6, 7] }' +
+      '<component>' +
+      '<variable name={a} value={[1, 2, 3, 5, "str", 6, 7] } />' +
       '{ arr_push(a, 10) }' +
       '{ arr_len(a) }' +
-      '{ a[6] }'
+      '{ a[6] }' +
+      '</component>'
     var result = [
-      {type: 'text', text: ''},
-      {type: 'text', text: '8'},
-      {type: 'text', text: '7'}
+      '',
+      8,
+      7,
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
@@ -125,14 +140,16 @@ describe ('JS array functions', function () {
 
   it ('arr_unshift', function () {
     var template =
-      '{ a = [1, 2, 3, 5, "str", 6, 7] }' +
+      '<component>' +
+      '<variable name={a} value={[1, 2, 3, 5, "str", 6, 7] } />' +
       '{ arr_unshift(a, 10) }' +
       '{ arr_len(a) }' +
-      '{ a[0] }'
+      '{ a[0] }' +
+      '</component>'
     var result = [
-      {type: 'text', text: ''},
-      {type: 'text', text: '8'},
-      {type: 'text', text: '10'}
+      '',
+      8,
+      10
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
@@ -140,12 +157,14 @@ describe ('JS array functions', function () {
 
   it ('arr_pop', function () {
     var template =
-      '{ a = [1, 2, 3, 5, "str", 6, 7] }' +
+      '<component>' +
+      '<variable name={a} value={[1, 2, 3, 5, "str", 6, 7] } />' +
       '{ arr_pop(a) }' +
-      '{ arr_len(a) }'
+      '{ arr_len(a) }' +
+      '</component>'
     var result = [
-      {type: 'text', text: '7'},
-      {type: 'text', text: '6'}
+      7,
+      6
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
@@ -153,12 +172,14 @@ describe ('JS array functions', function () {
 
   it ('arr_shift', function () {
     var template =
-      '{ a = [1, 2, 3, 5, "str", 6, 7] }' +
+      '<component>' +
+      '<variable name={a} value={ [1, 2, 3, 5, "str", 6, 7] } />' +
       '{ arr_shift(a) }' +
-      '{ arr_len(a) }'
+      '{ arr_len(a) }' +
+      '</component>'
     var result = [
-      {type: 'text', text: '1'},
-      {type: 'text', text: '6'}
+      1,
+      6
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
@@ -166,33 +187,36 @@ describe ('JS array functions', function () {
 
   it ('arr_rand', function () {
     var template =
-      '{ a = [1, 3, 5, 7, 9, 11, 13] }' +
-      '{ b = arr_rand(a) }' +
-      '{ if (arr_contain(a, b)) }' +
-      'contain' +
-      '{ else }' +
-      '{ b }' +
-      '{ endif }'
+      '<component>' +
+      '<variable name={a} value={ [1, 3, 5, 7, 9, 11, 13] } />' +
+      '<variable name={b} value={arr_rand(a) } />' +
+      '<switch>' +
+      '<case test={(arr_contain(a, b)) }>contain</case>' +
+      '<default>{ b }</default>' +
+      '</switch>' +
+      '</component>'
 
-    return parseJs(template).should.eventually.deep.equal([{type: 'text', text: 'contain'}])
+    return parseJs(template).should.eventually.deep.equal(['contain'])
   })
 
   it ('arr_slice', function () {
     var template =
-      '{ a = [1, 2, 3, 4, 5, 6, 7, 8] }' +
-      '{ subarr = arr_slice(a, 3 ,3) }' +
-      '{ for (item, subarr) }' +
+      '<component>' +
+      '<variable name={a} value={[1, 2, 3, 4, 5, 6, 7, 8] } />' +
+      '<variable name={subarr} value={arr_slice(a, 3 ,3) } />' +
+      '<for-each item={item} from={subarr}>' +
       '{ item },' +
-      '{ endfor }' +
-      '{ arr_len(a) }'
+      '</for-each>' +
+      '{ arr_len(a) }' +
+      '</component>'
     var result = [
-      {type: 'text', text: '4'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '5'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '6'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '8'}
+      4,
+      ',',
+      5,
+      ',',
+      6,
+      ',',
+      8
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
@@ -200,41 +224,43 @@ describe ('JS array functions', function () {
 
   it ('arr_splice', function () {
     var template =
-      '{ a = [1, 2, 3, 4, 5, 6, 7, 8] }' +
-      '{ subarr = arr_splice(a, 3, 3, [1, 2, 3, 4]) }' +
-      '{ for (item, subarr) }' +
+      '<component>' +
+      '<variable name={a} value={[1, 2, 3, 4, 5, 6, 7, 8] } />' +
+      '<variable name={subarr} value={arr_splice(a, 3, 3, [1, 2, 3, 4]) } />' +
+      '<for-each item={item} from={subarr}>' +
       '{ item },' +
-      '{ endfor }' +
+      '</for-each>' +
       '-' +
-      '{ for (item, a) }' +
+      '<for-each item={item} from={a}>' +
       '{ item },' +
-      '{ endfor }'
+      '</for-each>' +
+      '</component>'
     var result = [
-      {type: 'text', text: '4'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '5'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '6'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '-'},
-      {type: 'text', text: '1'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '3'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '1'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '3'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '4'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '7'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '8'},
-      {type: 'text', text: ','}
+      4,
+      ',',
+      5,
+      ',',
+      6,
+      ',',
+      '-',
+      1,
+      ',',
+      2,
+      ',',
+      3,
+      ',',
+      1,
+      ',',
+      2,
+      ',',
+      3,
+      ',',
+      4,
+      ',',
+      7,
+      ',',
+      8,
+      ','
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
@@ -242,28 +268,30 @@ describe ('JS array functions', function () {
 
   it ('arr_pad positive', function () {
     var template =
-      '{ arr = [1, 2, 3] }' +
-      '{ subarr = arr_pad(arr, 7, 9) }' +
-      '{ for (item, subarr) }' +
+      '<component>' +
+      '<variable name={arr} value={[1, 2, 3] } />' +
+      '<variable name={subarr} value={arr_pad(arr, 7, 9) } />' +
+      '<for-each item={item} from={subarr}>' +
       '{ item },' +
-      '{ endfor }' +
-      '{ arr_len(arr) }'
+      '</for-each>' +
+      '{ arr_len(arr) }' +
+      '</component>'
     var result = [
-      {type: 'text', text: '1'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '3'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '9'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '9'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '9'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '9'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '3'}
+      1,
+      ',',
+      2,
+      ',',
+      3,
+      ',',
+      9,
+      ',',
+      9,
+      ',',
+      9,
+      ',',
+      9,
+      ',',
+      3
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
@@ -271,28 +299,30 @@ describe ('JS array functions', function () {
 
   it ('arr_pad negative', function () {
     var template =
-      '{ arr = [1, 2, 3] }' +
-      '{ subarr = arr_pad(arr, -7, 9) }' +
-      '{ for (item, subarr) }' +
+      '<component>' +
+      '<variable name={arr} value={[1, 2, 3] } />' +
+      '<variable name={subarr} value={arr_pad(arr, -7, 9) } />' +
+      '<for-each item={item} from={subarr}>' +
       '{ item },' +
-      '{ endfor }' +
-      '{ arr_len(arr) }'
+      '</for-each>' +
+      '{ arr_len(arr) }' +
+      '</component>'
     var result = [
-      {type: 'text', text: '9'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '9'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '9'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '9'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '1'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '3'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '3'}
+      9,
+      ',',
+      9,
+      ',',
+      9,
+      ',',
+      9,
+      ',',
+      1,
+      ',',
+      2,
+      ',',
+      3,
+      ',',
+      3
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
@@ -300,35 +330,39 @@ describe ('JS array functions', function () {
 
   it ('arr_pad keep origin', function () {
     var template =
-      '{ subarr = arr_pad([1, 2, 3], -3, 9) }' +
-      '{ for (item, subarr) }' +
+      '<component>' +
+      '<variable name={subarr} value={ arr_pad([1, 2, 3], -3, 9) } />' +
+      '<for-each item={item} from={subarr}>' +
       '{ item },' +
-      '{ endfor }'
+      '</for-each>' +
+      '</component>'
     var result = [
-      {type: 'text', text: '1'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '3'},
-      {type: 'text', text: ','}
+      1,
+      ',',
+      2,
+      ',',
+      3,
+      ','
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
   })
 
-  it ('arr_pad keep origin', function () {
+  it ('arr_pad keep origin 2', function () {
     var template =
-      '{ subarr = arr_pad([1, 2, 3], 3, 9) }' +
-      '{ for (item, subarr) }' +
+      '<component>' +
+      '<variable name={subarr} value={arr_pad([1, 2, 3], 3, 9) } />' +
+      '<for-each item={item} from={subarr}>' +
       '{ item },' +
-      '{ endfor }'
+      '</for-each>' +
+      '</component>'
     var result = [
-      {type: 'text', text: '1'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '3'},
-      {type: 'text', text: ','}
+      1,
+      ',',
+      2,
+      ',',
+      3,
+      ','
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
@@ -336,27 +370,29 @@ describe ('JS array functions', function () {
 
   it ('arr_reverse', function () {
     var template =
-      '{ origin = [1, 2, 3] }' +
-      '{ reversed = arr_reverse(origin) }' +
-      '{ for (item, reversed) }' +
+      '<component>' +
+      '<variable name={origin} value={[1, 2, 3] } />' +
+      '<variable name={reversed} value={arr_reverse(origin) } />' +
+      '<for-each item={item} from={reversed}>' +
       '{ item },' +
-      '{ endfor }' +
-      '{ for (item, origin) }' +
+      '</for-each>' +
+      '<for-each item={item} from={origin}>' +
       '{ item },' +
-      '{ endfor }'
+      '</for-each>' +
+      '</component>'
     var result = [
-      {type: 'text', text: '3'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '1'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '1'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '3'},
-      {type: 'text', text: ','}
+      3,
+      ',',
+      2,
+      ',',
+      1,
+      ',',
+      1,
+      ',',
+      2,
+      ',',
+      3,
+      ','
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
@@ -364,21 +400,23 @@ describe ('JS array functions', function () {
 
   it ('arr_unique', function () {
     var template =
-      '{ unique = arr_unique([1, 2, 3, 2, 1, 4, 5, 3, 2]) }' +
-      '{ for (item, unique) }' +
+      '<component>' +
+      '<variable name={unique} value={arr_unique([1, 2, 3, 2, 1, 4, 5, 3, 2]) } />' +
+      '<for-each item={item} from={unique}>' +
       '{ item },' +
-      '{ endfor }'
+      '</for-each>' +
+      '</component>'
     var result = [
-      {type: 'text', text: '1'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '3'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '4'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '5'},
-      {type: 'text', text: ','}
+      1,
+      ',',
+      2,
+      ',',
+      3,
+      ',',
+      4,
+      ',',
+      5,
+      ','
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
@@ -386,53 +424,55 @@ describe ('JS array functions', function () {
 
   it ('arr_sort', function () {
     var template =
-      '{ origin = [1, 2, 3, 2, 1, 4, 5, 3, 2] }' +
-      '{ sorted = arr_sort(origin) }' +
-      '{ for (item, sorted) }' +
+      '<component>' +
+      '<variable name={origin} value={[1, 2, 3, 2, 1, 4, 5, 3, 2]} />' +
+      '<variable name={sorted} value={arr_sort(origin)} />' +
+      '<for-each item={item} from={sorted}>' +
       '{ item },' +
-      '{ endfor }' +
+      '</for-each>' +
       '-' +
-      '{ for (item, origin) }' +
+      '<for-each item={item} from={origin}>' +
       '{ item },' +
-      '{ endfor }'
+      '</for-each>' +
+      '</component>'
     var result = [
-      {type: 'text', text: '1'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '1'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '3'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '3'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '4'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '5'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '-'},
-      {type: 'text', text: '1'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '3'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '1'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '4'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '5'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '3'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','}
+      1,
+      ',',
+      1,
+      ',',
+      2,
+      ',',
+      2,
+      ',',
+      2,
+      ',',
+      3,
+      ',',
+      3,
+      ',',
+      4,
+      ',',
+      5,
+      ',',
+      '-',
+      1,
+      ',',
+      2,
+      ',',
+      3,
+      ',',
+      2,
+      ',',
+      1,
+      ',',
+      4,
+      ',',
+      5,
+      ',',
+      3,
+      ',',
+      2,
+      ','
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
@@ -440,53 +480,55 @@ describe ('JS array functions', function () {
 
   it ('arr_sort_reverse', function () {
     var template =
-      '{ origin = [1, 2, 3, 2, 1, 4, 5, 3, 2] }' +
-      '{ sorted = arr_sort_reverse(origin) }' +
-      '{ for (item, sorted) }' +
+      '<component>' +
+      '<variable name={origin} value={[1, 2, 3, 2, 1, 4, 5, 3, 2] } />' +
+      '<variable name={sorted} value={ arr_sort_reverse(origin) } />' +
+      '<for-each item={item} from={sorted}>' +
       '{ item },' +
-      '{ endfor }' +
+      '</for-each>' +
       '-' +
-      '{ for (item, origin) }' +
+      '<for-each item={item} from={origin}>' +
       '{ item },' +
-      '{ endfor }'
+      '</for-each>' +
+      '</component>'
     var result = [
-      {type: 'text', text: '5'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '4'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '3'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '3'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '1'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '1'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '-'},
-      {type: 'text', text: '1'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '3'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '1'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '4'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '5'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '3'},
-      {type: 'text', text: ','},
-      {type: 'text', text: '2'},
-      {type: 'text', text: ','}
+      5,
+      ',',
+      4,
+      ',',
+      3,
+      ',',
+      3,
+      ',',
+      2,
+      ',',
+      2,
+      ',',
+      2,
+      ',',
+      1,
+      ',',
+      1,
+      ',',
+      '-',
+      1,
+      ',',
+      2,
+      ',',
+      3,
+      ',',
+      2,
+      ',',
+      1,
+      ',',
+      4,
+      ',',
+      5,
+      ',',
+      3,
+      ',',
+      2,
+      ','
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)
@@ -494,9 +536,11 @@ describe ('JS array functions', function () {
 
   it ('arr_key', function () {
     var template =
-      '{ origin = ["e":1, "c":2, "f":3, "a":2, "b":1, "d":4, "i":5, "h":3, "g":2] }' +
-      '{ arr_key(origin, 2) }'
+      '<component>' +
+      '<variable name={origin} value={["e":1, "c":2, "f":3, "a":2, "b":1, "d":4, "i":5, "h":3, "g":2] } />' +
+      '{ arr_key(origin, 2) }' +
+      '</component>'
 
-    return parseJs(template).should.eventually.deep.equal([{type: 'text', text: 'c'}])
+    return parseJs(template).should.eventually.deep.equal(['c'])
   })
 })
