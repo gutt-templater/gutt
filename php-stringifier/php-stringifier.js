@@ -82,7 +82,7 @@ function attrValueHandle (attr, id) {
 
 function attrsHandler (fragment, attrs) {
   var result = []
-  var attrsFragment = fragment.firstChild ? handleTemplate(fragment.firstChild) : ''
+  var attrsFragment = fragment.firstChild ? handleTemplate(fragment.firstChild) : finishNode(fragment)
 
   attrs.forEach(function (attr) {
     result.push(attrValueHandle(attr, fragment.id))
@@ -117,7 +117,7 @@ function handleDefaultTag (node) {
   linkNodeWithAttrFragment(node, fragment)
 
   if (!node.isSingle) {
-    children = node.firstChild ? handleTemplate(node.firstChild) : ''
+    children = node.firstChild ? handleTemplate(node.firstChild) : finishNode(node)
   }
 
   attrs = attrsHandler(fragment, node.attrs)
@@ -224,9 +224,9 @@ function handleIfStatement (node) {
     parentNode = parentNode.parentNode
   }
 
-  if (!node.firstChild) return ''
+  content = node.firstChild ? handleTemplate(node.firstChild) : finishNode(node)
 
-  content = handleTemplate(node.firstChild)
+  if (!node.firstChild) return ''
 
   if (parentNode.type === 'tag' && parentNode.name === 'fragment') {
     mapCurrentFragmentNode[parentNode.id] = node.parentNode
@@ -261,9 +261,9 @@ function handleForEachStatement (node) {
     parentNode = parentNode.parentNode
   }
 
-  if (!node.firstChild) return ''
+  content = node.firstChild ? handleTemplate(node.firstChild) : finishNode(node)
 
-  content = handleTemplate(node.firstChild)
+  if (!node.firstChild) return ''
 
   if (parentNode.type === 'tag' && parentNode.name === 'fragment') {
     mapCurrentFragmentNode[parentNode.id] = node.parentNode
@@ -343,10 +343,10 @@ function handleComponent (node) {
 
   linkNodeWithAttrFragment(node, fragment)
 
-  if (!node.isSingle) {
+  if (!node.isSingle && node.firstChild) {
     children =
       '<?php ob_start(); ?>\n' +
-      (node.firstChild ? handleTemplate(node.firstChild) : '') +
+      handleTemplate(node.firstChild) +
       '<?php $children' + node.id + ' = ob_get_contents();?>' +
       '<?php ob_end_clean(); ?>'
   }
@@ -416,7 +416,7 @@ function handleCaseStatement (node) {
     throw new ParseError('<case /> must not be placed after <default />', {line: node.line, column: node.column})
   }
 
-  children = node.firstChild ? handleTemplate(node.firstChild) : ''
+  children = node.firstChild ? handleTemplate(node.firstChild) : finishNode(node)
   params = extractValuesFromAttrs(node.attrs, ['test'])
 
   if (isFirstSwitchCase(node)) {
@@ -453,7 +453,7 @@ function handleDefaultStatement (node) {
     throw new ParseError('<default /> must be at first level inside <switch />', {line: node.line, column: node.column})
   }
 
-  children = node.firstChild ? handleTemplate(node.firstChild) : ''
+  children = node.firstChild ? handleTemplate(node.firstChild) : finishNode(node)
 
   if (isFirstSwitchCase(node)) {
     setSwitchMarkerHasDefault(node)
@@ -592,16 +592,19 @@ function finishNode (node) {
       setMapCurrentFragmentNode(attrFragment, currentAttrNode.parentNode)
     }
   }
+
+  return ''
 }
 
 function handleTemplate (node) {
   var buffer = []
 
-  buffer.push(handleNode(node))
-
-  while (node.nextSibling) {
-    node = node.nextSibling
+  while (node) {
     buffer.push(handleNode(node))
+
+    if (!node.nextSibling) break;
+
+    node = node.nextSibling
   }
 
   if (node.parentNode) {

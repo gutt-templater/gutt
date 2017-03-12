@@ -11,7 +11,7 @@ describe ('JS array functions', function () {
   it ('arr_keys', function () {
     var template =
       '<component>' +
-      '<variable name={keys} value={arr_keys([1, 2, 3, a: 5, \'tr\', [3], \'t\': 6, a > b, 35: 36])} />' +
+      '<variable name={keys} value={arr_keys([1, 2, 3, \'a\': 5, \'tr\', [3], \'t\': 6, a > b, 35: 36])} />' +
       '<for-each item={key} from={keys}>' +
       '{ key },' +
       '</for-each>' +
@@ -30,6 +30,8 @@ describe ('JS array functions', function () {
       '5',
       ',',
       '35',
+      ',',
+      'a',
       ',',
       't',
       ','

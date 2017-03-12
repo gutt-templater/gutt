@@ -38,6 +38,8 @@ function prepareSingleQuoteString(str) {
 "||"                        return '||';
 "&"                         return '&';
 "|"                         return '|';
+"~"                         return '~';
+"^"                         return '^';
 "!"                         return '!';
 "?"                         return '?';
 ","                         return ',';
@@ -54,6 +56,7 @@ function prepareSingleQuoteString(str) {
 %left '&&'
 %left '|'
 %left '&'
+%left '^'
 %left '!='
 %left '=='
 %left '>=' '>' '<=' '<'
@@ -61,6 +64,7 @@ function prepareSingleQuoteString(str) {
 %left '>>' '<<'
 %left '+' '-'
 %left '*' '/'
+%left BITNOT
 %left UMINUS
 %left NOT
 %left '?'
@@ -103,9 +107,9 @@ params
 
 string
   : SINGLE_QUOTE_STRING
-    { $$ = prepareDoubleQuoteString($1); }
+    { $$ = {type: 'str', value: prepareDoubleQuoteString($1)}; }
   | DOUBLE_QUOTE_STRING
-    { $$ = prepareSingleQuoteString($1); }
+    { $$ = {type: 'str', value: prepareSingleQuoteString($1)}; }
   ;
 
 arr
@@ -135,9 +139,7 @@ arr_element
 
 arr_key
   : string
-    { $$ = {type: 'str', value: $1}; }
   | numb
-  | variable
   ;
 
 numb
@@ -152,6 +154,8 @@ expression
     { $$ = {type: 'and', value: [$1, $3]}; }
   | expression '|' expression
     { $$ = {type: 'bitor', value: [$1, $3]}; }
+  | expression '^' expression
+    { $$ = {type: 'bitxor', value: [$1, $3]}; }
   | expression '&' expression
     { $$ = {type: 'bitand', value: [$1, $3]}; }
   | expression '!=' expression
@@ -166,20 +170,22 @@ expression
     { $$ = {type: 'ltequal', value: [$1, $3]}; }
   | expression '<' expression
     { $$ = {type: 'lt', value: [$1, $3]}; }
+  | expression '>>' expression
+    { $$ = {type: 'rightshift', value: [$1, $3]}; }
+  | expression '<<' expression
+    { $$ = {type: 'leftshift', value: [$1, $3]}; }
   | expression '++' expression
     { $$ = {type: 'concat', value: [$1, $3]}; }
   | expression '+' expression
     { $$ = {type: 'plus', value: [$1, $3]}; }
   | expression '-' expression
     { $$ = {type: 'minus', value: [$1, $3]}; }
-  | expression '<<' expression
-    { $$ = {type: 'leftshift', value: [$1, $3]}; }
-  | expression '>>' expression
-    { $$ = {type: 'rightshift', value: [$1, $3]}; }
   | expression '*' expression
     { $$ = {type: 'mult', value: [$1, $3]}; }
   | expression '/' expression
     { $$ = {type: 'divis', value: [$1, $3]}; }
+  | '~' expression %prec BITNOT
+    { $$ = {type: 'bitnot', value: $2}; }
   | '-' expression %prec UMINUS
     { $$ = {type: 'uminus', value: $2}; }
   | '!' expression %prec NOT
@@ -190,5 +196,6 @@ expression
     { $$ = {type: 'brack', value: $2}; }
   | arr
   | function
+  | variable
   | arr_key
   ;

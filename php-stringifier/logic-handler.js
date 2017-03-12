@@ -206,95 +206,55 @@ function expression (tree) {
 
     case 'str':
       return expression('"' + tree.value + '"')
-
     case 'num':
-      str += tree.value
-
-      return str
+      return tree.value
     case 'leftshift':
-      str += expression(tree.value[0]) + ' << ' + expression(tree.value[1])
-
-      return str
+      return expression(tree.value[0]) + ' << ' + expression(tree.value[1])
     case 'rightshift':
-      str += expression(tree.value[0]) + ' >> ' + expression(tree.value[1])
-
-      return str
+      return expression(tree.value[0]) + ' >> ' + expression(tree.value[1])
     case 'plus':
-      str += expression(tree.value[0]) + ' + ' + expression(tree.value[1])
-
-      return str
+      return expression(tree.value[0]) + ' + ' + expression(tree.value[1])
     case 'minus':
-      str += expression(tree.value[0]) + ' - ' + expression(tree.value[1])
-
-      return str
+      return expression(tree.value[0]) + ' - ' + expression(tree.value[1])
     case 'mult':
-      str += expression(tree.value[0]) + ' * ' + expression(tree.value[1])
-
-      return str
+      return expression(tree.value[0]) + ' * ' + expression(tree.value[1])
     case 'divis':
-      str += expression(tree.value[0]) + ' / ' + expression(tree.value[1])
-
-      return str
+      return expression(tree.value[0]) + ' / ' + expression(tree.value[1])
     case 'or':
-      str += expression(tree.value[0]) + ' || ' + expression(tree.value[1])
-
-      return str
+      return expression(tree.value[0]) + ' || ' + expression(tree.value[1])
     case 'and':
-      str += expression(tree.value[0]) + ' && ' + expression(tree.value[1])
-
-      return str
+      return expression(tree.value[0]) + ' && ' + expression(tree.value[1])
+    case 'bitnot':
+      return ' ~ ' + expression(tree.value)
     case 'bitor':
-      str += expression(tree.value[0]) + ' | ' + expression(tree.value[1])
-
-      return str
+      return expression(tree.value[0]) + ' | ' + expression(tree.value[1])
     case 'bitand':
-      str += expression(tree.value[0]) + ' & ' + expression(tree.value[1])
-
-      return str
+      return expression(tree.value[0]) + ' & ' + expression(tree.value[1])
+    case 'bitxor':
+      return expression(tree.value[0]) + ' ^ ' + expression(tree.value[1])
     case 'notequal':
-      str += expression(tree.value[0]) + ' != ' + expression(tree.value[1])
-
-      return str
+    case 'notequal':
+      return expression(tree.value[0]) + ' != ' + expression(tree.value[1])
     case 'equal':
-      str += expression(tree.value[0]) + ' == ' + expression(tree.value[1])
-
-      return str
+      return expression(tree.value[0]) + ' == ' + expression(tree.value[1])
     case 'gtequal':
-      str += expression(tree.value[0]) + ' >= ' + expression(tree.value[1])
-
-      return str
+      return expression(tree.value[0]) + ' >= ' + expression(tree.value[1])
     case 'gt':
-      str += expression(tree.value[0]) + ' > ' + expression(tree.value[1])
-
-      return str
+      return expression(tree.value[0]) + ' > ' + expression(tree.value[1])
     case 'lt':
-      str += expression(tree.value[0]) + ' < ' + expression(tree.value[1])
-
-      return str
+      return expression(tree.value[0]) + ' < ' + expression(tree.value[1])
     case 'ltequal':
-      str += expression(tree.value[0]) + ' <= ' + expression(tree.value[1])
-
-      return str
+      return expression(tree.value[0]) + ' <= ' + expression(tree.value[1])
     case 'isset':
-      str += 'isset(' + expression(tree.value) + ')'
-
-      return str
+      return 'isset(' + expression(tree.value) + ')'
     case 'not':
-      str += '!' + expression(tree.value)
-
-      return str
+      return '!' + expression(tree.value)
     case 'brack':
-      str += '(' + expression(tree.value) + ')'
-
-      return str
+      return '(' + expression(tree.value) + ')'
     case 'uminus':
-      str += '-' + expression(tree.value)
-
-      return str
+      return '-' + expression(tree.value)
     case 'func':
-      str = handleFunction(tree)
-
-      return str
+      return handleFunction(tree)
     case 'concat':
       return tree.value.map(function (item) {
         return expression(item)
@@ -303,9 +263,6 @@ function expression (tree) {
     case 'array':
       if (tree.range) {
         switch (tree.range.type) {
-          case 'empty':
-            return '[]'
-
           case 'open':
             str = 'mkArr(' + expression(tree.range.value[0])
             str += ', ' + expression(tree.range.value[1])

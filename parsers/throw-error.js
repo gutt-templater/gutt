@@ -55,6 +55,7 @@ function throwError (e, source, filePath) {
   }
 
   console.log(chalk.red(e.message))
+  console.log(e.stack);
 }
 
 module.exports = throwError

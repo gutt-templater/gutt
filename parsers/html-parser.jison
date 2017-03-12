@@ -1,4 +1,5 @@
 %{
+var Script = require('./script');
 var Tag = require('./tag');
 var Comment = require('./comment');
 var Text = require('./text');
@@ -62,6 +63,7 @@ function createLogicNode (node, line, column) {
 [\s\n\t]+                   /* skip whitespace */
 <<EOF>>                     return 'EOF';
 [a-zA-Z_][a-zA-Z\-_0-9]*\b  return 'ID';
+\<script(.|\s|\n|\t)*?\>(.|\s|\n|\t)*?\<\/\s*script  return 'SCRIPT_LITERAL';
 \<\!\-\-.*?\-\-             return 'COMMENT_LITERAL';
 ':'                         return ':';
 '<'                         return '<';
@@ -96,7 +98,17 @@ nodes
   ;
 
 node
-  : '<' sl tagname attrs ss text_after_tag
+  : SCRIPT_LITERAL text_after_tag
+    {
+      var script = new Script($1, @1.first_line, @1.first_column);
+
+      appendNode(script);
+
+      if ($2) {
+        appendNode($2);
+      }
+    }
+  | '<' sl tagname attrs ss text_after_tag
     {
       if (!$2.length) {
         var isSingle = $5.length || $3 === '!DOCTYPE';

@@ -11,13 +11,13 @@ describe ('PHP array functions', function () {
   it ('arr_keys', function () {
     var template =
       '<component>' +
-      '<variable name={keys} value={arr_keys([1, 2, 3, a: 5, "str", [3], "t": 6, a > b, 35: 36]) } />' +
+      '<variable name={keys} value={arr_keys([1, 2, 3, \'a\': 5, "str", [3], "t": 6, a > b, 35: 36]) } />' +
       '<for-each item={key} from={keys}>' +
       '{ key },' +
       '</for-each>' +
       '</component>'
 
-    return parsePhp(template, {a: 4, b: 5}).should.eventually.equal('0,1,2,3,4,5,35,t,')
+    return parsePhp(template, {a: 4, b: 5}).should.eventually.equal('0,1,2,3,4,5,35,a,t,')
   })
 
   it ('arr_contain positive', function () {

@@ -365,6 +365,55 @@ describe ('Javascript stringifier', function () {
     return parseJs(template, {a: 1, b: 2}).should.eventually.deep.equal(result)
   })
 
+  it ('empty statements', function () {
+    var template =
+      '<component>' +
+      '<div>' +
+      '<switch>' +
+      '<case test={a > b}>' +
+      '</case>' +
+      '<default>' +
+      '</default>' +
+      '</switch>' +
+      '<variable name={emptyarr} value={[]} />' +
+      '<if test={1}></if>' +
+      '<for-each item={item} from={[]}></for-each>' +
+      '</div>' +
+      '</component>'
+    var result = [
+      {
+        tag: 'div',
+        attrs: {},
+        children: []
+      }
+    ]
+
+    return parseJs(template, {a: 1, b: 2}).should.eventually.deep.equal(result)
+  })
+
+  it ('if expression with attribute', function () {
+    var template =
+      '<component>' +
+      '<span>' +
+      '<if test={a == b}>' +
+      '<attribute name="data-value" value="a is equal b" />' +
+      '</if>' +
+      '</span>' +
+      '</component>'
+    var params = {a: 5, b: 5}
+    var result = [
+      {
+        tag: 'span',
+        attrs: {
+          'data-value': 'a is equal b'
+        },
+        children: []
+      }
+    ]
+
+    return parseJs(template, params).should.eventually.deep.equal(result)
+  })
+
   it ('array expressions open range grow up', function () {
     var template =
       '<component>' +
@@ -531,6 +580,78 @@ describe ('Javascript stringifier', function () {
           }
         ]
       }
+    ]
+
+    return parseJs(template).should.eventually.deep.equal(result)
+  })
+
+  it ('isset', function () {
+    var template =
+      '<component>' +
+      '<switch>' +
+      '<case test={!field[\'hide\']? || (field[\'hide\']? && !field[\'hide\'])}>hidden</case>' +
+      '<default>show</default>' +
+      '</switch>' +
+      '</component>'
+
+    return parseJs(template, {field: {}}).should.eventually.deep.equal(['hidden'])
+  })
+
+  it ('param with default value', function () {
+    var template =
+      '<component>' +
+      '<param name={a} value={1} />' +
+      '<switch>' +
+      '<case test={a > b}>first</case>' +
+      '<default>default</default>' +
+      '</switch>' +
+      '</component>'
+
+    return parseJs(template, {b: 2}).should.eventually.deep.equal(['default'])
+  })
+
+  it ('param with rewritten value', function () {
+    var template =
+      '<component>' +
+      '<param name={a} value={1} />' +
+      '<switch>' +
+      '<case test={a > b}>first</case>' +
+      '<default>default</default>' +
+      '</switch>' +
+      '</component>'
+
+    return parseJs(template, {a: 3, b: 2}).should.eventually.deep.equal(['first'])
+  })
+
+  it ('bits operations', function () {
+    var template =
+      '<component>' +
+      '<variable name={flag1} value={1 << 0} />' +
+      '<variable name={flag2} value={1 << 1} />' +
+      '<variable name={flag3} value={1 << 2} />' +
+      '<variable name={mix} value={flag1 | flag2} />' +
+      '<if test={mix & flag1}>1</if>' +
+      '<if test={mix & flag2}>2</if>' +
+      '<if test={mix & flag3}>3</if>' +
+      '<if test={mix | flag1}>4</if>' +
+      '<if test={mix | flag2}>5</if>' +
+      '<if test={mix | flag3}>6</if>' +
+      '<variable name={mix} value={mix & ~flag1} />' +
+      '<if test={mix & flag1}>7</if>' +
+      '<variable name={mix} value={1 | 1 << 1 | 1 << 2 | 1 << 3} />' +
+      '<if test={mix & flag3}>8</if>' +
+      '<variable name={mix} value={mix & ~(1 << 2)} />' +
+      '<if test={mix & flag3}>9</if>' +
+      '{15 ^ 7}' +
+      '</component>'
+    var result = [
+      '1',
+      '2',
+      '4',
+      '5',
+      '6',
+      '8',
+      8
     ]
 
     return parseJs(template).should.eventually.deep.equal(result)

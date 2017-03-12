@@ -2,25 +2,31 @@ var logicHandler = require('./logic-handler')
 var Attr = require('../parsers/attr')
 var Tag = require('../parsers/tag')
 var reservedTags = [
-  'apply-attribute',
+  'param',
   'attribute',
-  'apply-if',
+  'apply-attribute',
   'if',
-  'apply-for-each',
+  'apply-if',
   'for-each',
+  'apply-for-each',
   'switch',
-  'case',
-  'default',
   'apply-switch',
+  'case',
   'apply-case',
+  'default',
   'apply-default'
 ]
 var pairedTags = [
   'if',
+  'apply-if',
   'for-each',
+  'apply-for-each',
   'switch',
+  'apply-switch',
   'case',
-  'default'
+  'apply-case',
+  'default',
+  'apply-default'
 ]
 var singleTags = ['input']
 var mapAttrFragments = {}
@@ -82,7 +88,7 @@ function attrValueHandle (attr, id) {
 
 function attrsHandler (fragment, attrs) {
   var result = []
-  var attrsFragment = fragment.firstChild ? handleTemplate(fragment.firstChild) : ''
+  var attrsFragment = fragment.firstChild ? handleTemplate(fragment.firstChild) : finishNode(fragment)
 
   attrs.forEach(function (attr) {
     result.push(attrValueHandle(attr, fragment.id))
@@ -116,7 +122,7 @@ function handleDefaultTag (node) {
   linkNodeWithAttrFragment(node, fragment)
 
   if (!node.isSingle) {
-    children = node.firstChild ? handleTemplate(node.firstChild) : ''
+    children = node.firstChild ? handleTemplate(node.firstChild) : finishNode(node)
   }
 
   attrs = attrsHandler(fragment, node.attrs)
@@ -201,7 +207,7 @@ function handleParam (node) {
   name = handleNode(params.name)
   value = handleNode(params.value)
 
-  return 'if (typeof ' + name + ' !== \'undefined\') ' + name + ' = ' + value + ';\n'
+  return 'if (typeof ' + name + ' === \'undefined\' || ' + name + ' === null) ' + name + ' = ' + value + ';\n'
 }
 
 function getParentTagNode (node) {
@@ -221,9 +227,9 @@ function handleIfStatement (node) {
     parentNode = parentNode.parentNode
   }
 
-  if (!node.firstChild) return ''
+  content = node.firstChild ? handleTemplate(node.firstChild) : finishNode(node)
 
-  content = handleTemplate(node.firstChild)
+  if (!node.firstChild) return ''
 
   if (parentNode.type === 'tag' && parentNode.name === 'fragment') {
     mapCurrentFragmentNode[parentNode.id] = node.parentNode
@@ -260,9 +266,9 @@ function handleForEachStatement (node) {
     parentNode = parentNode.parentNode
   }
 
-  if (!node.firstChild) return ''
+  content = node.firstChild ? handleTemplate(node.firstChild) : finishNode(node)
 
-  content = handleTemplate(node.firstChild)
+  if (!node.firstChild) return ''
 
   if (parentNode.type === 'tag' && parentNode.name === 'fragment') {
     mapCurrentFragmentNode[parentNode.id] = node.parentNode
@@ -353,10 +359,10 @@ function handleComponent (node) {
 
   linkNodeWithAttrFragment(node, fragment)
 
-  if (!node.isSingle) {
+  if (!node.isSingle && node.firstChild) {
     children +=
       '(function (__children) {\n' +
-      (node.firstChild ? handleTemplate(node.firstChild) + '\n' : '') +
+      handleTemplate(node.firstChild) +
       '})(__children' + node.id + ');\n'
   }
 
@@ -428,7 +434,7 @@ function handleCaseStatement (node) {
     throw new ParseError('<case /> must not be placed after <default />', {line: node.line, column: node.column})
   }
 
-  children = node.firstChild ? handleTemplate(node.firstChild) : ''
+  children = node.firstChild ? handleTemplate(node.firstChild) : finishNode(node)
   params = extractValuesFromAttrs(node.attrs, ['test'])
 
   if (isFirstSwitchCase(node)) {
@@ -465,7 +471,7 @@ function handleDefaultStatement (node) {
     throw new ParseError('<default /> must be at first level inside <switch />', {line: node.line, column: node.column})
   }
 
-  children = node.firstChild ? handleTemplate(node.firstChild) : ''
+  children = node.firstChild ? handleTemplate(node.firstChild) : finishNode(node)
 
   if (isFirstSwitchCase(node)) {
     setSwitchMarkerHasDefault(node)
@@ -608,16 +614,19 @@ function finishNode (node) {
       setMapCurrentFragmentNode(attrFragment, currentAttrNode.parentNode)
     }
   }
+
+  return ''
 }
 
 function handleTemplate (node) {
   var buffer = []
 
-  buffer.push(handleNode(node))
-
-  while (node.nextSibling) {
-    node = node.nextSibling
+  while (node) {
     buffer.push(handleNode(node))
+
+    if (!node.nextSibling) break;
+
+    node = node.nextSibling
   }
 
   if (node.parentNode) {

@@ -72,12 +72,12 @@
   }
 */
 var htmlParser = (function(){
-var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[5,7,13,27],$V1=[1,8],$V2=[20,22],$V3=[1,12],$V4=[18,20,27,28,29,30],$V5=[1,28],$V6=[1,29];
+var o=function(k,v,o,l){for(o=o||{},l=k.length;l--;o[k[l]]=v);return o},$V0=[5,7,9,14,28],$V1=[1,9],$V2=[1,11],$V3=[21,23],$V4=[19,21,28,29,30,31],$V5=[1,30],$V6=[1,31];
 var parser = {trace: function trace() { },
 yy: {},
-symbols_: {"error":2,"document":3,"nodes":4,"EOF":5,"node":6,"<":7,"sl":8,"tagname":9,"attrs":10,"ss":11,"text_after_tag":12,"COMMENT_LITERAL":13,"logic":14,"close_logic":15,"text_after_logic":16,"}":17,"/":18,"se":19,"ID":20,":":21,"!":22,"attr":23,"=":24,"string":25,"LOGIC_CLOSE_AT_ATTRIBUTE":26,"LOGIC_LITERAL":27,"STRING_DOUBLE_QUOTE_LITERAL":28,"STRING_SINGLE_QUOTE_LITERAL":29,"TEXT_AFTER_TAG":30,"TEXT_AFTER_LOGIC":31,"$accept":0,"$end":1},
-terminals_: {2:"error",5:"EOF",7:"<",13:"COMMENT_LITERAL",17:"}",18:"/",20:"ID",21:":",22:"!",24:"=",26:"LOGIC_CLOSE_AT_ATTRIBUTE",27:"LOGIC_LITERAL",28:"STRING_DOUBLE_QUOTE_LITERAL",29:"STRING_SINGLE_QUOTE_LITERAL",30:"TEXT_AFTER_TAG",31:"TEXT_AFTER_LOGIC"},
-productions_: [0,[3,2],[4,0],[4,2],[6,6],[6,2],[6,2],[15,1],[15,1],[11,0],[11,1],[9,2],[9,4],[19,0],[19,1],[10,0],[10,2],[23,1],[23,3],[23,4],[23,1],[23,4],[23,5],[14,1],[25,1],[25,1],[8,0],[8,1],[12,1],[16,1]],
+symbols_: {"error":2,"document":3,"nodes":4,"EOF":5,"node":6,"SCRIPT_LITERAL":7,"text_after_tag":8,"<":9,"sl":10,"tagname":11,"attrs":12,"ss":13,"COMMENT_LITERAL":14,"logic":15,"close_logic":16,"text_after_logic":17,"}":18,"/":19,"se":20,"ID":21,":":22,"!":23,"attr":24,"=":25,"string":26,"LOGIC_CLOSE_AT_ATTRIBUTE":27,"LOGIC_LITERAL":28,"STRING_DOUBLE_QUOTE_LITERAL":29,"STRING_SINGLE_QUOTE_LITERAL":30,"TEXT_AFTER_TAG":31,"TEXT_AFTER_LOGIC":32,"$accept":0,"$end":1},
+terminals_: {2:"error",5:"EOF",7:"SCRIPT_LITERAL",9:"<",14:"COMMENT_LITERAL",18:"}",19:"/",21:"ID",22:":",23:"!",25:"=",27:"LOGIC_CLOSE_AT_ATTRIBUTE",28:"LOGIC_LITERAL",29:"STRING_DOUBLE_QUOTE_LITERAL",30:"STRING_SINGLE_QUOTE_LITERAL",31:"TEXT_AFTER_TAG",32:"TEXT_AFTER_LOGIC"},
+productions_: [0,[3,2],[4,0],[4,2],[6,2],[6,6],[6,2],[6,2],[16,1],[16,1],[13,0],[13,1],[11,2],[11,4],[20,0],[20,1],[12,0],[12,2],[24,1],[24,3],[24,4],[24,1],[24,4],[24,5],[15,1],[26,1],[26,1],[10,0],[10,1],[8,1],[17,1]],
 performAction: function anonymous(yytext, yyleng, yylineno, yy, yystate /* action[1] */, $$ /* vstack */, _$ /* lstack */) {
 /* this == yyval */
 
@@ -93,6 +93,17 @@ case 3:
  this.$ = $$[$0-1]; 
 break;
 case 4:
+
+      var script = new Script($$[$0-1], _$[$0-1].first_line, _$[$0-1].first_column);
+
+      appendNode(script);
+
+      if ($$[$0]) {
+        appendNode($$[$0]);
+      }
+    
+break;
+case 5:
 
       if (!$$[$0-4].length) {
         var isSingle = $$[$0-1].length || $$[$0-3] === '!DOCTYPE';
@@ -120,7 +131,7 @@ case 4:
       }
     
 break;
-case 5:
+case 6:
 
       var comment = new Comment($$[$0-1].substr(4, $$[$0-1].length - 6), _$[$0-1].first_line, _$[$0-1].first_column);
       appendNode(comment);
@@ -130,7 +141,7 @@ case 5:
       }
     
 break;
-case 6:
+case 7:
 
       var logic = new LogicNode($$[$0-1], _$[$0-1].first_line, _$[$0].first_column);
 
@@ -141,52 +152,52 @@ case 6:
       }
     
 break;
-case 9: case 13: case 26:
+case 10: case 14: case 27:
  this.$ = ''; 
 break;
-case 10:
+case 11:
  this.$ = '/'; 
 break;
-case 11:
+case 12:
  this.$ = $$[$0-1] + $$[$0]; 
 break;
-case 12:
+case 13:
  this.$ = $$[$0-3] + $$[$0-2] + $$[$0-1] + $$[$0]; 
 break;
-case 15:
+case 16:
  this.$ = []; 
 break;
-case 16:
+case 17:
  $$[$0-1].push($$[$0]); this.$ = $$[$0-1]; 
 break;
-case 17:
+case 18:
  this.$ = new Attr(new Str($$[$0], _$[$0].first_line, _$[$0].first_column), null); 
 break;
-case 18:
+case 19:
  this.$ = new Attr(new Str($$[$0-2], _$[$0-2].first_line, _$[$0-2].first_column), $$[$0]); 
 break;
-case 19:
+case 20:
  this.$ = new Attr(new Str($$[$0-3], _$[$0-3].first_line, _$[$0-3].first_column), $$[$0-1]); 
 break;
-case 20:
+case 21:
  this.$ = new Attr(null, $$[$0]); 
 break;
-case 21:
+case 22:
  this.$ = new Attr($$[$0-3], $$[$0]); 
 break;
-case 22:
+case 23:
  this.$ = new Attr($$[$0-4], $$[$0-1]); 
 break;
-case 23:
+case 24:
  this.$ = createLogicNode($$[$0].substr(1), _$[$0].first_line, _$[$0].first_column + 2); 
 break;
-case 24:
+case 25:
  this.$ = new Str(prepareDoubleQuoteString($$[$0]), _$[$0].first_line, _$[$0].first_column + 1); 
 break;
-case 25:
+case 26:
  this.$ = new Str(prepareSingleQuoteString($$[$0]), _$[$0].first_line, _$[$0].first_column + 1); 
 break;
-case 28: case 29:
+case 29: case 30:
  if ($$[$0].length > 1) {
         this.$ = new Text($$[$0].substr(1), _$[$0].first_line, _$[$0].first_column);
       } else {
@@ -196,8 +207,8 @@ case 28: case 29:
 break;
 }
 },
-table: [o($V0,[2,2],{3:1,4:2}),{1:[3]},{5:[1,3],6:4,7:[1,5],13:[1,6],14:7,27:$V1},{1:[2,1]},o($V0,[2,3]),o($V2,[2,26],{8:9,18:[1,10]}),{12:11,30:$V3},{15:13,16:14,17:[1,15],31:[1,16]},o([17,26,31],[2,23]),{9:17,19:18,20:[2,13],22:[1,19]},o($V2,[2,27]),o($V0,[2,5]),o($V0,[2,28]),o($V0,[2,6]),o($V0,[2,7]),o($V0,[2,8]),o($V0,[2,29]),o($V4,[2,15],{10:20}),{20:[1,21]},{20:[2,14]},{11:22,14:27,18:[1,24],20:[1,25],23:23,25:26,27:$V1,28:$V5,29:$V6,30:[2,9]},o($V4,[2,11],{21:[1,30]}),{12:31,30:$V3},o($V4,[2,16]),{30:[2,10]},o($V4,[2,17],{24:[1,32]}),o($V4,[2,20]),{26:[1,33]},o($V4,[2,24]),o($V4,[2,25]),{20:[1,34]},o($V0,[2,4]),{14:36,25:35,27:$V1,28:$V5,29:$V6},{24:[1,37]},o($V4,[2,12]),o($V4,[2,18]),{26:[1,38]},{14:40,25:39,27:$V1,28:$V5,29:$V6},o($V4,[2,19]),o($V4,[2,21]),{26:[1,41]},o($V4,[2,22])],
-defaultActions: {3:[2,1],19:[2,14],24:[2,10]},
+table: [o($V0,[2,2],{3:1,4:2}),{1:[3]},{5:[1,3],6:4,7:[1,5],9:[1,6],14:[1,7],15:8,28:$V1},{1:[2,1]},o($V0,[2,3]),{8:10,31:$V2},o($V3,[2,27],{10:12,19:[1,13]}),{8:14,31:$V2},{16:15,17:16,18:[1,17],32:[1,18]},o([18,27,32],[2,24]),o($V0,[2,4]),o($V0,[2,29]),{11:19,20:20,21:[2,14],23:[1,21]},o($V3,[2,28]),o($V0,[2,6]),o($V0,[2,7]),o($V0,[2,8]),o($V0,[2,9]),o($V0,[2,30]),o($V4,[2,16],{12:22}),{21:[1,23]},{21:[2,15]},{13:24,15:29,19:[1,26],21:[1,27],24:25,26:28,28:$V1,29:$V5,30:$V6,31:[2,10]},o($V4,[2,12],{22:[1,32]}),{8:33,31:$V2},o($V4,[2,17]),{31:[2,11]},o($V4,[2,18],{25:[1,34]}),o($V4,[2,21]),{27:[1,35]},o($V4,[2,25]),o($V4,[2,26]),{21:[1,36]},o($V0,[2,5]),{15:38,26:37,28:$V1,29:$V5,30:$V6},{25:[1,39]},o($V4,[2,13]),o($V4,[2,19]),{27:[1,40]},{15:42,26:41,28:$V1,29:$V5,30:$V6},o($V4,[2,20]),o($V4,[2,22]),{27:[1,43]},o($V4,[2,23])],
+defaultActions: {3:[2,1],21:[2,15],26:[2,11]},
 parseError: function parseError(str, hash) {
     if (hash.recoverable) {
         this.trace(str);
@@ -349,6 +360,7 @@ parse: function parse(input) {
     return true;
 }};
 
+var Script = require('./script');
 var Tag = require('./tag');
 var Comment = require('./comment');
 var Text = require('./text');
@@ -736,40 +748,42 @@ case 0:/* skip whitespace */
 break;
 case 1:return 5;
 break;
-case 2:return 20;
+case 2:return 21;
 break;
-case 3:return 13;
+case 3:return 7;
 break;
-case 4:return 21;
+case 4:return 14;
 break;
-case 5:return 7;
+case 5:return 22;
 break;
-case 6:return 18;
+case 6:return 9;
 break;
-case 7:return 24;
+case 7:return 19;
 break;
-case 8:return 26;
+case 8:return 25;
 break;
-case 9:return 30;
+case 9:return 27;
 break;
 case 10:return 31;
 break;
-case 11:return 27;
+case 11:return 32;
 break;
 case 12:return 28;
 break;
 case 13:return 29;
 break;
-case 14:return 17;
+case 14:return 30;
 break;
-case 15:return 22;
+case 15:return 18;
 break;
-case 16:return 18;
+case 16:return 23;
+break;
+case 17:return 19;
 break;
 }
 },
-rules: [/^(?:[\s\n\t]+)/,/^(?:$)/,/^(?:[a-zA-Z_][a-zA-Z\-_0-9]*\b)/,/^(?:<!--.*?--)/,/^(?::)/,/^(?:<)/,/^(?:\/)/,/^(?:=)/,/^(?:\}(?=(\{(\\\}|[^\}])*?\}|"(\\"|[^\"])*?"|[^\"\'\{\}\<\>])*>))/,/^(?:>(\\\{|[^\<\{])*)/,/^(?:\}[^\>\<\{]*(?=(\{|<)))/,/^(?:\{(\\\}|[^}])*)/,/^(?:"(\\"|[^\"])*?")/,/^(?:'(\\'|[^\'])*?')/,/^(?:\})/,/^(?:!)/,/^(?:\/)/],
-conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16],"inclusive":true}}
+rules: [/^(?:[\s\n\t]+)/,/^(?:$)/,/^(?:[a-zA-Z_][a-zA-Z\-_0-9]*\b)/,/^(?:<script(.|\s|\n|\t)*?>(.|\s|\n|\t)*?<\/\s*script\b)/,/^(?:<!--.*?--)/,/^(?::)/,/^(?:<)/,/^(?:\/)/,/^(?:=)/,/^(?:\}(?=(\{(\\\}|[^\}])*?\}|"(\\"|[^\"])*?"|[^\"\'\{\}\<\>])*>))/,/^(?:>(\\\{|[^\<\{])*)/,/^(?:\}[^\>\<\{]*(?=(\{|<)))/,/^(?:\{(\\\}|[^}])*)/,/^(?:"(\\"|[^\"])*?")/,/^(?:'(\\'|[^\'])*?')/,/^(?:\})/,/^(?:!)/,/^(?:\/)/],
+conditions: {"INITIAL":{"rules":[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17],"inclusive":true}}
 });
 return lexer;
 })();
