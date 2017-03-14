@@ -19,6 +19,7 @@
     "jshint": "^2.9.2",
     "pre-commit": "^1.1.3"
   },
+  "repository": "https://github.com/makingoff/gutt",
   "pre-commit": [
     "jslint"
   ],
