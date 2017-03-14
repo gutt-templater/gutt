@@ -1,8 +1,8 @@
 var htmlParser = require('./html-parser')
-var lexerParseError = require('./lexer-parse-error')
-var ParseError = require('./parse-error')
+var lexerParseError = require('../helpers/lexer-parse-error')
+var ParseError = require('../helpers/parse-error')
 var fs = require('fs')
-var throwError = require('./throw-error')
+var throwError = require('../helpers/throw-error')
 
 htmlParser.parser.lexer.parseError = lexerParseError
 

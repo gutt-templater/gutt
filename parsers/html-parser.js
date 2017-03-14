@@ -360,18 +360,18 @@ parse: function parse(input) {
     return true;
 }};
 
-var Script = require('./script');
-var Tag = require('./tag');
-var Comment = require('./comment');
-var Text = require('./text');
-var Str = require('./string');
-var Attr = require('./attr');
-var Logic = require('./logic');
-var LogicNode = require('./logic-node');
+var Script = require('../tokens/script');
+var Tag = require('../tokens/tag');
+var Comment = require('../tokens/comment');
+var Text = require('../tokens/text');
+var Str = require('../tokens/string');
+var Attr = require('../tokens/attr');
+var Logic = require('../tokens/logic');
+var LogicNode = require('../tokens/logic-node');
 var logicParser = require('./logic-parser')
 var currentNode;
-var ParseError = require('./parse-error')
-var lexerParseError = require('./lexer-parse-error')
+var ParseError = require('../helpers/parse-error')
+var lexerParseError = require('../helpers/lexer-parse-error')
 
 logicParser.parser.lexer.parseError = lexerParseError;
 
