@@ -1,0 +1,9 @@
+.covignore
+.editorconfig
+.gitignore
+.jscsrc
+.jshintignore
+.jshintrc
+/parsers/*.jison
+/covreporter/
+/tmp/
