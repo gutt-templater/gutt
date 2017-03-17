@@ -14,6 +14,7 @@ function prepareSingleQuoteString(str) {
 [\s\n\t]+                   /* skip whitespace */
 [0-9]+("."[0-9]+)?\b        return 'NUMBER';
 [a-zA-Z]+([a-zA-Z0-9_]+)?\b return 'WORD';
+"$"                         return '$';
 ":"                         return ':';
 "*"                         return '*';
 "/"                         return '/';
@@ -87,12 +88,12 @@ variable
     { $1.keys.push($3); $$ = $1; }
   | variable '.' WORD
     { $1.keys.push({type: 'str', value: $3}); $$ = $1; }
-  | WORD
-    { $$ = {type: 'var', value: $1, keys: []}; }
+  | '$' WORD
+    { $$ = {type: 'var', value: $2, keys: []}; }
   ;
 
 function
-  : variable '(' params ')'
+  : WORD '(' params ')'
     { $$ = {type: 'func', value: $1, attrs: $3}; }
   ;
 
