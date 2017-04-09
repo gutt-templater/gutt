@@ -12,6 +12,7 @@ function prepareSingleQuoteString(str) {
 
 %%
 [\s\n\t]+                   /* skip whitespace */
+(true|false)\b              return 'CONSTS';
 \$[a-zA-Z]+([a-zA-Z0-9_\-]+)?\b return 'VAR_NAME';
 [0-9]+("."[0-9]+)?\b        return 'NUMBER';
 [a-zA-Z]+([a-zA-Z0-9_]+)?\b return 'WORD';
@@ -199,4 +200,6 @@ expression
   | function
   | variable
   | arr_key
+  | CONSTS
+    { $$ = {type: 'const', value: $1}; }
   ;
