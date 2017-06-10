@@ -47,15 +47,14 @@ function throwError (e, source, filePath) {
 
     arrowLine = o(' ', 3) + ' | ' + o(' ', column) + '^'
 
-    console.log(
+    throw new Error(
       chalk.red(e.message + ' ' + (filePath ? 'in ' + filePath + ':' : 'at ') +
       '(' + currentLineNumber + ':' + column + ')\n') +
       previousLine + currentLine + arrowLine + nextLine
     )
   }
 
-  console.log(chalk.red(e.message))
-  console.log(e.stack);
+  throw new Error(chalk.red(e.message) + '\n' + e.stack)
 }
 
 module.exports = throwError

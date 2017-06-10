@@ -56,7 +56,6 @@ Parser.prototype.stringifyWith = function (stringifier) {
   } catch (e) {
     throwError(e, this.source, this.filePath, this.rootPath)
   }
-
 }
 
 module.exports = {
