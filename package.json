@@ -1,8 +1,11 @@
 {
   "name": "gutt",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "",
   "main": "index.js",
+  "bin": {
+    "gutt": "cmd.js"
+  },
   "scripts": {
     "generate": "jison ./parsers/html-parser.jison -o ./parsers/html-parser.js && jison ./parsers/logic-parser.jison -o ./parsers/logic-parser.js",
     "jslint": "jscs ./ && jshint ./"
@@ -24,6 +27,7 @@
     "jslint"
   ],
   "dependencies": {
-    "chalk": "^1.1.3"
+    "chalk": "^1.1.3",
+    "yargs": "^8.0.1"
   }
 }
