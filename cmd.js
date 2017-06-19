@@ -31,6 +31,7 @@ argvs = yargs
 .version(function () {
   return 'v' + require('./package.json').version;
 })
+.epilogue('For more information visit https://guttjs.com/')
 .argv
 
 files = argvs._
