@@ -41,7 +41,6 @@ function prepareSingleQuoteString(str) {
 "&"                         return '&';
 "|"                         return '|';
 "~"                         return '~';
-"^"                         return '^';
 "!"                         return '!';
 "?"                         return '?';
 ","                         return ',';

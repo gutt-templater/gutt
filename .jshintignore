@@ -1,6 +1,0 @@
-.git/
-node_modules/
-parsers/html-parser.js
-parsers/logic-parser.js
-tmp/
-covreporter/

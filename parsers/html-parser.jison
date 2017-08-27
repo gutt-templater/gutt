@@ -107,7 +107,6 @@ function createLogicNode (node, line, column) {
 \'(\\\'|[^\'])*?\'          return 'STRING_SINGLE_QUOTE_LITERAL';
 '}'                         return '}';
 '!'                         return '!';
-'/'                         return '/';
 
 /lex
 

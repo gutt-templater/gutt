@@ -1,8 +1,8 @@
-function Logic (expr, line, column) {
-  this.type = 'logic'
-  this.expr = expr
-  this.line = line
-  this.column = column
+function Logic (type, value, line, column) {
+	this.type = type
+	this.value = value
+	this.line = line
+	this.column = column
 }
 
 module.exports = Logic
