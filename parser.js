@@ -11,6 +11,7 @@ const Func = require('./tokens/function')
 const Arr = require('./tokens/array')
 const LogicAttr = require('./tokens/logic-attr')
 const ParseError = require('./helpers/parse-error')
+const appendNode = require('./append-node')
 
 const hasOwnProperty = Function.prototype.call.bind(Object.prototype.hasOwnProperty)
 let currentNode
@@ -187,50 +188,6 @@ class Lexer {
 	}
 }
 
-const reservedTags = [
-	'attribute',
-	'case',
-	'default',
-	'for-each',
-	'if',
-	'import',
-	'param',
-	'switch',
-	'template',
-	'variable'
-]
-
-function appendNode (node) {
-	const isTag = node.type === 'tag'
-	const isReservedOrComponentName = isTag && (~reservedTags.indexOf(node.name) || ~node.name.indexOf('-'))
-	const isLastChideIsFirstChild = isTag && currentNode.name === 'component' && currentNode.firstChild === currentNode.lastChild
-	const isLogic = node.type === 'logic-node' || node.type === 'logic'
-
-	if (isReservedOrComponentName || isLastChideIsFirstChild || isLogic) {
-		if (currentNode.lastChild && currentNode.lastChild.type === 'text' && !currentNode.lastChild.text.trim().length) {
-			if (currentNode.lastChild.previousSibling) {
-				currentNode.lastChild = currentNode.lastChild.previousSibling
-			} else {
-				currentNode.lastChild = null
-				currentNode.firstChild = null
-			}
-		}
-	}
-
-	node.parentNode = currentNode
-
-	if (!currentNode.firstChild) {
-		currentNode.firstChild = node
-	}
-
-	if (currentNode.lastChild) {
-		currentNode.lastChild.nextSibling = node
-		node.previousSibling = currentNode.lastChild
-	}
-
-	currentNode.lastChild = node
-}
-
 function prepareDoubleQuoteString (str) {
 	return str.substr(1, str.length - 2).replace(/"/g, '\\"')
 }
@@ -356,7 +313,7 @@ function parseTag (lexer) {
 	}
 
 	const tag = new Tag(tagname, attrs, isSingle, token.line, token.column)
-	appendNode(tag)
+	appendNode(currentNode, tag)
 
 	if (!tag.isSingle) {
 		currentNode = tag
@@ -366,7 +323,7 @@ function parseTag (lexer) {
 function text (lexer) {
 	const token = lexer.getNextToken([tokens.TEXT])
 
-	appendNode(new Text(token.str, token.line, token.column))
+	appendNode(currentNode, new Text(token.str, token.line, token.column))
 }
 
 const variableSeparators = [tokens.ELLIPSIS, tokens.TWO_DOTS, tokens.DOT, tokens.SQUARE_OPEN]
@@ -672,7 +629,7 @@ function parseLogicNode (lexer) {
 
 	const logic = parseLogic(lexer)
 
-	appendNode(new LogicNode(logic, logic.line, logic.column))
+	appendNode(currentNode, new LogicNode(logic, logic.line, logic.column))
 
 	lexer.getNextToken([tokens.BRACE_CLOSE])
 }
@@ -682,14 +639,14 @@ function parseComment (lexer) {
 	const commentStr = commentToken.str.substr(4, commentToken.str.length - 7)
 	const comment = new Comment(commentStr, commentToken.line, commentToken.column)
 
-	appendNode(comment)
+	appendNode(currentNode, comment)
 }
 
 function parseScript (lexer) {
 	const scriptToken = lexer.getNextToken([tokens.SCRIPT_LITERAL])
 	const script = new Script(scriptToken.str, scriptToken.line, scriptToken.column)
 
-	appendNode(script)
+	appendNode(currentNode, script)
 }
 
 function nodes (lexer) {

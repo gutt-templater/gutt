@@ -1,8 +1,14 @@
 const parser = require('./parser')
 const fs = require('fs')
 const throwError = require('./helpers/throw-error')
+const appendNode = require('./append-node')
+const Text = require('./tokens/text')
 
 function validateTemplateStructure (tree) {
+	if (!tree.firstChild) {
+		appendNode(tree, new Text('', 0, 0))
+	}
+
 	if (~tree.firstChild.type === 'tag' || tree.firstChild.name === 'component') {
 		return tree.firstChild.firstChild
 	}
