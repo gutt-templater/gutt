@@ -34,6 +34,7 @@ const rules = {
 	NUMBER: /^(?:([\s\n\t]*)([0-9]+(\.[0-9]+)?\b))/,
 	WORD: /^(?:([\s\n\t]*)([a-zA-Z]+([a-zA-Z0-9_]+)?\b))/,
 	MULTIPLICATION: /^(?:([\s\n\t]*)(\*))/,
+	REMINDER: /^(?:([\s\n\t]*)(%))/,
 	MINUS: /^(?:([\s\n\t]*)(-))/,
 	CONCAT: /^(?:([\s\n\t]*)(\+\+))/,
 	PLUS: /^(?:([\s\n\t]*)(\+))/,
@@ -72,7 +73,7 @@ for (const key in rules) {
 }
 
 const priorityTable = [
-	[tokens.MULTIPLICATION, tokens.SLASH],
+	[tokens.MULTIPLICATION, tokens.SLASH, tokens.REMINDER],
 	[tokens.PLUS, tokens.MINUS],
 	[tokens.BIT_SHIFT_LEFT, tokens.BIT_SHIFT_RIGHT],
 	[tokens.CONCAT],
@@ -516,6 +517,7 @@ function parseExpr (lexer) {
 const operationTokens = [
 	tokens.MULTIPLICATION,
 	tokens.SLASH,
+	tokens.REMINDER,
 	tokens.CONCAT,
 	tokens.PLUS,
 	tokens.MINUS,
@@ -553,6 +555,10 @@ function parseLogic (lexer, priority = 0) {
 			case tokens.SLASH:
 				lexer.consume(operation)
 				expr = new Logic('divis', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+				break
+			case tokens.REMINDER:
+				lexer.consume(operation)
+				expr = new Logic('mod', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
 				break
 			case tokens.CONCAT:
 				lexer.consume(operation)
