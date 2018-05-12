@@ -1,6 +1,6 @@
 {
   "name": "gutt",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "",
   "main": "index.js",
   "bin": {
@@ -16,12 +16,12 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "babel-eslint": "^7.2.3",
-    "babel-preset-es2015": "^6.24.1",
-    "babel-preset-es2017": "^6.24.1",
-    "babel-register": "^6.24.1",
-    "eslint": "^4.4.1",
-    "pre-commit": "^1.1.3"
+    "babel-eslint": "7.2.3",
+    "babel-preset-es2015": "6.24.1",
+    "babel-preset-es2017": "6.24.1",
+    "babel-register": "6.24.1",
+    "eslint": "4.18.2",
+    "pre-commit": "1.1.3"
   },
   "repository": "https://github.com/makingoff/gutt",
   "pre-commit": [

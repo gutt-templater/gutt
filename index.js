@@ -16,15 +16,16 @@ function validateTemplateStructure (tree) {
 	return tree.firstChild
 }
 
-function Parser (source, filePath, rootPath) {
+function Parser (source, filePath, rootPath, params = {}) {
 	this.source = source
 	this.result = source
 	this.filePath = filePath || ''
 	this.rootPath = rootPath || ''
+	this.params = params
 
 	if (typeof this.source === 'string') {
 		try {
-			this.result = parser(this.source)
+			this.result = parser(this.source, params)
 			this.result = validateTemplateStructure(this.result)
 		} catch (e) {
 			throwError(e, this.source, this.filePath, this.rootPath)
@@ -44,18 +45,18 @@ Parser.prototype.filePath = function () {
 
 Parser.prototype.stringifyWith = function (stringifier) {
 	try {
-		return stringifier(this.result, this.source, this.filePath, this.rootPath)
+		return stringifier(this.result, this.source, this.filePath, this.rootPath, this.params)
 	} catch (e) {
 		throwError(e, this.source, this.filePath, this.rootPath)
 	}
 }
 
 module.exports = {
-	parse: function (str, filePath, rootPath) {
-		return new Parser(str, filePath, rootPath)
+	parse: function (str, filePath, rootPath, params) {
+		return new Parser(str, filePath, rootPath, params)
 	},
 
-	parseFile: function (filePath, rootPath) {
-		return this.parse(fs.readFileSync(filePath, 'utf-8').trim(), filePath, rootPath)
+	parseFile: function (filePath, rootPath, params) {
+		return this.parse(fs.readFileSync(filePath, 'utf-8').trim(), filePath, rootPath, params)
 	}
 }

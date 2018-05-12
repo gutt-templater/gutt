@@ -1,7 +1,7 @@
-function Script (text, line, column) {
+function Script (attrs, body, line, column) {
 	this.type = 'script'
-	this.attrs = text.substr(8, text.indexOf('>') - 8)
-	this.text = text.match(/>((.|\n|\s|\t)*?)<\/\s*script/i)[1]
+	this.attrs = attrs
+	this.body = body
 	this.line = line
 	this.column = column
 }

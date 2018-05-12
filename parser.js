@@ -20,7 +20,8 @@ const rules = {
 	WHITESPACE: /^(?:()([\s\n\t]+))/,
 	ID: /^(?:([\s\n\t]*)([a-zA-Z]([a-zA-Z\-_0-9]+(:[a-zA-Z\-_0-9]+)?)?))/,
 	DOCTYPE: /^(?:([\s\n\t]*)(!DOCTYPE))/,
-	SCRIPT_LITERAL: /^(?:([\s\n\t]*)(<script(.|\s|\n|\t)*?>(.|\s|\n|\t)*?<\/\s*script>))/,
+	SCRIPT_LITERAL_OPEN: /^(?:([\s\n\t]*)(<script))/,
+	SCRIPT_LITERAL_CLOSE: /^(?:(<\/\s*script>))/,
 	COMMENT_LITERAL: /^(?:([\s\n\t]*)(<!--.*?-->))/,
 	COLON: /^(?:([\s\n\t]*)(:))/,
 	SLASH: /^(?:([\s\n\t]*)(\/))/,
@@ -321,7 +322,7 @@ function parseTag (lexer) {
 	}
 }
 
-function text (lexer) {
+function parseText (lexer) {
 	const token = lexer.getNextToken([tokens.TEXT])
 
 	appendNode(currentNode, new Text(token.str, token.line, token.column))
@@ -649,8 +650,12 @@ function parseComment (lexer) {
 }
 
 function parseScript (lexer) {
-	const scriptToken = lexer.getNextToken([tokens.SCRIPT_LITERAL])
-	const script = new Script(scriptToken.str, scriptToken.line, scriptToken.column)
+	const scriptToken = lexer.getNextToken([tokens.SCRIPT_LITERAL_OPEN])
+	const attrs = parseAttrs(lexer)
+	lexer.getNextToken([tokens.GT])
+	const text = lexer.getNextToken([tokens.TEXT])
+	lexer.getNextToken([tokens.SCRIPT_LITERAL_CLOSE])
+	const script = new Script(attrs, text, scriptToken.line, scriptToken.column)
 
 	appendNode(currentNode, script)
 }
@@ -660,7 +665,7 @@ function nodes (lexer) {
 
 	while (true) { // eslint-disable-line
 		token = lexer.lookAhead([
-			tokens.SCRIPT_LITERAL,
+			tokens.SCRIPT_LITERAL_OPEN,
 			tokens.COMMENT_LITERAL,
 			tokens.LT,
 			tokens.BRACE_OPEN,
@@ -668,7 +673,7 @@ function nodes (lexer) {
 		], true)
 
 		switch (token.rule) {
-			case tokens.SCRIPT_LITERAL:
+			case tokens.SCRIPT_LITERAL_OPEN:
 				parseScript(lexer)
 				break
 			case tokens.COMMENT_LITERAL:
@@ -681,7 +686,7 @@ function nodes (lexer) {
 				parseTag(lexer)
 				break
 			case tokens.TEXT:
-				text(lexer)
+				parseText(lexer)
 				break
 			case tokens.EOF:
 				return
