@@ -21,8 +21,8 @@ const rules = {
 	ID: /^(?:([\s\n\t]*)([a-zA-Z]([a-zA-Z\-_0-9]+(:[a-zA-Z\-_0-9]+)?)?))/,
 	DOCTYPE: /^(?:([\s\n\t]*)(!DOCTYPE))/,
 	SCRIPT_LITERAL_OPEN: /^(?:([\s\n\t]*)(<script))/,
-	SCRIPT_LITERAL_CLOSE: /^(?:(<\/\s*script>))/,
-	COMMENT_LITERAL: /^(?:([\s\n\t]*)(<!--.*?-->))/,
+	SCRIPT_LITERAL_CLOSE: /^((.|\n|\s|\t)*?)(<\/\s*script>)/,
+	COMMENT_LITERAL: /^(?:([\s\n\t]*)(<!--(.|\n|\s|\t)*?-->))/,
 	COLON: /^(?:([\s\n\t]*)(:))/,
 	SLASH: /^(?:([\s\n\t]*)(\/))/,
 	STRING_DOUBLE_QUOTE_LITERAL: /^(?:([\s\n\t]*)("(\\"|[^"])*?"))/,
@@ -653,9 +653,19 @@ function parseScript (lexer) {
 	const scriptToken = lexer.getNextToken([tokens.SCRIPT_LITERAL_OPEN])
 	const attrs = parseAttrs(lexer)
 	lexer.getNextToken([tokens.GT])
-	const text = lexer.getNextToken([tokens.TEXT])
-	lexer.getNextToken([tokens.SCRIPT_LITERAL_CLOSE])
+	const match = lexer.currentLine.match(rules.SCRIPT_LITERAL_CLOSE)
+	const position = lexer.getPositionByOffset(lexer.currentOffset)
+	const text = new Token(
+		match[1],
+		match[0].length,
+		tokens.TEXT,
+		lexer.currentOffset,
+		position.line,
+		position.column
+	)
 	const script = new Script(attrs, text, scriptToken.line, scriptToken.column)
+	lexer.currentOffset += match[0].length
+	lexer.currentLine = lexer.currentLine.substr(match[0].length)
 
 	appendNode(currentNode, script)
 }
