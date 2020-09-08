@@ -27,6 +27,7 @@ const rules = {
 	SLASH: /^(?:([\s\n\t]*)(\/))/,
 	STRING_DOUBLE_QUOTE_LITERAL: /^(?:([\s\n\t]*)("(\\"|[^"])*?"))/,
 	STRING_SINGLE_QUOTE_LITERAL: /^(?:([\s\n\t]*)('(\\'|[^'])*?'))/,
+	DOUBLE_EXCLAMATION_MARK: /^(?:([\s\n\t]*)(!!))/,
 	EXCLAMATION_MARK: /^(?:([\s\n\t]*)(!))/,
 	BRACE_OPEN: /^(?:([\s\n\t]*)(\{))/,
 	BRACE_CLOSE: /^(?:([\s\n\t]*)(\}))/,
@@ -58,6 +59,7 @@ const rules = {
 	BIT_AND: /^(?:([\s\n\t]*)(&))/,
 	BIT_OR: /^(?:([\s\n\t]*)(\|))/,
 	BIT_NOT: /^(?:([\s\n\t]*)(~))/,
+	DOUBLE_QUESTION_MARK: /^(?:([\s\n\t]*)(\?\?))/,
 	QUESTION_MARK: /^(?:([\s\n\t]*)(\?))/,
 	COMMA: /^(?:([\s\n\t]*)(,))/,
 	ELLIPSIS: /^(?:([\s\n\t]*)(\.\.\.))/,
@@ -85,6 +87,7 @@ const priorityTable = [
 	[tokens.BIT_OR],
 	[tokens.AND],
 	[tokens.OR],
+	[tokens.DOUBLE_QUESTION_MARK, tokens.DOUBLE_EXCLAMATION_MARK],
 	[tokens.BRACE_CLOSE, tokens.SQUARE_CLOSE, tokens.COMMA, tokens.BRAKET_CLOSE]
 ]
 
@@ -358,12 +361,12 @@ function parseVariable (lexer) {
 		}
 	}
 
-	const isIsset = lexer.lookAhead([tokens.QUESTION_MARK], false, false)
+	const isIssetToken = lexer.lookAhead([tokens.DOUBLE_QUESTION_MARK, tokens.QUESTION_MARK], false, false)
 
-	if (isIsset) {
-		lexer.consume(isIsset)
+	if (isIssetToken && isIssetToken.rule === 'QUESTION_MARK') {
+		lexer.consume(isIssetToken)
 
-		return new Logic('isset', variable, isIsset.line, isIsset.column)
+		return new Logic('isset', variable, isIssetToken.line, isIssetToken.column)
 	}
 
 	return variable
@@ -534,12 +537,14 @@ const operationTokens = [
 	tokens.OR,
 	tokens.BIT_AND,
 	tokens.BIT_XOR,
-	tokens.BIT_OR
+	tokens.BIT_OR,
+	tokens.DOUBLE_QUESTION_MARK
 ]
 
 function parseLogic (lexer, priority = 0) {
 	let expr = parseExpr(lexer)
 	let operation
+	let left
 
 	while (operation = lexer.lookAhead(operationTokens, false, false)) {
 		const operationPriority = priorities[operation.rule]
@@ -624,6 +629,12 @@ function parseLogic (lexer, priority = 0) {
 			case tokens.OR:
 				lexer.consume(operation)
 				expr = new Logic('or', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+				break
+			case tokens.DOUBLE_QUESTION_MARK:
+				lexer.consume(operation)
+				left = parseLogic(lexer, operationPriority)
+				lexer.getNextToken([tokens.DOUBLE_EXCLAMATION_MARK])
+				expr = new Logic('ternary', [expr, left, parseLogic(lexer, operationPriority)], operation.line, operation.column)
 				break
 		}
 	}
