@@ -1,13 +1,9 @@
 {
   "name": "gutt",
-  "version": "0.4.2",
+  "version": "0.5.0",
   "description": "",
   "main": "index.js",
-  "bin": {
-    "gutt": "cmd.js"
-  },
   "scripts": {
-    "generate": "jison ./parsers/html-parser.jison -o ./parsers/html-parser.js && jison ./parsers/logic-parser.jison -o ./parsers/logic-parser.js",
     "eslint": "eslint ./"
   },
   "author": {
@@ -16,11 +12,9 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "babel-eslint": "7.2.3",
-    "babel-preset-es2015": "6.24.1",
-    "babel-preset-es2017": "6.24.1",
-    "babel-register": "6.24.1",
-    "eslint": "4.18.2",
+    "chai": "^4.3.4",
+    "eslint": "^8.25.0",
+    "mocha": "^9.1.3",
     "pre-commit": "1.1.3"
   },
   "repository": "https://github.com/makingoff/gutt",
@@ -34,7 +28,6 @@
     ]
   },
   "dependencies": {
-    "chalk": "^1.1.3",
-    "yargs": "^8.0.1"
+    "chalk": "^1.1.3"
   }
 }

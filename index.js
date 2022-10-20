@@ -1,5 +1,5 @@
-const parser = require('./parser')
 const fs = require('fs')
+const parser = require('./parser')
 const throwError = require('./helpers/throw-error')
 const appendNode = require('./append-node')
 const Text = require('./tokens/text')
