@@ -1,6 +1,6 @@
-const ParseError = require('./parse-error')
+import ParseError from './parse-error'
 
-module.exports = function parseError (str, hash) {
+export default function parseError(str, hash) {
 	hash.column = this.yylloc.last_column
 	str = 'Unexpected token'
 

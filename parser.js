@@ -1,22 +1,20 @@
-const Style = require('./tokens/style')
-const Script = require('./tokens/script')
-const Tag = require('./tokens/tag')
-const Comment = require('./tokens/comment')
-const Variable = require('./tokens/variable')
-const Text = require('./tokens/text')
-const Str = require('./tokens/string')
-const Attr = require('./tokens/attr')
-const Logic = require('./tokens/logic')
-const LogicNode = require('./tokens/logic-node')
-const Func = require('./tokens/function')
-const Arr = require('./tokens/array')
-const LogicAttr = require('./tokens/logic-attr')
-const ParseError = require('./helpers/parse-error')
-const appendNode = require('./append-node')
+import Style from './tokens/style.js'
+import Script from './tokens/script.js'
+import Tag from './tokens/tag.js'
+import Comment from './tokens/comment.js'
+import Variable from './tokens/variable.js'
+import Text from './tokens/text.js'
+import Str from './tokens/string.js'
+import Attr from './tokens/attr.js'
+import Logic from './tokens/logic.js'
+import LogicNode from './tokens/logic-node.js'
+import Func from './tokens/function.js'
+import Arr from './tokens/array.js'
+import LogicAttr from './tokens/logic-attr.js'
+import ParseError from './helpers/parse-error.js'
+import appendNode from './append-node.js'
 
 const hasOwnProperty = Function.prototype.call.bind(Object.prototype.hasOwnProperty)
-let currentNode
-
 const rules = {
 	WHITESPACE: /^(?:()(\s+))/,
 	ID: /^(?:(\s*)([a-zA-Z]([a-zA-Z\-_0-9]+(:[a-zA-Z\-_0-9]+)?)?))/,
@@ -70,10 +68,13 @@ const rules = {
 	ELLIPSIS: /^(?:(\s*)(\.\.\.))/,
 	TWO_DOTS: /^(?:(\s*)(\.\.))/,
 	DOT: /^(?:(\s*)(\.))/,
-	TEXT: /^()([^<{]*)/
+	TEXT: /^()([^<{]*)/,
+	THEN_KEYWORD: /^(then)/i,
+	ELSE_KEYWORD: /^(else)/i
 }
-
 const tokens = {}
+let currentNode
+
 for (const key in rules) {
 	if (hasOwnProperty(rules, key)) {
 		tokens[key] = key
@@ -95,8 +96,8 @@ const priorityTable = [
 	[tokens.DOUBLE_QUESTION_MARK, tokens.DOUBLE_EXCLAMATION_MARK],
 	[tokens.BRACE_CLOSE, tokens.SQUARE_CLOSE, tokens.COMMA, tokens.BRAKET_CLOSE]
 ]
-
 const priorities = {}
+
 priorityTable.forEach((row, index) => row.forEach(element => priorities[element] =
 	priorityTable.length - index)
 )
@@ -140,7 +141,15 @@ class Lexer {
 			if (matchedToken = this.currentLine.match(rules[checkRules[i]])) {
 				if (!isUseWhitespaces || !matchedToken[1].length) {
 					const position = this.getPositionByOffset(this.currentOffset)
-					return new Token(matchedToken[2], matchedToken[0].length, checkRules[i], this.currentOffset, position.line, position.column)
+
+					return new Token(
+						matchedToken[2],
+						matchedToken[0].length,
+						checkRules[i],
+						this.currentOffset,
+						position.line,
+						position.column
+					)
 				}
 			}
 		}
@@ -286,6 +295,7 @@ function parseAttrs (lexer) {
 
 function parseTag (lexer) {
 	lexer.getNextToken([tokens.LT])
+
 	let token = lexer.getNextToken([tokens.DOCTYPE, tokens.SLASH, tokens.ID], true)
 	let isClosingTag = false
 
@@ -323,6 +333,7 @@ function parseTag (lexer) {
 	}
 
 	const tag = new Tag(tagname, attrs, isSingle, token.line, token.column)
+
 	appendNode(currentNode, tag)
 
 	if (!tag.isSingle) {
@@ -381,6 +392,7 @@ function parseFunction(lexer) {
 	const funcName = lexer.getNextToken([tokens.WORD])
 	const func = new Func(funcName.str)
 	let separator
+
 	lexer.getNextToken([tokens.BRAKET_OPEN])
 
 	if (!lexer.lookAhead([tokens.BRAKET_CLOSE], false, false)) {
@@ -399,8 +411,8 @@ function parseFunction(lexer) {
 
 function parseArr (lexer) {
 	lexer.getNextToken([tokens.SQUARE_OPEN])
-	const items = []
 
+	const items = []
 	let value
 	let key
 	let delimiter = lexer.lookAhead([tokens.SQUARE_CLOSE], false, false)
@@ -408,11 +420,11 @@ function parseArr (lexer) {
 
 	if (delimiter) {
 		lexer.consume(delimiter)
+
 		return new Arr(items)
 	}
 
-	while (true) { // eslint-disable-line
-		value = parseLogic(lexer)
+	while (value = parseLogic(lexer)) {
 		key = null
 		delimiter = lexer.lookAhead([
 			tokens.COMMA,
@@ -562,84 +574,104 @@ function parseLogic (lexer, priority = 0) {
 			case tokens.MULTIPLICATION:
 				lexer.consume(operation)
 				expr = new Logic('mult', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+
 				break
 			case tokens.SLASH:
 				lexer.consume(operation)
 				expr = new Logic('divis', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+
 				break
 			case tokens.REMINDER:
 				lexer.consume(operation)
 				expr = new Logic('mod', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+
 				break
 			case tokens.CONCAT:
 				lexer.consume(operation)
 				expr = new Logic('concat', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+
 				break
 			case tokens.PLUS:
 				lexer.consume(operation)
 				expr = new Logic('plus', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+
 				break
 			case tokens.MINUS:
 				lexer.consume(operation)
 				expr = new Logic('minus', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+
 				break
 			case tokens.BIT_SHIFT_LEFT:
 				lexer.consume(operation)
 				expr = new Logic('leftshift', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+
 				break
 			case tokens.BIT_SHIFT_RIGHT:
 				lexer.consume(operation)
 				expr = new Logic('rightshift', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+
 				break
 			case tokens.LT:
 				lexer.consume(operation)
 				expr = new Logic('lt', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+
 				break
 			case tokens.LESS_EQUAL:
 				lexer.consume(operation)
 				expr = new Logic('ltequal', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+
 				break
 			case tokens.GT:
 				lexer.consume(operation)
 				expr = new Logic('gt', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+
 				break
 			case tokens.MORE_EQUAL:
 				lexer.consume(operation)
 				expr = new Logic('gtequal', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+
 				break
 			case tokens.EQUAL:
 				lexer.consume(operation)
 				expr = new Logic('equal', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+
 				break
 			case tokens.NOT_EQUAL:
 				lexer.consume(operation)
 				expr = new Logic('notequal', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+
 				break
 			case tokens.BIT_AND:
 				lexer.consume(operation)
 				expr = new Logic('bitand', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+
 				break
 			case tokens.BIT_XOR:
 				lexer.consume(operation)
 				expr = new Logic('bitxor', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+
 				break
 			case tokens.BIT_OR:
 				lexer.consume(operation)
 				expr = new Logic('bitor', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+
 				break
 			case tokens.AND:
 				lexer.consume(operation)
 				expr = new Logic('and', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+
 				break
 			case tokens.OR:
 				lexer.consume(operation)
 				expr = new Logic('or', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+
 				break
 			case tokens.DOUBLE_QUESTION_MARK:
 				lexer.consume(operation)
 				left = parseLogic(lexer, operationPriority)
 				lexer.getNextToken([tokens.DOUBLE_EXCLAMATION_MARK])
 				expr = new Logic('ternary', [expr, left, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+
 				break
 		}
 	}
@@ -668,9 +700,13 @@ function parseComment (lexer) {
 function parseScript (lexer) {
 	const scriptToken = lexer.getNextToken([tokens.SCRIPT_LITERAL_OPEN])
 	const attrs = parseAttrs(lexer)
+
 	lexer.getNextToken([tokens.GT])
+
 	const scriptBody = lexer.getNextToken([tokens.SCRIPT_BODY])
+
 	lexer.getNextToken([tokens.SCRIPT_LITERAL_CLOSE])
+
 	const script = new Script(attrs, scriptBody, scriptToken.line, scriptToken.column)
 
 	appendNode(currentNode, script)
@@ -679,9 +715,13 @@ function parseScript (lexer) {
 function parseStyle (lexer) {
 	const styleToken = lexer.getNextToken([tokens.STYLE_LITERAL_OPEN])
 	const attrs = parseAttrs(lexer)
+
 	lexer.getNextToken([tokens.GT])
+
 	const styleBody = lexer.getNextToken([tokens.STYLE_BODY])
+
 	lexer.getNextToken([tokens.STYLE_LITERAL_CLOSE])
+
 	const style = new Style(attrs, styleBody, styleToken.line, styleToken.column)
 
 	appendNode(currentNode, style)
@@ -690,34 +730,38 @@ function parseStyle (lexer) {
 function nodes (lexer) {
 	let token
 
-	while (true) { // eslint-disable-line
-		token = lexer.lookAhead([
-			tokens.STYLE_LITERAL_OPEN,
-			tokens.SCRIPT_LITERAL_OPEN,
-			tokens.COMMENT_LITERAL,
-			tokens.LT,
-			tokens.BRACE_OPEN,
-			tokens.TEXT
-		], true)
-
+	while (token = lexer.lookAhead([
+		tokens.STYLE_LITERAL_OPEN,
+		tokens.SCRIPT_LITERAL_OPEN,
+		tokens.COMMENT_LITERAL,
+		tokens.LT,
+		tokens.BRACE_OPEN,
+		tokens.TEXT
+	], true)) {
 		switch (token.rule) {
 			case tokens.STYLE_LITERAL_OPEN:
 				parseStyle(lexer)
+
 				break
 			case tokens.SCRIPT_LITERAL_OPEN:
 				parseScript(lexer)
+
 				break
 			case tokens.COMMENT_LITERAL:
 				parseComment(lexer)
+
 				break
 			case tokens.BRACE_OPEN:
 				parseLogicNode(lexer)
+
 				break
 			case tokens.LT:
 				parseTag(lexer)
+
 				break
 			case tokens.TEXT:
 				parseText(lexer)
+
 				break
 			case tokens.EOF:
 				return
@@ -725,7 +769,7 @@ function nodes (lexer) {
 	}
 }
 
-function parser (source) {
+export default function parser (source) {
 	const lexer = new Lexer(source)
 
 	currentNode = new Tag('root', [], null, 1, 0)
@@ -734,5 +778,3 @@ function parser (source) {
 
 	return currentNode
 }
-
-module.exports = parser

@@ -1,4 +1,4 @@
-module.exports = class Variable {
+export default class Variable {
 	constructor (varname, line, column) {
 		this.type = 'var'
 		this.value = varname,

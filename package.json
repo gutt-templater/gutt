@@ -1,8 +1,9 @@
 {
   "name": "gutt",
-  "version": "0.5.1",
+  "version": "0.6.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
     "eslint": "eslint ./"
   },
@@ -12,22 +13,10 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "chai": "^4.3.4",
-    "eslint": "^8.25.0",
-    "mocha": "^9.1.3",
-    "pre-commit": "1.1.3"
+    "eslint": "^9.37.0"
   },
   "repository": "https://github.com/makingoff/gutt",
-  "pre-commit": [
-    "eslint"
-  ],
-  "babel": {
-    "presets": [
-      "es2015",
-      "es2017"
-    ]
-  },
   "dependencies": {
-    "chalk": "^1.1.3"
+    "chalk": "^5.6.2"
   }
 }

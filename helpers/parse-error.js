@@ -1,9 +1,9 @@
-function ParseError (msg, position) {
-	this.message = msg
-	this.line = position.line
-	this.column = position.column
+export default class ParseError extends Error {
+	constructor(msg, position) {
+		super()
+
+		this.message = msg
+		this.line = position.line
+		this.column = position.column
+	}
 }
-
-ParseError.prototype = Error
-
-module.exports = ParseError

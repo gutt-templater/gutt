@@ -1,11 +1,11 @@
-module.exports = class Func {
-	constructor (funcName) {
+export default class Func {
+	constructor(funcName) {
 		this.type = 'func'
 		this.value = funcName
 		this.attrs = []
 	}
 
-	addAttr (attr) {
+	addAttr(attr) {
 		this.attrs.push(attr)
 	}
 }

@@ -1,4 +1,4 @@
-module.exports = class Arr {
+export default class Arr {
 	constructor(...values) {
 		this.type = 'array'
 

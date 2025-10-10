@@ -11,7 +11,7 @@ const reservedTags = [
 	'variable'
 ]
 
-module.exports = function appendNode (currentNode, node) {
+export default function appendNode (currentNode, node) {
 	const isTag = node.type === 'tag'
 	const isReservedOrComponentName = isTag && (~reservedTags.indexOf(node.name) || ~node.name.indexOf('-'))
 	const isLastChildIsFirstChild = isTag && currentNode.name === 'component' && currentNode.firstChild === currentNode.lastChild

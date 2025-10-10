@@ -1,10 +1,10 @@
-const fs = require('fs')
-const parser = require('./parser')
-const throwError = require('./helpers/throw-error')
-const appendNode = require('./append-node')
-const Text = require('./tokens/text')
+import fs from 'fs'
+import parser from './parser.js'
+import throwError from './helpers/throw-error.js'
+import appendNode from './append-node.js'
+import Text from './tokens/text.js'
 
-function validateTemplateStructure (tree) {
+function validateTemplateStructure(tree) {
 	if (!tree.firstChild) {
 		appendNode(tree, new Text('', 0, 0))
 	}
@@ -16,47 +16,45 @@ function validateTemplateStructure (tree) {
 	return tree.firstChild
 }
 
-function Parser (source, filePath, rootPath, params = {}) {
-	this.source = source
-	this.result = source
-	this.filePath = filePath || ''
-	this.rootPath = rootPath || ''
-	this.params = params
+class Parser {
+	constructor(source, filePath, rootPath, params = {}) {
+		this.source = source
+		this.result = source
+		this.path = filePath || ''
+		this.rootPath = rootPath || ''
+		this.params = params
 
-	if (typeof this.source === 'string') {
-		try {
-			this.result = parser(this.source, params)
-			this.result = validateTemplateStructure(this.result)
-		} catch (e) {
-			throwError(e, this.source, this.filePath, this.rootPath)
+		if (typeof this.source === 'string') {
+			try {
+				this.result = parser(this.source, params)
+				this.result = validateTemplateStructure(this.result)
+			} catch (e) {
+				throwError(e, this.source, this.filePath, this.rootPath)
+			}
 		}
 	}
 
-	return this
-}
+	getRootPath() {
+		return this.rootPath
+	}
 
-Parser.prototype.getRootPath = function () {
-	return this.rootPath
-}
+	filePath() {
+		return this.path
+	}
 
-Parser.prototype.filePath = function () {
-	return this._filePath
-}
-
-Parser.prototype.stringifyWith = function (stringifier) {
-	try {
-		return stringifier(this.result, this.source, this.filePath, this.rootPath, this.params)
-	} catch (e) {
-		throwError(e, this.source, this.filePath, this.rootPath)
+	stringifyWith(stringifier) {
+		try {
+			return stringifier(this.result, this.source, this.path, this.rootPath, this.params)
+		} catch (e) {
+			throwError(e, this.source, this.path, this.rootPath)
+		}
 	}
 }
 
-module.exports = {
-	parse: function (str, filePath, rootPath, params) {
-		return new Parser(str, filePath, rootPath, params)
-	},
+export function parse(str, filePath, rootPath, params) {
+	return new Parser(str, filePath, rootPath, params)
+}
 
-	parseFile: function (filePath, rootPath, params) {
-		return this.parse(fs.readFileSync(filePath, 'utf-8').trim(), filePath, rootPath, params)
-	}
+export function parseFile(filePath, rootPath, params) {
+	return this.parse(fs.readFileSync(filePath, 'utf-8').trim(), filePath, rootPath, params)
 }

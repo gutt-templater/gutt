@@ -1,8 +1,8 @@
-const chalk = require('chalk')
+import chalk from 'chalk'
 
-function o (character, number) {
-	let i
+function indent(character, number) {
 	const c = new Array(number)
+	let i
 
 	for (i = 0; i < number; i++) {
 		c[i] = character
@@ -11,11 +11,11 @@ function o (character, number) {
 	return c.join('')
 }
 
-function prepareLine (str) {
+function formatLine(str) {
 	return str.replace(/\t/g, ' ')
 }
 
-function throwError (e, source, filePath) {
+export default function throwError(e, source, filePath) {
 	let lines
 	let previousLineNumber
 	let currentLineNumber
@@ -34,19 +34,19 @@ function throwError (e, source, filePath) {
 		column = e.column
 
 		if (previousLineNumber) {
-			previousLine = o(' ', 3 - previousLineNumber.toString().length) + previousLineNumber + ' | ' +
-			prepareLine(lines[previousLineNumber - 1]) + '\n'
+			previousLine = indent(' ', 3 - previousLineNumber.toString().length) + previousLineNumber + ' | ' +
+			formatLine(lines[previousLineNumber - 1]) + '\n'
 		}
 
 		if (lines[nextLineNumber]) {
-			nextLine = '\n' + o(' ', 3 - nextLineNumber.toString().length) + nextLineNumber + ' | ' +
-			prepareLine(lines[nextLineNumber - 1]) + '\n'
+			nextLine = '\n' + indent(' ', 3 - nextLineNumber.toString().length) + nextLineNumber + ' | ' +
+			formatLine(lines[nextLineNumber - 1]) + '\n'
 		}
 
-		currentLine = o(' ', 3 - currentLineNumber.toString().length) + currentLineNumber + ' | ' +
-		prepareLine(lines[currentLineNumber - 1]) + '\n'
+		currentLine = indent(' ', 3 - currentLineNumber.toString().length) + currentLineNumber + ' | ' +
+		formatLine(lines[currentLineNumber - 1]) + '\n'
 
-		arrowLine = o(' ', 3) + ' | ' + o(' ', column) + '^'
+		arrowLine = indent(' ', 3) + ' | ' + indent(' ', column) + '^'
 
 		throw new Error(
 			chalk.red(e.message + ' ' + (filePath ? 'in ' + filePath + ':' : 'at ') +
@@ -57,5 +57,3 @@ function throwError (e, source, filePath) {
 
 	throw new Error(chalk.red(e.message) + '\n' + e.stack)
 }
-
-module.exports = throwError
