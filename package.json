@@ -13,7 +13,9 @@
   },
   "license": "MIT",
   "devDependencies": {
-    "eslint": "^9.37.0"
+    "chai": "^6.2.0",
+    "eslint": "^9.37.0",
+    "mocha": "^11.7.4"
   },
   "repository": "https://github.com/makingoff/gutt",
   "dependencies": {

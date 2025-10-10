@@ -57,8 +57,8 @@ const rules = {
 	LT: /^(?:(\s*)(<))/,
 	BIT_SHIFT_RIGHT: /^(?:(\s*)(>>))/,
 	GT: /^(?:(\s*)(>))/,
-	AND: /^(?:(\s*)(&&))/,
-	OR: /^(?:(\s*)(\|\|))/,
+	AND: /^(?:(\s*)(&&|and))/i,
+	OR: /^(?:(\s*)(\|\||or))/i,
 	BIT_AND: /^(?:(\s*)(&))/,
 	BIT_OR: /^(?:(\s*)(\|))/,
 	BIT_NOT: /^(?:(\s*)(~))/,
@@ -448,6 +448,10 @@ function parseArr (lexer) {
 			lexer.getNextToken([tokens.SQUARE_CLOSE])
 
 			return new Arr('open', value, expr)
+
+			if (true) {
+				console.error('wrong')
+			}
 		}
 
 		if (delimiter.rule === tokens.COLON) {
@@ -561,7 +565,7 @@ const operationTokens = [
 function parseLogic (lexer, priority = 0) {
 	let expr = parseExpr(lexer)
 	let operation
-	let left
+	let left, right
 
 	while (operation = lexer.lookAhead(operationTokens, false, false)) {
 		const operationPriority = priorities[operation.rule]
@@ -666,11 +670,18 @@ function parseLogic (lexer, priority = 0) {
 				expr = new Logic('or', [expr, parseLogic(lexer, operationPriority)], operation.line, operation.column)
 
 				break
+			case tokens.THEN_KEYWORD:
 			case tokens.DOUBLE_QUESTION_MARK:
 				lexer.consume(operation)
 				left = parseLogic(lexer, operationPriority)
-				lexer.getNextToken([tokens.DOUBLE_EXCLAMATION_MARK])
-				expr = new Logic('ternary', [expr, left, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+				operation = lexer.lookAhead([tokens.ELSE_KEYWORD, tokens.DOUBLE_EXCLAMATION_MARK], false, false)
+
+				if (operation) {
+					lexer.consume(operation)
+					expr = new Logic('ternary', [expr, left, parseLogic(lexer, operationPriority)], operation.line, operation.column)
+				} else {
+					expr = new Logic('ternary', [expr, left, new Logic('str', '', operation.line, operation.column)], operation.line, operation.column)
+				}
 
 				break
 		}
